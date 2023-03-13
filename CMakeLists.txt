@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12)
 
-project(Renderer)
-add_subdirectory(Scene/tinyobjloader)
+project(VI-RT)
 
-add_executable(renderer Camera/perspective.cpp Primitive/BRDF/Phong.cpp Primitive/Geometry/mesh.cpp Scene/scene.cpp Image/ImagePPM.cpp main.cpp utils/AABB.cpp "Primitive/primitive.cpp")
-target_include_directories(renderer PRIVATE "3DSortingStruct/" "Camera/" "Image/" "Light/" "Primitive/" "Primitive/BRDF" "Primitive/Geometry" "Rays/" "Renderer/" "Scene/" "utils/" )
-target_link_libraries(renderer tinyobjloader)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wsign-conversion -pedantic-errors -O2 -DNDEBUG")
+file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.cpp")
+include_directories(include lib/tiny_obj_loader/include)
+add_executable(program ${SOURCES})
