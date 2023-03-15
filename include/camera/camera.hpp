@@ -18,9 +18,17 @@ class camera_t {
 
 public:
 
+    size_t const width;
+    size_t const height;
+
+    camera_t(size_t const width, size_t const height) noexcept;
+
     virtual ~camera_t();
 
-    virtual std::optional<ray::ray_t> generate_ray(const int x, const int y, const float* cam_jitter = nullptr) = 0;
+    virtual std::optional<ray::ray_t> generate_ray(
+        int const x, int const y,
+        float const* const cam_jitter = nullptr
+    ) const = 0;
 };
 
 };

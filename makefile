@@ -36,7 +36,7 @@ BIN 			:= $(BIN_DIR)/a.out
 
 
 # compiler
-CXX 			:= g++
+CXX 			:= clang++
 
 # language standard to be used
 STD				:= c++20

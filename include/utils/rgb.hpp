@@ -7,17 +7,21 @@
 #ifndef RGB_HPP
 #define RGB_HPP
 
+#include <type_traits>
 namespace rgb {
 
+template<typename T>
 class rgb_t {
+
+    static_assert(std::is_same<T, float>::value || std::is_same<T, unsigned char>::value);
 
 public:
 
-    float r, g, b;
+    T r, g, b;
 
     rgb_t() noexcept : r(0.f), g(0.f), b(0.f) {}
 
-    rgb_t(float const r, float const g, float const b) noexcept : r(r), g(g), b(b) {}
+    rgb_t(T const r, T const g, T const b) noexcept : r(r), g(g), b(b) {}
 
     rgb_t(rgb_t const& rgb) noexcept : r(rgb.r), g(rgb.g), b(rgb.b) {}
 

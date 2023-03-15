@@ -5,6 +5,7 @@
 //
 
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <vector>
 #include <memory>
@@ -27,15 +28,20 @@
 namespace scene {
 
 scene_t::scene_t() noexcept :
-    prims{},
-    lights{},
-    brdfs{} {}
+    success{false}, prims{}, lights{}, brdfs{} {}
+
+scene_t::scene_t(std::string const& fn):
+    success{false}, prims{}, lights{}, brdfs{} 
+{
+    this->load(fn);
+}
+
 
 static void print_info(tinyobj::ObjReader const& obj_reader){
 
-    tinyobj::attrib_t const attrib { obj_reader.GetAttrib() };
-    std::vector<tinyobj::shape_t> const shapes { obj_reader.GetShapes() };
-    std::vector<tinyobj::material_t> const materials { obj_reader.GetMaterials() };
+    tinyobj::attrib_t const& attrib {obj_reader.GetAttrib()};
+    std::vector<tinyobj::shape_t> const& shapes {obj_reader.GetShapes()};
+    std::vector<tinyobj::material_t> const& materials {obj_reader.GetMaterials()};
 
     std::cout << "# of vertices  : " << (attrib.vertices.size() / 3)  << '\n'
               << "# of normals   : " << (attrib.normals.size() / 3)   << '\n'
@@ -78,12 +84,14 @@ void scene_t::print_summary() const {
  https://github.com/tinyobjloader/tinyobjloader
  */
 
-bool scene_t::load(std::string const& fname){
+void scene_t::load(std::string const& fn){
 
     tinyobj::ObjReader obj_reader {};
 
-    if(!obj_reader.ParseFromFile(fname))
-        return false;
+    if(!obj_reader.ParseFromFile(fn)){
+        this->success = false;
+        return;
+    }
 
     print_info(obj_reader);
 
@@ -107,7 +115,10 @@ bool scene_t::load(std::string const& fname){
         std::array<vec::vec3_t, 3> face_vertices {};
 
         using indices_iter_t = std::vector<tinyobj::index_t>::const_iterator;
-        for(indices_iter_t indices_iter {shape.mesh.indices.begin()}; indices_iter != shape.mesh.indices.end();){
+        for(
+            indices_iter_t indices_iter {shape.mesh.indices.begin()};
+            indices_iter != shape.mesh.indices.end();
+        ){
 
             prim::geo::face_t face {};
             if(obj_normals.size() > 0)
@@ -127,7 +138,8 @@ bool scene_t::load(std::string const& fname){
 
                 if(face.has_shading_normals()){
 
-                    face.vert_normals_indices.value()[v] = static_cast<size_t>(indices_iter->normal_index);
+                    face.vert_normals_indices.value()[v] = 
+                        static_cast<size_t>(indices_iter->normal_index);
                     vec::vec3_t const normal {
                         obj_normals[static_cast<size_t>(indices_iter->normal_index * 3)],
                         obj_normals[static_cast<size_t>(indices_iter->normal_index * 3 + 1)],
@@ -180,36 +192,34 @@ bool scene_t::load(std::string const& fname){
         this->brdfs.push_back(std::move(brdf));
     }
 
-    return true;
+    this->success = true;
+}
+
+bool scene_t::is_loaded() const noexcept {
+    return this->success;
 }
 
 std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const {
 
-    if(this->prims.size() == 0)
-        return std::nullopt;
-
-    ray::intersection_t curr_isect {};
     bool intersects {false};
+    ray::intersection_t min_isect {};
+    min_isect.depth = std::numeric_limits<float>::max();
 
     // iterate over all primitives
     for(prim::primitive_t const& prim : this->prims){
 
-        std::optional<ray::intersection_t> const inter = prim.g->intersect(r);
+        std::optional<ray::intersection_t> const inter {prim.g->intersect(r)};
+        if(!inter.has_value())
+            continue;
 
-        if(inter.has_value()){
-
-            if(!intersects){ // first intersection
-                intersects = true;
-                curr_isect = inter.value();
-                curr_isect.f = this->brdfs[prim.material_index].get();
-            }
-            else if (inter.value().depth < curr_isect.depth) {
-                curr_isect = inter.value();
-            }
+        intersects = true;
+        if(inter.value().depth < min_isect.depth){
+            min_isect = inter.value();
+            min_isect.f = this->brdfs[prim.material_index];
         }
     }
 
-    return intersects ? std::make_optional(curr_isect) : std::nullopt;
+    return intersects ? std::make_optional(min_isect) : std::nullopt;
 }
 
 };

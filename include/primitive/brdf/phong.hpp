@@ -9,30 +9,46 @@
 
 #include "utils/rgb.hpp"
 #include "primitive/brdf/brdf.hpp"
+#include "utils/vector.hpp"
 
 namespace prim::brdf {
 
 struct phong_t : public brdf_t {
 
 private:
-    rgb::rgb_t ka, kd, ks, kt;
+    rgb::rgb_t<float> const ka;
+    rgb::rgb_t<float> const kd;
+    rgb::rgb_t<float> const ks;
+    rgb::rgb_t<float> const kt;
 
 public:
 
-    phong_t(rgb::rgb_t const ka, rgb::rgb_t const kd, rgb::rgb_t const ks, rgb::rgb_t const kt); 
+    phong_t(
+        rgb::rgb_t<float> const& ka,
+        rgb::rgb_t<float> const& kd,
+        rgb::rgb_t<float> const& ks,
+        rgb::rgb_t<float> const& kt
+    ) noexcept;
 
-    ~phong_t() override;
+    ~phong_t() noexcept;
 
-    rgb::rgb_t f(vec::vec3_t const wi, vec::vec3_t const wo, BRDF_TYPES const type) override;
-
-    rgb::rgb_t sample_f(
-        vec::vec3_t const wi,
-        float* prob,
-        vec::vec3_t* wo,
+    rgb::rgb_t<float> compute_radiance(
+        vec::vec3_t const& wi,
+        vec::vec3_t const& wo,
         BRDF_TYPES const type
-    ) override;
+    ) const noexcept override;
 
-    float pdf(vec::vec3_t const wi, vec::vec3_t const wo, BRDF_TYPES const type) override;
+    std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_f(
+        vec::vec3_t const& wi,
+        float const lower, float const upper,
+        BRDF_TYPES const type
+    ) const noexcept override;
+
+    float pdf(
+        vec::vec3_t const& wi,
+        vec::vec3_t const& wo,
+        BRDF_TYPES const type
+    ) const noexcept override;
 };
 
 };

@@ -1,46 +1,49 @@
+#include <limits>
+#include <tuple>
+
 #include "primitive/bb.hpp"
 #include "rays/ray.hpp"
 #include "utils/vector.hpp"
-#include <limits>
-#include <utility>
 
 namespace prim {
 
-bb_t::bb_t(vec::vec3_t const& p1) : min(p1), max(p1) {}
+bb_t::bb_t() noexcept : min({0.f, 0.f, 0.f}), max({0.f, 0.f, 0.f}) {}
 
-bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) : 
+bb_t::bb_t(vec::vec3_t const& p1) noexcept : min(p1), max(p1) {}
+
+bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) noexcept :
     min(
-        { 
+        {
             std::min(p1.x, p2.x),
             std::min(p1.y, p2.y),
             std::min(p1.z, p2.z)
         }
     ),
     max(
-        { 
+        {
             std::max(p1.x, p2.x),
             std::max(p1.y, p2.y),
             std::max(p1.z, p2.z)
         }
     ){}
 
-bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2, vec::vec3_t const& p3) : 
+bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2, vec::vec3_t const& p3) noexcept :
     min(
-        { 
+        {
             std::min(std::min(p1.x, p2.x), p3.x),
             std::min(std::min(p1.y, p2.y), p3.y),
             std::min(std::min(p1.z, p2.z), p3.z)
         }
     ),
     max(
-        { 
+        {
             std::max(std::max(p1.x, p2.x), p3.x),
             std::max(std::max(p1.y, p2.y), p3.y),
             std::max(std::max(p1.z, p2.z), p3.z)
         }
     ){}
 
-bb_t bb_t::from_union_of(bb_t const& b1, bb_t const& b2){
+bb_t bb_t::from_union_of(bb_t const& b1, bb_t const& b2) noexcept {
 
     return {
         {
@@ -56,64 +59,36 @@ bb_t bb_t::from_union_of(bb_t const& b1, bb_t const& b2){
     };
 }
 
+static bool get_t0_and_t1(
+    float const ray_dir_cp, float const ray_org_cp,
+    float const min_cp, float const max_cp,
+    float& t0, float& t1
+){
 
+    float const inv_ray_dir_cp {1 / ray_dir_cp};
+    float t_near_cp {(min_cp - ray_org_cp) * inv_ray_dir_cp};
+    float t_far_cp  {(max_cp - ray_org_cp) * inv_ray_dir_cp};
 
-
-bool bb_t::intersects(ray::ray_t const& r) const {
-
-    float t0 = 0;
-    float t1 = std::numeric_limits<float>::max();
-
-
-    float const inv_ray_dir_x = 1 / r.dir.x;
-    float const inv_ray_dir_y = 1 / r.dir.y;
-    float const inv_ray_dir_z = 1 / r.dir.z;
-
-    float t_near_x = (this->min.x - r.o.x) * inv_ray_dir_x;
-    float t_far_x  = (this->max.x - r.o.x) * inv_ray_dir_x;
-
-    if(t_near_x > t_far_x)
-        std::swap(t_near_x, t_far_x);
+    if(t_near_cp > t_far_cp)
+        std::swap(t_near_cp, t_far_cp);
 
     //t_far_x *= 1 + 2 * gamma(3);
 
-    t0 = t_near_x > t0 ? t_near_x : t0;
-    t1 = t_far_x  < t1 ? t_far_x  : t1;
+    t0 = t_near_cp > t0 ? t_near_cp : t0;
+    t1 = t_far_cp  < t1 ? t_far_cp  : t1;
 
-    if (t0 > t1) 
-        return false;
+    return t0 <= t1;
+}
 
+bool bb_t::intersects(ray::ray_t const& r) const {
 
-    float t_near_y = (this->min.y - r.o.y) * inv_ray_dir_y;
-    float t_far_y  = (this->max.y - r.o.y) * inv_ray_dir_y;
+    float t0 {0.f};
+    float t1 {std::numeric_limits<float>::max()};
 
-    if(t_near_y > t_far_y)
-        std::swap(t_near_y, t_far_y);
-
-    //t_far_y *= 1 + 2 * gamma(3);
-
-    t0 = t_near_y > t0 ? t_near_y : t0;
-    t1 = t_far_y  < t1 ? t_far_y  : t1;
-
-    if (t0 > t1) 
-        return false;
-
-
-    float t_near_z = (this->min.z - r.o.z) * inv_ray_dir_z;
-    float t_far_z  = (this->max.z - r.o.z) * inv_ray_dir_z;
-
-    if(t_near_z > t_far_z)
-        std::swap(t_near_z, t_far_z);
-
-    //t_far_z *= 1 + 2 * gamma(3);
-
-    t0 = t_near_z > t0 ? t_near_z : t0;
-    t1 = t_far_z  < t1 ? t_far_z  : t1;
-
-    if (t0 > t1) 
-        return false;
-
-    return true;
+    return
+        get_t0_and_t1(r.dir.x, r.org.x, this->min.x, this->max.x, t0, t1) &&
+        get_t0_and_t1(r.dir.y, r.org.y, this->min.y, this->max.y, t0, t1) &&
+        get_t0_and_t1(r.dir.z, r.org.z, this->min.z, this->max.z, t0, t1);
 }
 
 };

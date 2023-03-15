@@ -8,58 +8,57 @@
 #include <fstream>
 
 #include "image/image_ppm.hpp"
+#include "utils/rgb.hpp"
 
 namespace img {
 
-void image_ppm_t::tone_map(){
+image_ppm_t::image_ppm_t(size_t const w, size_t const h) :
+    image_t{w, h},
+    image_to_save{std::make_unique<rgb::rgb_t<unsigned char>[]>(w * h)}{}
 
-    image_to_save = new rgb::rgb_t[this->width * this->height];
-    
+
+void image_ppm_t::tone_map() const noexcept {
+
     // loop over each pixel in the image, clamp and convert to byte format
-    for (size_t j = 0 ; j< this->height ; j++) {
-        for (size_t i = 0; i < this->width ; ++i) {
-            image_to_save[j*this->width+i].r = (unsigned char)(std::min(1.f, this->image_plane[j*this->width+i].r) * 255);
-            image_to_save[j*this->width+i].g = (unsigned char)(std::min(1.f, this->image_plane[j*this->width+i].g) * 255);
-            image_to_save[j*this->width+i].b = (unsigned char)(std::min(1.f, this->image_plane[j*this->width+i].b) * 255);
-        }
-    }
+    for(size_t j {0}; j < this->height; j++)
 
+        for(size_t i {0}; i < this->width; ++i){
+
+            rgb::rgb_t<float>&       from {this->image_plane[j * this->width + i]};
+            rgb::rgb_t<unsigned char>& to {this->image_to_save[j * this->width + i]};
+
+            to.r = static_cast<unsigned char>(std::min(1.f, from.r) * 255);
+            to.g = static_cast<unsigned char>(std::min(1.f, from.g) * 255);
+            to.b = static_cast<unsigned char>(std::min(1.f, from.b) * 255);
+        }
 }
 
-bool image_ppm_t::save(std::string const& filename){ 
-    
+bool image_ppm_t::save(std::string const& filename) const {
+
     if(this->height == 0 || this->width == 0){
         std::cerr << "Can't save an empty image\n";
         return false;
     }
 
     // convert from float to {0,1,..., 255}
-    tone_map();
-    
-    std::ofstream ofs;
-    ofs.open(filename, std::ios::out | std::ios::binary);  //need to spec. binary mode for Windows users
+    this->tone_map();
 
-    if (ofs.fail()){
-        std::cerr << "IO error\n";
+    std::ofstream ofs {};
+    ofs.open(filename, std::ios::out | std::ios::binary);
+
+    if(ofs.fail()){
+        std::cerr << "IO error while trying to open file " << filename << '\n';
         return false;
     }
 
     ofs << "P3\n" << this->width << " " << this->height << "\n255\n";
 
-    unsigned char r, g, b;
     // loop over each pixel in the image, clamp and convert to byte format
-    for (int i = 0; i < this->width * this->height; ++i) {
-        r = static_cast<unsigned char>(this->image_to_save[i].r);
-        g = static_cast<unsigned char>(this->image_to_save[i].g);
-        b = static_cast<unsigned char>(this->image_to_save[i].b);
-        ofs << r << g << b;
-    }
-    ofs.close();
-    // write imageToSave to file
-    
-    // Details and code on PPM files available at:
-    // https://www.scratchapixel.com/lessons/digital-imaging/simple-image-manipulations/reading-writing-images.html
-    
+    for (size_t i {0}; i < this->width * this->height; ++i)
+        ofs << this->image_to_save[i].r
+            << this->image_to_save[i].g
+            << this->image_to_save[i].b;
+
     return true;
 }
 

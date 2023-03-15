@@ -24,15 +24,14 @@ protected:
 
 public:
 
-    geometry_t() = default;
-    geometry_t(prim::bb_t const& b) : bb{b} {}
+    geometry_t() noexcept = default;
+    geometry_t(prim::bb_t const& bb) noexcept : bb{bb} {}
 
-    virtual ~geometry_t();
+    virtual ~geometry_t() = default;
 
     // return True if r intersects this geometric primitive
     // returns data about intersection on isect
     virtual std::optional<ray::intersection_t> intersect(ray::ray_t const& r) const = 0;
-
 };
 
 };

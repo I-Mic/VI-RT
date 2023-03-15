@@ -17,7 +17,7 @@ struct primitive_t {
     std::unique_ptr<geo::geometry_t> g;
     size_t material_index;
 
-    primitive_t(std::unique_ptr<geo::geometry_t> g, size_t const material_index);
+    primitive_t(std::unique_ptr<geo::geometry_t> g, size_t const material_index) noexcept;
 };
 
 };

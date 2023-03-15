@@ -7,6 +7,7 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
+#include <tuple>
 #include "utils/vector.hpp"
 #include "utils/rgb.hpp"
 
@@ -16,18 +17,20 @@ class light_t {
 
 public:
 
-    light_t () {}
+    light_t() noexcept = default;
 
-    virtual ~light_t () {}
+    virtual ~light_t() = default;
 
     // return the light_t RGB radiance for a given point : p
-    virtual rgb::rgb_t L(vec::vec3_t p){ return rgb::rgb_t();}
+    virtual rgb::rgb_t<float> compute_radiance(vec::vec3_t const& p) const noexcept = 0;
 
     // return a point p and rgb::rgb_t radiance for a given probability pair prob[2]
-    virtual rgb::rgb_t Sample_L (float *prob, vec::vec3_t *p) {return rgb::rgb_t();}
+    virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_l(
+        float const lower, float const upper
+    ) const noexcept = 0;
 
     // return the probability of p
-    virtual float pdf(vec::vec3_t p) {return 0.;}
+    virtual float pdf(vec::vec3_t const& p) const noexcept = 0;
 };
 
 };

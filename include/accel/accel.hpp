@@ -17,6 +17,7 @@ namespace accel {
 class accel_t {
 
 public:
+
     accel_t();
 
     void build(scene::scene_t const& s);

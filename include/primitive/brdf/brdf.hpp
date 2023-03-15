@@ -18,33 +18,36 @@ enum class BRDF_TYPES {
     DIFFUSE_REF    = 0b10,
     SPECULAR_TRANS = 0b100,
     GLOSSY_REF     = 0b1000,
-    BRDF_ALL       = SPECULAR_REF | DIFFUSE_REF | SPECULAR_TRANS | GLOSSY_REF
+    BRDF_ALL       = 0b1111
 };
 
 struct brdf_t {
 
 public:
-    brdf_t();
-    virtual ~brdf_t();
+    brdf_t() noexcept = default;
+    virtual ~brdf_t() = default;
 
     // return the brdf_t RGB value for a pair of (incident, scattering) directions : (wi,wo)
-    virtual rgb::rgb_t f(
-        vec::vec3_t const wi,
-        vec::vec3_t const wo,
+    virtual rgb::rgb_t<float> compute_radiance(
+        vec::vec3_t const& wi,
+        vec::vec3_t const& wo,
         BRDF_TYPES const type = BRDF_TYPES::BRDF_ALL
-    ) = 0;
+    ) const noexcept = 0;
 
-    // return an outgoing direction wo and brdf 
+    // return an outgoing direction wo and brdf
     // RGB value for a given wi and probability pair prob[2]
-    virtual rgb::rgb_t sample_f(
-        vec::vec3_t const wi,
-        float *prob,
-        vec::vec3_t *wo,
-        const BRDF_TYPES = BRDF_TYPES::BRDF_ALL
-    ) = 0;
+    virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_f(
+        vec::vec3_t const& wi,
+        float const lower, float const upper,
+        BRDF_TYPES const type = BRDF_TYPES::BRDF_ALL
+    ) const noexcept = 0;
 
     // return the probability of sampling wo given wi
-    virtual float pdf(vec::vec3_t wi, vec::vec3_t wo, const BRDF_TYPES = BRDF_TYPES::BRDF_ALL) = 0;
+    virtual float pdf(
+        vec::vec3_t const& wi,
+        vec::vec3_t const& wo,
+        BRDF_TYPES const type = BRDF_TYPES::BRDF_ALL
+    ) const noexcept = 0;
 };
 
 };

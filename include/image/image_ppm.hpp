@@ -17,15 +17,15 @@ class image_ppm_t : public image_t {
 
 private:
 
-    rgb::rgb_t *image_to_save;
+    std::unique_ptr<rgb::rgb_t<unsigned char>[]> image_to_save;
 
-    void tone_map();
+    void tone_map() const noexcept;
 
 public:
 
-    image_ppm_t(size_t const w, size_t const h): image_t(w, h) {}
+    image_ppm_t(size_t const w, size_t const h);
 
-    bool save(std::string const& filename);
+    bool save(std::string const& filename) const override;
 };
 
 };

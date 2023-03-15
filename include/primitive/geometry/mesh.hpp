@@ -22,12 +22,13 @@
 namespace prim::geo {
 
 struct face_t {
+
     std::array<size_t, 3> vert_indices;
     vec::vec3_t geo_normal;           // geometric normal
     std::optional<std::array<size_t, 3>> vert_normals_indices;
     prim::bb_t bb;      // face bounding box
-                // this is min={0.,0.,0.} , max={0.,0.,0.} due to the Point constructor
-    face_t();
+
+    face_t() noexcept;
     bool has_shading_normals() const noexcept;
 };
 
@@ -39,16 +40,21 @@ private:
     std::vector<vec::vec3_t> vertices;
     std::vector<vec::vec3_t> normals;
 
-    std::optional<ray::intersection_t> triangle_intersect(ray::ray_t const& r, size_t const face_index) const;
+    std::optional<ray::intersection_t> triangle_intersect(
+        ray::ray_t const& r,
+        size_t const face_index
+    ) const noexcept;
 
 public:
-    mesh_t();
+    mesh_t() noexcept;
     mesh_t(
         std::vector<face_t> faces,
         std::vector<vec::vec3_t> vertices,
         std::vector<vec::vec3_t> normals,
         prim::bb_t b
-    );
+    ) noexcept;
+
+    ~mesh_t() noexcept;
 
     std::optional<ray::intersection_t> intersect(ray::ray_t const& r) const override;
 };

@@ -7,7 +7,6 @@
 #ifndef PERSPECTIVE_HPP
 #define PERSPECTIVE_HPP
 
-#include <tuple>
 #include <optional>
 #include <array>
 
@@ -21,23 +20,23 @@ namespace cam {
 class perspective_t : public camera_t {
 
 private:
-    vec::vec3_t eye;
-    vec::vec3_t at;
-    vec::vec3_t up;
-    float field_of_view_w;
-    float field_of_view_h;
-    size_t const width;
-    size_t const height;
+    vec::vec3_t const eye;
+    vec::vec3_t const at;
+    vec::vec3_t const up;
+    float const fov_w;
+    float const fov_h;
     std::array<std::array<float, 3>, 3> c2w;
 
 public:
-    perspective_t(size_t const w, size_t const h); 
+    perspective_t(
+        vec::vec3_t const& eye, vec::vec3_t const& at, vec::vec3_t const& up,
+        size_t const w, size_t const h, float const fov_w, float const fov_h
+    ) noexcept;
 
-    std::optional<ray::ray_t> generate_ray(const int x, const int y, const float *cam_jitter=nullptr) override;
-
-    std::tuple<size_t, size_t> get_resolution() const noexcept {
-        return std::make_tuple(this->width, this->height);
-    }
+    std::optional<ray::ray_t> generate_ray(
+        int const x, int const y,
+        float const* const cam_jitter=nullptr
+    ) const noexcept override;
 };
 
 };
