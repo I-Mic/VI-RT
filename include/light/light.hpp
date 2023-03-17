@@ -17,7 +17,9 @@ class light_t {
 
 public:
 
-    light_t() noexcept = default;
+    bool const is_ambient;
+
+    light_t(bool const is_ambient) noexcept : is_ambient{is_ambient} {}
 
     virtual ~light_t() = default;
 

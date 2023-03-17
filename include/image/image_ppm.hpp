@@ -23,9 +23,9 @@ private:
 
 public:
 
-    image_ppm_t(size_t const w, size_t const h);
+    image_ppm_t(std::unique_ptr<render::renderer_t> render, size_t const w, size_t const h);
 
-    bool save(std::string const& filename) const override;
+    bool output_image(std::string const& filename) const override;
 };
 
 };

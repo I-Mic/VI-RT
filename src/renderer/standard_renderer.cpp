@@ -1,18 +1,26 @@
 #include "renderer/standard_renderer.hpp"
+#include "rays/intersection.hpp"
+#include "rays/ray.hpp"
+#include "utils/rgb.hpp"
 
 namespace render {
 
 standard_renderer_t::standard_renderer_t(
-    std::shared_ptr<cam::camera_t> cam,
-    std::shared_ptr<scene::scene_t> scene,
-    std::shared_ptr<img::image_t> img,
-    std::shared_ptr<shader::shader_t> shader
-) noexcept : renderer_t{cam, scene, img, shader} {}
+    std::unique_ptr<cam::camera_t> cam,
+    std::unique_ptr<shader::shader_t> shader
+) noexcept : renderer_t{std::move(cam), std::move(shader)} {}
 
 standard_renderer_t::~standard_renderer_t() noexcept {}
 
-void standard_renderer_t::render() const {
-    
+rgb::rgb_t<float> standard_renderer_t::render_pixel(
+    size_t const x, size_t const y
+) const {
+
+    std::optional<ray::ray_t> const primary_ray {this->cam->generate_ray(x, y)};
+
+    rgb::rgb_t<float> const color {this->shader->shade(primary_ray)};
+
+    return color;
 }
 
 };

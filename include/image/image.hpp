@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "utils/rgb.hpp"
+#include "renderer/renderer.hpp"
 
 
 namespace img {
@@ -20,19 +21,17 @@ class image_t {
 protected:
 
     std::unique_ptr<rgb::rgb_t<float>[]> image_plane;
+    std::unique_ptr<render::renderer_t> renderer;
 
 public:
 
     size_t const width;
     size_t const height;
 
-    image_t() noexcept;
-    image_t(size_t const w, size_t const h) noexcept;
+    image_t(std::unique_ptr<render::renderer_t> renderer, size_t const w, size_t const h) noexcept;
     virtual ~image_t();
 
-    bool set_at(size_t const x, size_t const y, rgb::rgb_t<float> const& rgb) const noexcept;
-    bool add_at(size_t const x, size_t const y, rgb::rgb_t<float> const& rgb) const noexcept;
-    virtual bool save(std::string const& filename) const = 0; 
+    virtual bool output_image(std::string const& filename) const = 0;
 };
 
 };

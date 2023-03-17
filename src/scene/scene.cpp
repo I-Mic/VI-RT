@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 
+#include "light/light.hpp"
 #include "primitive/bb.hpp"
 #include "primitive/brdf/brdf.hpp"
 #include "primitive/geometry/geometry.hpp"
@@ -31,7 +32,7 @@ scene_t::scene_t() noexcept :
     success{false}, prims{}, lights{}, brdfs{} {}
 
 scene_t::scene_t(std::string const& fn):
-    success{false}, prims{}, lights{}, brdfs{} 
+    success{false}, prims{}, lights{}, brdfs{}
 {
     this->load(fn);
 }
@@ -73,10 +74,29 @@ bool scene_t::set_lights() noexcept {
     return true;
 }
 
+void scene_t::add_light(std::unique_ptr<light::light_t> l){
+    this->lights.push_back(std::move(l));
+}
+
 void scene_t::print_summary() const {
     std::cout << "#primitives = " << this->prims.size()  << " ; "
               << "#lights = "     << this->lights.size() << " ; "
-              << "#materials = "  << this->brdfs.size()  << " ;\n";
+              << "#materials = "  << this->brdfs.size()  << '\n';
+}
+
+void scene_t::compute_ambient_color(
+    rgb::rgb_t<float> const& ka,
+    rgb::rgb_t<float>& color
+) const noexcept
+{
+    vec::vec3_t const dummy {};
+
+    for(std::unique_ptr<light::light_t> const& l : this->lights){
+        if(!l->is_ambient)
+            continue;
+
+        color += ka * l->compute_radiance(dummy);
+    }
 }
 
 /*
@@ -138,7 +158,7 @@ void scene_t::load(std::string const& fn){
 
                 if(face.has_shading_normals()){
 
-                    face.vert_normals_indices.value()[v] = 
+                    face.vert_normals_indices.value()[v] =
                         static_cast<size_t>(indices_iter->normal_index);
                     vec::vec3_t const normal {
                         obj_normals[static_cast<size_t>(indices_iter->normal_index * 3)],
@@ -156,7 +176,7 @@ void scene_t::load(std::string const& fn){
             vec::vec3_t const geo_normal {v1.cross_product(v2)};
             face.geo_normal = geo_normal;
 
-            prim::bb_t const face_bb {face_vertices[0], face_vertices[1], face_vertices[2]}; 
+            prim::bb_t const face_bb {face_vertices[0], face_vertices[1], face_vertices[2]};
             face.bb = face_bb;
 
             faces.push_back(face);

@@ -8,7 +8,6 @@
 #define VECTOR_HPP
 
 #include <cmath>
-#include <concepts>
 
 namespace vec {
 
@@ -18,11 +17,11 @@ public:
 
     float x, y, z;
 
-    vec3_t() noexcept : x(0.f), y(0.f), z(0.f) {}
+    vec3_t() noexcept : x{0.f}, y{0.f}, z{0.f} {}
 
-    vec3_t(float const x, float const y, float const z) noexcept : x(x), y(y), z(z) {}
+    vec3_t(float const x, float const y, float const z) noexcept : x{x}, y{y}, z{z} {}
 
-    vec3_t(vec3_t const& v) noexcept : x(v.x), y(v.y), z(v.z) {}
+    vec3_t(vec3_t const& v) noexcept : x{v.x}, y{v.y}, z{v.z} {}
 
     vec3_t& operator=(vec3_t const& v) noexcept = default;
     vec3_t& operator=(vec3_t&& v) noexcept = default;
@@ -56,7 +55,7 @@ public:
     template<std::floating_point T>
     vec3_t operator*(T const rhs) const noexcept {
 
-        float const f { static_cast<float>(rhs) };
+        float const f {static_cast<float>(rhs)};
         return {
             this->x * f,
             this->y * f,
@@ -67,7 +66,7 @@ public:
     template<std::floating_point T>
     vec3_t& operator*=(T const rhs) noexcept {
 
-        float const f { static_cast<float>(rhs) };
+        float const f {static_cast<float>(rhs)};
 
         this->x *= f;
         this->y *= f;
@@ -88,7 +87,7 @@ public:
 
     void normalize() noexcept {
 
-        const float norm { this->norm() };
+        float const norm {this->norm()};
 
         if (norm > 0.f) {
             this->x /= norm;

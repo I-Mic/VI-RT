@@ -7,63 +7,106 @@
 #include <iostream>
 #include <memory>
 
-#include "camera/camera.hpp"
-#include "image/image.hpp"
-#include "image/image_ppm.hpp"
-#include "scene/scene.hpp"
 #include "camera/perspective.hpp"
-#include "renderer/renderer.hpp"
+#include "image/image_ppm.hpp"
+#include "light/ambient_light.hpp"
+#include "scene/scene.hpp"
 #include "renderer/standard_renderer.hpp"
-#include "shader/shader.hpp"
 #include "shader/ambient_shader.hpp"
 #include "utils/rgb.hpp"
 #include "utils/vector.hpp"
 
-int main(){
+static size_t constexpr width  {640};
+static size_t constexpr height {480};
 
-    std::shared_ptr<scene::scene_t> const scene {
-        std::make_shared<scene::scene_t>("models/cornell_box.obj")
+static std::unique_ptr<cam::camera_t> get_camera(){
+
+    static vec::vec3_t const eye {3.f, 3.f, 3.f};
+    static vec::vec3_t const at  {0.f, 0.f, 0.f};
+    static vec::vec3_t const up  {0.f, 1.f, 0.f};
+    //static float const fov_w {3.14/2.f};
+    //static float const fov_h {3.14/2.f};
+    static float const fov_w {3.14/3.f};
+    static float const fov_h {3.14/3.f};
+
+    std::unique_ptr<cam::camera_t> cam {
+        std::make_unique<cam::perspective_t>(eye, at, up, width, height, fov_w, fov_h)
     };
-    if(!scene->is_loaded()) {
-        std::cerr << "ERROR!! :o\n";
+
+    return cam;
+}
+
+static void add_light(std::unique_ptr<scene::scene_t> const& scene){
+
+    std::unique_ptr<light::light_t> light {
+        std::make_unique<light::ambient_light_t>(rgb::rgb_t<float>{0.9f, 0.9f, 0.9f})
+    };
+
+    scene->add_light(std::move(light));
+}
+
+static std::unique_ptr<shader::shader_t> get_shader(std::unique_ptr<scene::scene_t> scene){
+
+    static rgb::rgb_t<float> const background {0.4f, 0.4f, 0.4f};
+
+    std::unique_ptr<shader::shader_t> shader {
+        std::make_unique<shader::ambient_shader_t>(std::move(scene), background)
+    };
+
+    return shader;
+}
+
+
+int main(int const argc, char const* const* const argv){
+
+    if(argc < 3){
+        std::cerr << "usage: " << argv[0] << " <INPUT_FILE> <OUTPUT_FILE>\n";
         return 1;
     }
 
-    vec::vec3_t const eye {1.f, 1.f, 1.f};
-    vec::vec3_t const at  {1.f, 1.f, 1.f};
-    vec::vec3_t const up  {1.f, 1.f, 1.f};
-    size_t const width  {640};
-    size_t const height {480};
-    float const fov_w {90.f};
-    float const fov_h {90.f};
-    std::shared_ptr<cam::camera_t> const cam {
-        std::make_shared<cam::perspective_t>(eye, at, up, width, height, fov_w, fov_h)
+    for(int i = 3; i < argc; ++i)
+        std::cerr << argv[0] << ": unknown operand '" << argv[i] << "'\n";
+
+    std::string const input_fn  { argv[1] };
+    std::string const output_fn { argv[2] };
+
+
+    std::unique_ptr<scene::scene_t> scene {
+        std::make_unique<scene::scene_t>(input_fn)
     };
+    if(!scene->is_loaded()){
+        std::cerr << argv[0] << ": error loading file '" << input_fn << "'\n";
+        return 2;
+    }
 
-    std::shared_ptr<img::image_t> const img {
-        std::make_shared<img::image_ppm_t>(width, height)
-    };
-
-    rgb::rgb_t<float> const background { 1.f, 1.f, 1.f };
-    std::shared_ptr<shader::shader_t> const shader {
-        std::make_shared<shader::ambient_shader_t>(scene, background)
-    };
-
-
-    std::cerr << "Scene Load: SUCCESS!! :-)\n";
+    std::cout << "scene loaded successfully\n";
     scene->print_summary();
     std::cout << '\n';
 
+
+    add_light(scene);
+
     // declare the renderer
-    std::unique_ptr<render::renderer_t> const renderer {
-        std::make_unique<render::standard_renderer_t>(cam, scene, img, shader)
+    std::unique_ptr<render::renderer_t> renderer {
+        std::make_unique<render::standard_renderer_t>(
+            get_camera(),
+            get_shader(std::move(scene))
+        )
     };
 
-    // render
-    renderer->render();
+    std::unique_ptr<img::image_t> const img {
+        std::make_unique<img::image_ppm_t>(
+            std::move(renderer),
+            width,
+            height
+        )
+    };
 
-    // save the image
-    img->save("djfjdhfkj");
+    // produce the output
+    if(!img->output_image(output_fn)){
+        std::cerr << argv[0] << ": error outputting to file '" << output_fn << "'\n";
+        return 2;
+    }
 
     std::cout << "That's all, folks!\n";
 

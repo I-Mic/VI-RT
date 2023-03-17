@@ -34,7 +34,7 @@ public:
     ) noexcept;
 
     std::optional<ray::ray_t> generate_ray(
-        int const x, int const y,
+        size_t const x, size_t const y,
         float const* const cam_jitter=nullptr
     ) const noexcept override;
 };

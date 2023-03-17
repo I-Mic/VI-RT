@@ -65,7 +65,7 @@ static bool get_t0_and_t1(
     float& t0, float& t1
 ){
 
-    float const inv_ray_dir_cp {1 / ray_dir_cp};
+    float const inv_ray_dir_cp {1.f / ray_dir_cp};
     float t_near_cp {(min_cp - ray_org_cp) * inv_ray_dir_cp};
     float t_far_cp  {(max_cp - ray_org_cp) * inv_ray_dir_cp};
 

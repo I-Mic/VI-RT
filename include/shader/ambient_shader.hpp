@@ -1,6 +1,9 @@
 #ifndef AMBIENT_SHADER_HPP
 #define AMBIENT_SHADER_HPP
 
+#include <optional>
+
+#include "rays/ray.hpp"
 #include "scene/scene.hpp"
 #include "shader/shader.hpp"
 #include "utils/rgb.hpp"
@@ -13,14 +16,11 @@ private:
 	rgb::rgb_t<float> background;
 
 public:
-	ambient_shader_t(std::shared_ptr<scene::scene_t> scene, rgb::rgb_t<float> const& bg) noexcept;
+	ambient_shader_t(std::unique_ptr<scene::scene_t> scene, rgb::rgb_t<float> const& bg) noexcept;
 
 	~ambient_shader_t() noexcept;
 
-	rgb::rgb_t<float> shade(
-		bool const intersected,
-		ray::intersection_t const& isect
-	) const noexcept override;
+	rgb::rgb_t<float> shade(std::optional<ray::ray_t> const& ray) const noexcept override;
 };
 
 };

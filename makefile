@@ -31,7 +31,7 @@ INC_FILES 		:= $(shell find $(INC_DIR) -name "*.hpp" -o \
 										   -name "*.h")
 PCH_INC_FILES 	:=
 
-BIN 			:= $(BIN_DIR)/a.out
+BIN 			:= $(BIN_DIR)/renderer
 
 
 
@@ -42,7 +42,7 @@ CXX 			:= clang++
 STD				:= c++20
 
 # compiler flags
-CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -Wno-unused-parameter -pedantic-errors -std=$(STD)
+CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD)
 
 # include flags
 CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include

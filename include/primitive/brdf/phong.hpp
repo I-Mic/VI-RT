@@ -15,13 +15,12 @@ namespace prim::brdf {
 
 struct phong_t : public brdf_t {
 
-private:
+public:
     rgb::rgb_t<float> const ka;
     rgb::rgb_t<float> const kd;
     rgb::rgb_t<float> const ks;
     rgb::rgb_t<float> const kt;
 
-public:
 
     phong_t(
         rgb::rgb_t<float> const& ka,

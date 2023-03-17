@@ -15,14 +15,14 @@ perspective_t::perspective_t(
     camera_t{w, h}, eye{eye}, at{at}, up{up},
     fov_w{fov_w}, fov_h{fov_h}, c2w{}
 {
-    vec::vec3_t f {this->eye - this->eye};
-    f.normalize();
-    vec::vec3_t r {this->up.cross_product(f)};
-    r.normalize();
+    vec::vec3_t forward {this->at - this->eye};
+    forward.normalize();
+    vec::vec3_t right {forward.cross_product(this->up)};
+    right.normalize();
 
-    this->c2w[0] = {r.x, r.y, r.z};
+    this->c2w[0] = {right.x, right.y, right.z};
     this->c2w[1] = {this->up.x, this->up.y, this->up.z};
-    this->c2w[2] = {f.x, f.y, f.z};
+    this->c2w[2] = {forward.x, forward.y, forward.z};
 }
 
 static vec::vec3_t matrix_product(
@@ -42,7 +42,7 @@ static vec::vec3_t matrix_product(
 }
 
 std::optional<ray::ray_t> perspective_t::generate_ray(
-    int const x, int const y, float const* const cam_jitter
+    size_t const x, size_t const y, float const* const cam_jitter
 ) const noexcept {
 
     float const xs {2.f * (x + 0.5f) / this->width - 1};
