@@ -16,8 +16,7 @@ namespace img {
 
 image_ppm_t::image_ppm_t(
     std::unique_ptr<render::renderer_t> render,
-    size_t const w,
-    size_t const h
+    size_t const w, size_t const h
 ) :
     image_t{std::move(render), w, h},
     image_to_save{std::make_unique<rgb::rgb_t<unsigned char>[]>(w * h)}{}
@@ -62,11 +61,9 @@ bool image_ppm_t::output_image(std::string const& filename) const {
 
     std::ofstream ofs {};
     ofs.open(filename, std::ios::out | std::ios::binary);
-
-    if(ofs.fail()){
-        //std::cerr << "IO error while trying to open file " << filename << '\n';
+    if(ofs.fail())
         return false;
-    }
+
 
     ofs << "P6\n" << this->width << " " << this->height << "\n255\n";
 

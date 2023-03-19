@@ -41,7 +41,7 @@ static vec::vec3_t matrix_product(
     return {res[0], res[1], res[2]};
 }
 
-std::optional<ray::ray_t> perspective_t::generate_ray(
+ray::ray_t perspective_t::generate_ray(
     size_t const x, size_t const y, float const* const cam_jitter
 ) const noexcept {
 
@@ -53,7 +53,7 @@ std::optional<ray::ray_t> perspective_t::generate_ray(
 
     vec::vec3_t const ray_dir {matrix_product(this->c2w, {xc, yc, 1.f})};
 
-    return std::make_optional<ray::ray_t>(this->eye, ray_dir);
+    return {this->eye, ray_dir};
 }
 
 };

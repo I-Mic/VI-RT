@@ -7,41 +7,33 @@
 
 namespace prim {
 
-bb_t::bb_t() noexcept : min({0.f, 0.f, 0.f}), max({0.f, 0.f, 0.f}) {}
+bb_t::bb_t() noexcept : min{0.f, 0.f, 0.f}, max{0.f, 0.f, 0.f} {}
 
-bb_t::bb_t(vec::vec3_t const& p1) noexcept : min(p1), max(p1) {}
+bb_t::bb_t(vec::vec3_t const& p1) noexcept : min{p1}, max{p1} {}
 
 bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) noexcept :
-    min(
-        {
-            std::min(p1.x, p2.x),
-            std::min(p1.y, p2.y),
-            std::min(p1.z, p2.z)
-        }
-    ),
-    max(
-        {
-            std::max(p1.x, p2.x),
-            std::max(p1.y, p2.y),
-            std::max(p1.z, p2.z)
-        }
-    ){}
+    min{
+        std::min(p1.x, p2.x),
+        std::min(p1.y, p2.y),
+        std::min(p1.z, p2.z)
+    },
+    max{
+        std::max(p1.x, p2.x),
+        std::max(p1.y, p2.y),
+        std::max(p1.z, p2.z)
+    }{}
 
 bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2, vec::vec3_t const& p3) noexcept :
-    min(
-        {
-            std::min(std::min(p1.x, p2.x), p3.x),
-            std::min(std::min(p1.y, p2.y), p3.y),
-            std::min(std::min(p1.z, p2.z), p3.z)
-        }
-    ),
-    max(
-        {
-            std::max(std::max(p1.x, p2.x), p3.x),
-            std::max(std::max(p1.y, p2.y), p3.y),
-            std::max(std::max(p1.z, p2.z), p3.z)
-        }
-    ){}
+    min{
+        std::min(std::min(p1.x, p2.x), p3.x),
+        std::min(std::min(p1.y, p2.y), p3.y),
+        std::min(std::min(p1.z, p2.z), p3.z)
+    },
+    max{
+        std::max(std::max(p1.x, p2.x), p3.x),
+        std::max(std::max(p1.y, p2.y), p3.y),
+        std::max(std::max(p1.z, p2.z), p3.z)
+    } {}
 
 bb_t bb_t::from_union_of(bb_t const& b1, bb_t const& b2) noexcept {
 

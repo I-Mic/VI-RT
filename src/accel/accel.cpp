@@ -12,7 +12,11 @@ accel_t::accel_t(){}
 
 void accel_t::build(scene::scene_t const& s){}
 
-bool accel_t::trace(scene::scene_t const& s, ray::ray_t const& r, ray::intersection_t const& isect){
+bool accel_t::trace(
+    scene::scene_t const& s,
+    ray::ray_t const& r,
+    ray::intersection_t const& isect
+){
     return false;
 }
 

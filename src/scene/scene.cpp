@@ -7,6 +7,7 @@
 #include <iostream>
 #include <limits>
 #include <optional>
+#include <utility>
 #include <vector>
 #include <memory>
 
@@ -15,6 +16,7 @@
 #include "primitive/brdf/brdf.hpp"
 #include "primitive/geometry/geometry.hpp"
 #include "rays/intersection.hpp"
+#include "rays/ray.hpp"
 #include "scene/scene.hpp"
 #include "primitive/primitive.hpp"
 #include "primitive/geometry/mesh.hpp"
@@ -28,11 +30,11 @@
 
 namespace scene {
 
-scene_t::scene_t() noexcept :
-    success{false}, prims{}, lights{}, brdfs{} {}
+scene_t::scene_t(std::vector<std::unique_ptr<light::light_t>> lights) noexcept :
+    success{false}, prims{}, lights{std::move(lights)}, brdfs{} {}
 
-scene_t::scene_t(std::string const& fn):
-    success{false}, prims{}, lights{}, brdfs{}
+scene_t::scene_t(std::string const& fn, std::vector<std::unique_ptr<light::light_t>> lights):
+    success{false}, prims{}, lights{std::move(lights)}, brdfs{}
 {
     this->load(fn);
 }
@@ -70,33 +72,11 @@ static void print_info(tinyobj::ObjReader const& obj_reader){
     }
 }
 
-bool scene_t::set_lights() noexcept {
-    return true;
-}
-
-void scene_t::add_light(std::unique_ptr<light::light_t> l){
-    this->lights.push_back(std::move(l));
-}
 
 void scene_t::print_summary() const {
     std::cout << "#primitives = " << this->prims.size()  << " ; "
               << "#lights = "     << this->lights.size() << " ; "
               << "#materials = "  << this->brdfs.size()  << '\n';
-}
-
-void scene_t::compute_ambient_color(
-    rgb::rgb_t<float> const& ka,
-    rgb::rgb_t<float>& color
-) const noexcept
-{
-    vec::vec3_t const dummy {};
-
-    for(std::unique_ptr<light::light_t> const& l : this->lights){
-        if(!l->is_ambient)
-            continue;
-
-        color += ka * l->compute_radiance(dummy);
-    }
 }
 
 /*
@@ -219,7 +199,7 @@ bool scene_t::is_loaded() const noexcept {
     return this->success;
 }
 
-std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const {
+std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noexcept {
 
     bool intersects {false};
     ray::intersection_t min_isect {};
@@ -228,18 +208,29 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const {
     // iterate over all primitives
     for(prim::primitive_t const& prim : this->prims){
 
-        std::optional<ray::intersection_t> const inter {prim.g->intersect(r)};
+        std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
         if(!inter.has_value())
             continue;
 
         intersects = true;
         if(inter.value().depth < min_isect.depth){
             min_isect = inter.value();
-            min_isect.f = this->brdfs[prim.material_index];
+            min_isect.material_index = prim.material_index;
         }
     }
 
     return intersects ? std::make_optional(min_isect) : std::nullopt;
+}
+
+
+std::pair<lights_iter_t, lights_iter_t> 
+scene_t::get_lights_iterator() const noexcept {
+    return std::make_pair(this->lights.begin(), this->lights.end());
+}
+
+std::pair<brdfs_iter_t, brdfs_iter_t> 
+scene_t::get_brdfs_iterator() const noexcept {
+    return std::make_pair(this->brdfs.begin(), this->brdfs.end());
 }
 
 };

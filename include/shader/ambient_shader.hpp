@@ -1,8 +1,6 @@
 #ifndef AMBIENT_SHADER_HPP
 #define AMBIENT_SHADER_HPP
 
-#include <optional>
-
 #include "rays/ray.hpp"
 #include "scene/scene.hpp"
 #include "shader/shader.hpp"
@@ -20,7 +18,7 @@ public:
 
 	~ambient_shader_t() noexcept;
 
-	rgb::rgb_t<float> shade(std::optional<ray::ray_t> const& ray) const noexcept override;
+	rgb::rgb_t<float> shade(ray::ray_t const& ray) const noexcept override;
 };
 
 };

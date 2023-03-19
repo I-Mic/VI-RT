@@ -15,8 +15,7 @@ rgb::rgb_t<float> ambient_light_t::compute_radiance(vec::vec3_t const&) const no
 
 std::tuple<vec::vec3_t, rgb::rgb_t<float>> ambient_light_t::sample_l(
     float const lower, float const upper
-) const noexcept 
-{
+) const noexcept {
     return std::make_tuple<vec::vec3_t, rgb::rgb_t<float>>({}, {});
 }
 

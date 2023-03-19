@@ -13,14 +13,16 @@
 
 namespace prim::brdf {
 
-struct phong_t : public brdf_t {
+class phong_t : public brdf_t {
 
-public:
+private:
+
     rgb::rgb_t<float> const ka;
     rgb::rgb_t<float> const kd;
     rgb::rgb_t<float> const ks;
     rgb::rgb_t<float> const kt;
 
+public:
 
     phong_t(
         rgb::rgb_t<float> const& ka,
@@ -34,19 +36,23 @@ public:
     rgb::rgb_t<float> compute_radiance(
         vec::vec3_t const& wi,
         vec::vec3_t const& wo,
-        BRDF_TYPES const type
+        brdf_types_t const type
     ) const noexcept override;
 
     std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_f(
         vec::vec3_t const& wi,
         float const lower, float const upper,
-        BRDF_TYPES const type
+        brdf_types_t const type
     ) const noexcept override;
 
     float pdf(
         vec::vec3_t const& wi,
         vec::vec3_t const& wo,
-        BRDF_TYPES const type
+        brdf_types_t const type
+    ) const noexcept override;
+
+    rgb::rgb_t<float> ambient(
+        rgb::rgb_t<float> const& radiance
     ) const noexcept override;
 };
 

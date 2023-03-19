@@ -2,9 +2,7 @@
 #define SHADER_HPP
 
 #include <memory>
-#include <optional>
 
-#include "rays/intersection.hpp"
 #include "scene/scene.hpp"
 #include "utils/rgb.hpp"
 
@@ -20,7 +18,7 @@ public:
 
 	virtual ~shader_t() = default;
 
-	virtual rgb::rgb_t<float> shade(std::optional<ray::ray_t> const& ray) const noexcept = 0;
+	virtual rgb::rgb_t<float> shade(ray::ray_t const& ray) const noexcept = 0;
 };
 
 };

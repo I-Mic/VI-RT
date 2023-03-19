@@ -7,7 +7,6 @@
 #ifndef PERSPECTIVE_HPP
 #define PERSPECTIVE_HPP
 
-#include <optional>
 #include <array>
 
 #include "camera/camera.hpp"
@@ -33,7 +32,7 @@ public:
         size_t const w, size_t const h, float const fov_w, float const fov_h
     ) noexcept;
 
-    std::optional<ray::ray_t> generate_ray(
+    ray::ray_t generate_ray(
         size_t const x, size_t const y,
         float const* const cam_jitter=nullptr
     ) const noexcept override;

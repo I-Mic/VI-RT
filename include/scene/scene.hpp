@@ -19,6 +19,9 @@
 
 namespace scene {
 
+using lights_iter_t = std::vector<std::unique_ptr<light::light_t>>::const_iterator;
+using brdfs_iter_t = std::vector<std::unique_ptr<prim::brdf::brdf_t>>::const_iterator;
+
 class scene_t {
 
 private:
@@ -26,23 +29,23 @@ private:
     bool success;
     std::vector<prim::primitive_t> prims;
     std::vector<std::unique_ptr<light::light_t>> lights;
-    std::vector<std::shared_ptr<prim::brdf::brdf_t>> brdfs;
+    std::vector<std::unique_ptr<prim::brdf::brdf_t>> brdfs;
+
 
 public:
 
-    scene_t() noexcept;
-    scene_t(std::string const& fn);
+
+    scene_t(std::vector<std::unique_ptr<light::light_t>> lights) noexcept;
+    scene_t(std::string const& fn, std::vector<std::unique_ptr<light::light_t>> lights);
 
     void load(std::string const& fn);
-    bool is_loaded() const noexcept;
-    bool set_lights() noexcept;
-    std::optional<ray::intersection_t> trace(ray::ray_t const& r) const;
-    void add_light(std::unique_ptr<light::light_t> l);
-    void compute_ambient_color(
-        rgb::rgb_t<float> const& ka,
-        rgb::rgb_t<float>& color
-    ) const noexcept;
 
+    bool is_loaded() const noexcept;
+
+    std::pair<lights_iter_t, lights_iter_t> get_lights_iterator() const noexcept;
+    std::pair<brdfs_iter_t, brdfs_iter_t> get_brdfs_iterator() const noexcept;
+
+    std::optional<ray::intersection_t> trace(ray::ray_t const& r) const noexcept;
 
     void print_summary() const;
 };

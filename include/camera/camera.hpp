@@ -7,8 +7,6 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include <optional>
-
 #include "rays/ray.hpp"
 
 // based on pbrt book, sec 6.1, pag. 356
@@ -25,7 +23,7 @@ public:
 
     virtual ~camera_t();
 
-    virtual std::optional<ray::ray_t> generate_ray(
+    virtual ray::ray_t generate_ray(
         size_t const x, size_t const y,
         float const* const cam_jitter = nullptr
     ) const = 0;
