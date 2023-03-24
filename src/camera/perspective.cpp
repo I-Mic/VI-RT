@@ -5,6 +5,7 @@
 //
 
 #include "camera/perspective.hpp"
+#include "utils/vector.hpp"
 
 namespace cam {
 
@@ -15,14 +16,19 @@ perspective_t::perspective_t(
     camera_t{w, h}, eye{eye}, at{at}, up{up},
     fov_w{fov_w}, fov_h{fov_h}, c2w{}
 {
-    vec::vec3_t forward {this->at - this->eye};
-    forward.normalize();
-    vec::vec3_t right {forward.cross_product(this->up)};
-    right.normalize();
+    vec::vec3_t f {this->at - this->eye};
+    f.normalize();
+    vec::vec3_t r {f.cross_product(this->up)};
+    r.normalize();
+	vec::vec3_t real_up {r.cross_product(f)};
+	real_up.normalize();
 
-    this->c2w[0] = {right.x, right.y, right.z};
-    this->c2w[1] = {this->up.x, this->up.y, this->up.z};
-    this->c2w[2] = {forward.x, forward.y, forward.z};
+	//flip image
+	//real_up *= -1.f;
+
+    this->c2w[0] = {r.x, r.y, r.z};
+    this->c2w[1] = {real_up.x, real_up.y, real_up.z};
+    this->c2w[2] = {f.x, f.y, f.z};
 }
 
 static vec::vec3_t matrix_product(
@@ -51,7 +57,8 @@ ray::ray_t perspective_t::generate_ray(
     float const xc {xs * std::tan(this->fov_w / 2.f)};
     float const yc {ys * std::tan(this->fov_h / 2.f)};
 
-    vec::vec3_t const ray_dir {matrix_product(this->c2w, {xc, yc, 1.f})};
+    vec::vec3_t ray_dir {matrix_product(this->c2w, {xc, yc, 1.f})};
+	ray_dir.normalize();
 
     return {this->eye, ray_dir};
 }

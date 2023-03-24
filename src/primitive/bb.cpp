@@ -64,7 +64,10 @@ static bool get_t0_and_t1(
     if(t_near_cp > t_far_cp)
         std::swap(t_near_cp, t_far_cp);
 
-    //t_far_x *= 1 + 2 * gamma(3);
+    static const float epsilon {std::numeric_limits<float>::epsilon()};
+    static const float gamma {3.f * epsilon / (1 - 3.f * epsilon)};
+
+    t_far_cp *= 1 + 2 * gamma;
 
     t0 = t_near_cp > t0 ? t_near_cp : t0;
     t1 = t_far_cp  < t1 ? t_far_cp  : t1;

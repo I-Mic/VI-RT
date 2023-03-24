@@ -50,10 +50,9 @@ bool image_ppm_t::output_image(std::string const& filename) const {
 
         for(size_t x {0}; x < this->width; ++x){
 
-            std::optional<rgb::rgb_t<float>> const color {this->renderer->render_pixel(x, y)};
+            rgb::rgb_t<float> const color {this->renderer->render_pixel(x, y)};
 
-            if(color.has_value())
-                this->image_plane[y * this->width + x] = color.value();
+			this->image_plane[y * this->width + x] = color;
         }
 
     // convert from float to {0,1,..., 255}

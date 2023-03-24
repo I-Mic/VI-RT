@@ -22,11 +22,11 @@ static size_t constexpr height {480};
 
 static std::unique_ptr<cam::camera_t> get_camera(){
 
-    static vec::vec3_t const eye {3.f, 3.f, 3.f};
-    static vec::vec3_t const at  {0.f, 0.f, 0.f};
+    static vec::vec3_t const eye {0.f, 0.f, 0.f};
+    static vec::vec3_t const at  {0.f, 0.f, 1.f};
     static vec::vec3_t const up  {0.f, 1.f, 0.f};
-    static float const fov_w {3.14/3.f};
-    static float const fov_h {3.14/3.f};
+    static float const fov_w {3.14f/3.f};
+    static float const fov_h {3.14f/3.f};
 
     std::unique_ptr<cam::camera_t> cam {
         std::make_unique<cam::perspective_t>(eye, at, up, width, height, fov_w, fov_h)
@@ -39,14 +39,14 @@ static std::vector<std::unique_ptr<light::light_t>> get_lights(){
 
     std::vector<std::unique_ptr<light::light_t>> v {1};
 
-    v.push_back(std::make_unique<light::ambient_light_t>(rgb::rgb_t<float>{0.9f, 0.9f, 0.9f}));
+    v.at(0) = std::make_unique<light::ambient_light_t>(rgb::rgb_t<float>{0.9f, 0.9f, 0.9f});
 
     return v;
 }
 
 static std::unique_ptr<shader::shader_t> get_shader(std::unique_ptr<scene::scene_t> scene){
 
-    static rgb::rgb_t<float> const background {0.4f, 0.4f, 0.4f};
+    static rgb::rgb_t<float> const background {0.05f, 0.05f, 0.55f};
 
     std::unique_ptr<shader::shader_t> shader {
         std::make_unique<shader::ambient_shader_t>(std::move(scene), background)

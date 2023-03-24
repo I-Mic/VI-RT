@@ -107,12 +107,10 @@ void scene_t::load(std::string const& fn){
     for(tinyobj::shape_t const& shape : shapes){
 
         std::vector<prim::geo::face_t> faces {};
-        std::vector<vec::vec3_t> mesh_vertices {};
-        std::vector<vec::vec3_t> mesh_normals  {};
+        std::unordered_map<size_t, vec::vec3_t> mesh_vertices {};
+        std::unordered_map<size_t, vec::vec3_t> mesh_normals  {};
         prim::bb_t mesh_bb {};
 
-        //needed to compute geometric normal only
-        std::array<vec::vec3_t, 3> face_vertices {};
 
         using indices_iter_t = std::vector<tinyobj::index_t>::const_iterator;
         for(
@@ -121,42 +119,61 @@ void scene_t::load(std::string const& fn){
         ){
 
             prim::geo::face_t face {};
-            if(obj_normals.size() > 0)
-                face.vert_normals_indices = std::make_optional(std::array<size_t, 3>{});
+            if(indices_iter->normal_index > -1)
+                face.normals_indices = std::make_optional<std::array<size_t, 3>>();
 
             // process 3 vertices
             for(size_t v {0}; v < 3; ++v){
 
                 face.vert_indices[v] = static_cast<size_t>(indices_iter->vertex_index);
+
                 vec::vec3_t const vertice {
-                    obj_vertices[static_cast<size_t>(indices_iter->vertex_index * 3)],
-                    obj_vertices[static_cast<size_t>(indices_iter->vertex_index * 3 + 1)],
-                    obj_vertices[static_cast<size_t>(indices_iter->vertex_index * 3 + 2)]
+                    obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3),
+                    obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 1),
+                    obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 2)
                 };
-                mesh_vertices.push_back(vertice);
-                face_vertices[v] = vertice;
+
+                mesh_vertices.insert_or_assign(
+                    face.vert_indices[v],
+                    vertice
+                );
 
                 if(face.has_shading_normals()){
-
-                    face.vert_normals_indices.value()[v] =
+                    face.normals_indices.value()[v] =
                         static_cast<size_t>(indices_iter->normal_index);
+
                     vec::vec3_t const normal {
-                        obj_normals[static_cast<size_t>(indices_iter->normal_index * 3)],
-                        obj_normals[static_cast<size_t>(indices_iter->normal_index * 3 + 1)],
-                        obj_normals[static_cast<size_t>(indices_iter->normal_index * 3 + 2)]
+                        obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3),
+                        obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 1),
+                        obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 2)
                     };
-                    mesh_normals.push_back(normal);
+
+                    mesh_vertices.insert_or_assign(
+                        face.normals_indices.value()[v],
+                        normal
+                    );
                 }
 
                 ++indices_iter;
             }
 
-            vec::vec3_t const v1 {face_vertices[1] - face_vertices[0]};
-            vec::vec3_t const v2 {face_vertices[2] - face_vertices[0]};
+
+            vec::vec3_t const v1 {
+                mesh_vertices.at(face.vert_indices[1]) -
+                mesh_vertices.at(face.vert_indices[0])
+            };
+            vec::vec3_t const v2 {
+                mesh_vertices.at(face.vert_indices[2]) -
+                mesh_vertices.at(face.vert_indices[0])
+            };
             vec::vec3_t const geo_normal {v1.cross_product(v2)};
             face.geo_normal = geo_normal;
 
-            prim::bb_t const face_bb {face_vertices[0], face_vertices[1], face_vertices[2]};
+            prim::bb_t const face_bb {
+                mesh_vertices.at(face.vert_indices[0]),
+                mesh_vertices.at(face.vert_indices[1]),
+                mesh_vertices.at(face.vert_indices[2])
+            };
             face.bb = face_bb;
 
             faces.push_back(face);
@@ -174,7 +191,9 @@ void scene_t::load(std::string const& fn){
         };
 
         // assumes all faces in a mesh use the same material!
-        this->prims.push_back({std::move(mesh), static_cast<size_t>(shape.mesh.material_ids[0])});
+        this->prims.push_back(
+			{std::move(mesh), static_cast<size_t>(shape.mesh.material_ids.at(0))}
+		);
     }
 
 
@@ -223,12 +242,12 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
 }
 
 
-std::pair<lights_iter_t, lights_iter_t> 
+std::pair<lights_iter_t, lights_iter_t>
 scene_t::get_lights_iterator() const noexcept {
     return std::make_pair(this->lights.begin(), this->lights.end());
 }
 
-std::pair<brdfs_iter_t, brdfs_iter_t> 
+std::pair<brdfs_iter_t, brdfs_iter_t>
 scene_t::get_brdfs_iterator() const noexcept {
     return std::make_pair(this->brdfs.begin(), this->brdfs.end());
 }

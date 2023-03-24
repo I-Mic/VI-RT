@@ -53,6 +53,12 @@ public:
         return *this;
     }
 
+	bool is_zero() const noexcept {
+		return this->r == static_cast<T>(0) &&
+		       this->g == static_cast<T>(0) &&
+		       this->b == static_cast<T>(0);
+	}
+
     //float Y() { what?
     //    return (r*0.2126 + g*0.7152 + b*0.0722 );
     //

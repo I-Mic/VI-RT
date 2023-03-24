@@ -8,6 +8,7 @@
 #define MESH_HPP
 
 #include <vector>
+#include <unordered_map>
 #include <array>
 #include <optional>
 
@@ -25,7 +26,7 @@ struct face_t {
 
     std::array<size_t, 3> vert_indices;
     vec::vec3_t geo_normal;           // geometric normal
-    std::optional<std::array<size_t, 3>> vert_normals_indices;
+    std::optional<std::array<size_t, 3>> normals_indices;
     prim::bb_t bb;      // face bounding box
 
     face_t() noexcept;
@@ -37,20 +38,20 @@ class mesh_t : public geo::geometry_t {
 
 private:
     std::vector<face_t> faces;
-    std::vector<vec::vec3_t> vertices;
-    std::vector<vec::vec3_t> normals;
+    std::unordered_map<size_t, vec::vec3_t> vertices;
+    std::unordered_map<size_t, vec::vec3_t> normals;
 
     std::optional<ray::intersection_t> triangle_intersect(
         ray::ray_t const& r,
-        size_t const face_index
+		face_t const& face
     ) const noexcept;
 
 public:
     mesh_t() noexcept;
     mesh_t(
         std::vector<face_t> faces,
-        std::vector<vec::vec3_t> vertices,
-        std::vector<vec::vec3_t> normals,
+        std::unordered_map<size_t, vec::vec3_t> vertices,
+        std::unordered_map<size_t, vec::vec3_t> normals,
         prim::bb_t b
     ) noexcept;
 

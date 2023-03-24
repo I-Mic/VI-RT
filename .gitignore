@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .ycm_extra_conf.py
+*.out
+*.ppm

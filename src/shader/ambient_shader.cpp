@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "light/light.hpp"
 #include "primitive/brdf/phong.hpp"
 #include "primitive/brdf/brdf.hpp"
@@ -30,6 +32,9 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
     vec::vec3_t const dummy {};
     rgb::rgb_t<float> color {};
 
+    /*if(color.is_zero())
+        return color;*/
+
     std::pair<scene::lights_iter_t, scene::lights_iter_t> const lights_range {
         this->scene->get_lights_iterator()
     };
@@ -40,12 +45,12 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
 
     for(scene::lights_iter_t li {lights_range.first}; li < lights_range.second; ++li){
 
-        std::unique_ptr<light::light_t> const& l {*li};
+        light::light_t const* const l {li->get()};
 
         if(l->is_ambient){
 
-            std::unique_ptr<prim::brdf::brdf_t> const& brdf {
-                *(brdfs_range.first + static_cast<long>(isect.value().material_index))
+            prim::brdf::brdf_t const* const brdf {
+                (brdfs_range.first + static_cast<long>(isect.value().material_index))->get()
             };
 
             color += brdf->ambient(l->compute_radiance(dummy));
