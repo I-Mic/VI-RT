@@ -108,6 +108,7 @@ $(PCH_INC_FILES): $(INC_DIR)/%.$(PCH_EXT) : $(INC_DIR)/%
 clean:
 	-rm -rf $(OBJ_DIR)
 	-rm -rf $(BIN_DIR)
+	-rm -rf *.out *.ppm
 ifdef PCH_INC_FILES
 	-rm -rf $(PCH_INC_FILES)
 endif

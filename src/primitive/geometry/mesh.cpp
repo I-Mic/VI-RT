@@ -4,6 +4,7 @@
 //  Created by Luis Paulo Santos on 05/02/2023.
 //
 
+#include <iostream>
 #include <optional>
 #include <tuple>
 #include <limits>

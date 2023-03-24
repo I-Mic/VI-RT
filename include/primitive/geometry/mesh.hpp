@@ -37,9 +37,9 @@ struct face_t {
 class mesh_t : public geo::geometry_t {
 
 private:
-    std::vector<face_t> faces;
-    std::unordered_map<size_t, vec::vec3_t> vertices;
-    std::unordered_map<size_t, vec::vec3_t> normals;
+    std::vector<face_t> const faces;
+    std::unordered_map<size_t, vec::vec3_t> const vertices;
+    std::unordered_map<size_t, vec::vec3_t> const normals;
 
     std::optional<ray::intersection_t> triangle_intersect(
         ray::ray_t const& r,
