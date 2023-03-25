@@ -11,7 +11,7 @@ namespace shader {
 class ambient_shader_t : public shader_t {
 
 private:
-	rgb::rgb_t<float> background;
+	rgb::rgb_t<float> const background;
 
 public:
 	ambient_shader_t(std::unique_ptr<scene::scene_t> scene, rgb::rgb_t<float> const& bg) noexcept;

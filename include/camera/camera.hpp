@@ -14,11 +14,11 @@ namespace cam {
 
 class camera_t {
 
-public:
-
+protected:
     size_t const width;
     size_t const height;
 
+public:
     camera_t(size_t const width, size_t const height) noexcept;
 
     virtual ~camera_t();

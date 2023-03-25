@@ -17,7 +17,7 @@ class image_ppm_t : public image_t {
 
 private:
 
-    std::unique_ptr<rgb::rgb_t<unsigned char>[]> image_to_save;
+    std::unique_ptr<rgb::rgb_t<unsigned char>[]> const image_to_save;
 
     void tone_map() const noexcept;
 

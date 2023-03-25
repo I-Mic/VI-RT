@@ -20,7 +20,7 @@ class geometry_t {
 
 protected:
     // geometric primitive bounding box
-    prim::bb_t bb;  // this is min={0.,0.,0.} , max={0.,0.,0.} due to the Point constructor
+    prim::bb_t const bb;  // this is min={0.,0.,0.} , max={0.,0.,0.} due to the Point constructor
 
 public:
 

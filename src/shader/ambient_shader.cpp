@@ -33,9 +33,6 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
     vec::vec3_t const dummy {};
     rgb::rgb_t<float> color {};
 
-    if(color.is_zero())
-        return color;
-
     std::pair<scene::lights_iter_t, scene::lights_iter_t> const lights_range {
         this->scene->get_lights_iterator()
     };
@@ -50,8 +47,8 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
 
         if(l->is_ambient){
 
-            prim::brdf::brdf_t const* const brdf {
-                (brdfs_range.first + static_cast<long>(isect.value().material_index))->get()
+			std::unique_ptr<prim::brdf::brdf_t> const& brdf {
+                *(brdfs_range.first + static_cast<long>(isect.value().material_index))
             };
 
             color += brdf->ambient(l->compute_radiance(dummy));

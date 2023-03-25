@@ -11,7 +11,7 @@ namespace shader {
 class shader_t {
 
 protected:
-	std::unique_ptr<scene::scene_t> scene;
+	std::unique_ptr<scene::scene_t> const scene;
 
 public:
 	shader_t(std::unique_ptr<scene::scene_t> scene) noexcept : scene{std::move(scene)} {}

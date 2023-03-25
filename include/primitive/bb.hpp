@@ -16,7 +16,8 @@ namespace prim {
 struct bb_t {
 
 public:
-    vec::vec3_t min, max;
+    vec::vec3_t min;
+    vec::vec3_t max;
 
     bb_t() noexcept;
     bb_t(vec::vec3_t const& p1) noexcept;

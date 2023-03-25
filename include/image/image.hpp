@@ -20,8 +20,8 @@ class image_t {
 
 protected:
 
-    std::unique_ptr<rgb::rgb_t<float>[]> image_plane;
-    std::unique_ptr<render::renderer_t> renderer;
+    std::unique_ptr<rgb::rgb_t<float>[]> const image_plane;
+    std::unique_ptr<render::renderer_t> const renderer;
 
 public:
 

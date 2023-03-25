@@ -15,9 +15,11 @@ namespace light {
 
 class ambient_light_t : public light_t {
 
-public:
+private:
 
     rgb::rgb_t<float> const color;
+
+public:
 
     ambient_light_t(rgb::rgb_t<float> const& color) noexcept;
 

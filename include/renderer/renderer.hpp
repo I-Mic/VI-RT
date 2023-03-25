@@ -17,8 +17,8 @@ namespace render {
 class renderer_t {
 
 protected:
-    std::unique_ptr<cam::camera_t> cam;
-    std::unique_ptr<shader::shader_t> shader;
+    std::unique_ptr<cam::camera_t> const cam;
+    std::unique_ptr<shader::shader_t> const shader;
 
 public:
     renderer_t(

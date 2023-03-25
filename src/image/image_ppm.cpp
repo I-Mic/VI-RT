@@ -25,25 +25,20 @@ image_ppm_t::image_ppm_t(
 void image_ppm_t::tone_map() const noexcept {
 
     // loop over each pixel in the image, clamp and convert to byte format
-    for(size_t j {0}; j < this->height; ++j)
+    for(size_t y {0}; y < this->height; ++y)
 
-        for(size_t i {0}; i < this->width; ++i){
+        for(size_t x {0}; x < this->width; ++x){
 
-            rgb::rgb_t<float>&       from {this->image_plane[j * this->width + i]};
-            rgb::rgb_t<unsigned char>& to {this->image_to_save[j * this->width + i]};
+            rgb::rgb_t<float>&       from {this->image_plane[y * this->width + x]};
+            rgb::rgb_t<unsigned char>& to {this->image_to_save[y * this->width + x]};
 
-            to.r = static_cast<unsigned char>(std::min(1.f, from.r) * 255);
-            to.g = static_cast<unsigned char>(std::min(1.f, from.g) * 255);
-            to.b = static_cast<unsigned char>(std::min(1.f, from.b) * 255);
+            to.r = static_cast<unsigned char>(std::min(1.f, from.r) * 255.f);
+            to.g = static_cast<unsigned char>(std::min(1.f, from.g) * 255.f);
+            to.b = static_cast<unsigned char>(std::min(1.f, from.b) * 255.f);
         }
 }
 
 bool image_ppm_t::output_image(std::string const& filename) const {
-
-    /*if(this->height == 0 || this->width == 0){
-        std::cerr << "Can't save an empty image\n";
-        return false;
-    }*/
 
     //shade each pixel
     for(size_t y {0}; y < this->height; ++y)
@@ -67,10 +62,13 @@ bool image_ppm_t::output_image(std::string const& filename) const {
     ofs << "P6\n" << this->width << " " << this->height << "\n255\n";
 
     // loop over each pixel in the image, clamp and convert to byte format
-    for (size_t i {0}; i < this->width * this->height; ++i)
-        ofs << this->image_to_save[i].r
-            << this->image_to_save[i].g
-            << this->image_to_save[i].b;
+    for(size_t y {0}; y < this->height; ++y)
+
+        for(size_t x {0}; x < this->width; ++x)
+
+			ofs << this->image_to_save[y * this->width + x].r
+				<< this->image_to_save[y * this->width + x].g
+				<< this->image_to_save[y * this->width + x].b;
 
     return true;
 }

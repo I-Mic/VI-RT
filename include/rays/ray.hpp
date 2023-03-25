@@ -17,7 +17,7 @@ public:
 
     vec::vec3_t org; // ray origin
     vec::vec3_t dir; // ray direction
-                     //
+
     ray_t(){}
     ray_t(vec::vec3_t const& o, vec::vec3_t const& d): org(o), dir(d) {}
 };

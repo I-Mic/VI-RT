@@ -14,9 +14,9 @@
 namespace prim::brdf {
 
 enum class brdf_types_t {
-    SPECULAR_REF   = 0b1,
-    DIFFUSE_REF    = 0b10,
-    SPECULAR_TRANS = 0b100,
+    SPECULAR_REF   = 0b0001,
+    DIFFUSE_REF    = 0b0010,
+    SPECULAR_TRANS = 0b0100,
     GLOSSY_REF     = 0b1000,
     BRDF_ALL       = 0b1111
 };

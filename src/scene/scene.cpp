@@ -191,17 +191,17 @@ void scene_t::load(std::string const& fn){
 
         // assumes all faces in a mesh use the same material!
         this->prims.push_back(
-			{std::move(mesh), static_cast<size_t>(shape.mesh.material_ids.at(0))}
-		);
+            {std::move(mesh), static_cast<size_t>(shape.mesh.material_ids.at(0))}
+        );
     }
 
 
     for(tinyobj::material_t const& mat : materials){
 
-        rgb::rgb_t const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
-        rgb::rgb_t const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
-        rgb::rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
-        rgb::rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
+        rgb::rgb_t<float> const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
+        rgb::rgb_t<float> const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
+        rgb::rgb_t<float> const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
+        rgb::rgb_t<float> const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
 
         std::unique_ptr<prim::brdf::brdf_t> brdf {
             std::make_unique<prim::brdf::phong_t>(ka, kd, ks, kt)

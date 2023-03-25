@@ -12,7 +12,7 @@
 namespace rgb {
 
 template<typename T>
-class rgb_t {
+struct rgb_t {
 
     static_assert(std::is_same<T, float>::value || std::is_same<T, unsigned char>::value);
 
@@ -38,9 +38,9 @@ public:
         static_assert(std::is_same<T, float>::value);
 
         return {
-            lhs.r * rhs.r / 255.f,
-            lhs.g * rhs.g / 255.f,
-            lhs.b * rhs.b / 255.f
+            (lhs.r * rhs.r),
+            (lhs.g * rhs.g),
+            (lhs.b * rhs.b)
         };
     }
 
@@ -52,12 +52,6 @@ public:
 
         return *this;
     }
-
-	bool is_zero() const noexcept {
-		return this->r == static_cast<T>(0) &&
-		       this->g == static_cast<T>(0) &&
-		       this->b == static_cast<T>(0);
-	}
 
     //float Y() { what?
     //    return (r*0.2126 + g*0.7152 + b*0.0722 );

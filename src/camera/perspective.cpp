@@ -32,7 +32,9 @@ static std::array<std::array<float, 3>, 3> get_camera_to_world_matrix(
 	real_up.normalize();
 
 	//flip image
-	//real_up *= -1.f;
+	real_up *= -1.f;
+
+	//f *= 10.f;
 
     cam_to_world_matrix[0] = {r.x, r.y, r.z};
     cam_to_world_matrix[1] = {real_up.x, real_up.y, real_up.z};
@@ -65,8 +67,8 @@ ray::ray_t perspective_t::generate_ray(
 		get_camera_to_world_matrix(this->eye, this->at, this->up)
 	};
 
-    float const xs {2.f * (x + 0.5f) / this->width - 1};
-    float const ys {2.f * (y + 0.5f) / this->height - 1};
+    float const xs {(2.f * (x + 0.5f) / this->width) - 1};
+    float const ys {(2.f * (y + 0.5f) / this->height) - 1};
 
     float const xc {xs * std::tan(this->fov_w / 2.f)};
     float const yc {ys * std::tan(this->fov_h / 2.f)};

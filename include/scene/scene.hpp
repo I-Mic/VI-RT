@@ -34,7 +34,6 @@ private:
 
 public:
 
-
     scene_t(std::vector<std::unique_ptr<light::light_t>> lights) noexcept;
     scene_t(std::string const& fn, std::vector<std::unique_ptr<light::light_t>> lights);
 

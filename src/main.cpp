@@ -17,16 +17,21 @@
 #include "utils/rgb.hpp"
 #include "utils/vector.hpp"
 
-static size_t constexpr width  {640};
-static size_t constexpr height {480};
+static size_t constexpr width  {1024};
+static size_t constexpr height {1024};
 
 static std::unique_ptr<cam::camera_t> get_camera(){
 
-    static vec::vec3_t const eye {0.f, 0.f, 0.f};
-    static vec::vec3_t const at  {0.f, 0.f, 1.f};
+    static vec::vec3_t const eye {280.f, 275.f, -330.f};
+    static vec::vec3_t const at  {280.f, 265.f, 0.f};
+    //static vec::vec3_t const at  {280.f, 0.f, -330.f};
+	
+    //static vec::vec3_t const eye {560.f, 275.f, -660.f};
+    //static vec::vec3_t const at  {280.f, 265.f, 0.f};
+    //static vec::vec3_t const at  {560.f, 0.f, -660.f};
     static vec::vec3_t const up  {0.f, 1.f, 0.f};
-    static float const fov_w {3.14f/3.f};
-    static float const fov_h {3.14f/3.f};
+    static float const fov_w {3.1415/2.f};
+    static float const fov_h {fov_w * static_cast<float>(height) / static_cast<float>(width)};
 
     std::unique_ptr<cam::camera_t> cam {
         std::make_unique<cam::perspective_t>(eye, at, up, width, height, fov_w, fov_h)

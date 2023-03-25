@@ -11,7 +11,7 @@
 
 namespace vec {
 
-class vec3_t {
+struct vec3_t {
 
 public:
 
@@ -82,7 +82,7 @@ public:
 
 
     float norm() const noexcept {
-        return std::sqrt(this->x * this->x + this->y + this->y + this->z + this->z);
+        return std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
     }
 
     void normalize() noexcept {
