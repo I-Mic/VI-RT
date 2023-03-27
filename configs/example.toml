@@ -1,0 +1,46 @@
+use_degrees = true
+
+[image]
+type = "ppm"
+
+output_fn 	= "output.ppm"
+width 		= 1024
+height 		= 1024
+
+
+[camera]
+type = "perspective"
+
+width 		= 1024
+height 		= 1024
+
+eye = [280.0, 275.0, -330.0]
+at  = [280.0, 265.0, 0.0]
+up  = [0.0, 1.0, 0.0]
+fov_w = 90.0
+fov_h = 90.0
+
+
+[scene]
+
+input_fn 	= "models/cornell_box.obj"
+
+light_ids = ["light0"]
+
+	[scene.light0]
+	type = "ambient"
+
+	color = [0.9, 0.9, 0.9]
+
+	#[scene.lights.light1]
+	#type = "ambient"
+
+
+[shader]
+type = "ambient"
+
+bg = [0.05, 0.05, 0.55]
+
+
+[renderer]
+type = "standard"

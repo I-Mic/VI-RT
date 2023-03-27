@@ -45,7 +45,8 @@ STD				:= c++20
 CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD)
 
 # include flags
-CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include
+CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include 
+CXXFLAGS        += -I$(LIB_DIR)/toml11/include
 
 # linker flags (e.g. -L/path/to/lib)
 LDFLAGS			:=

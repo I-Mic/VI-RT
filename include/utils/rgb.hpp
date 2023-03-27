@@ -8,6 +8,7 @@
 #define RGB_HPP
 
 #include <type_traits>
+#include <array>
 
 namespace rgb {
 
@@ -31,6 +32,10 @@ public:
 
     rgb_t& operator=(rgb_t const& rgb) = default;
     rgb_t& operator=(rgb_t&& rgb) = default;
+
+	static rgb_t from_array(std::array<T, 3> const& arr){
+		return {arr[0], arr[1], arr[2]};
+	}
 
 
     friend rgb_t operator*(rgb_t const& lhs, rgb_t const& rhs) noexcept {

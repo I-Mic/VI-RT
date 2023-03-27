@@ -8,6 +8,7 @@
 #define VECTOR_HPP
 
 #include <cmath>
+#include <array>
 
 namespace vec {
 
@@ -26,6 +27,9 @@ public:
     vec3_t& operator=(vec3_t const& v) noexcept = default;
     vec3_t& operator=(vec3_t&& v) noexcept = default;
 
+	static vec3_t from_array(std::array<float, 3> const& arr){
+		return {arr[0], arr[1], arr[2]};
+	}
 
     vec3_t operator+(vec3_t const& rhs) const noexcept {
         return {

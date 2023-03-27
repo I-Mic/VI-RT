@@ -22,6 +22,7 @@ private:
     vec::vec3_t const up;
     float const fov_w;
     float const fov_h;
+    std::array<std::array<float, 3>, 3> mutable cam_to_world_matrix;
 
 public:
     perspective_t(

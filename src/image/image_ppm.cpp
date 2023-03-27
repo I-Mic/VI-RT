@@ -15,10 +15,11 @@
 namespace img {
 
 image_ppm_t::image_ppm_t(
-    std::unique_ptr<render::renderer_t> render,
-    size_t const w, size_t const h
+    std::unique_ptr<render::renderer_t> renderer,
+    size_t const w, size_t const h,
+	std::string output_fn
 ) :
-    image_t{std::move(render), w, h},
+    image_t{std::move(renderer), w, h, std::move(output_fn)},
     image_to_save{std::make_unique<rgb::rgb_t<unsigned char>[]>(w * h)}{}
 
 
@@ -38,7 +39,7 @@ void image_ppm_t::tone_map() const noexcept {
         }
 }
 
-bool image_ppm_t::output_image(std::string const& filename) const {
+bool image_ppm_t::output_image() const {
 
     //shade each pixel
     for(size_t y {0}; y < this->height; ++y)
@@ -54,7 +55,7 @@ bool image_ppm_t::output_image(std::string const& filename) const {
     this->tone_map();
 
     std::ofstream ofs {};
-    ofs.open(filename, std::ios::out | std::ios::binary);
+    ofs.open(this->output_fn, std::ios::out | std::ios::binary);
     if(ofs.fail())
         return false;
 

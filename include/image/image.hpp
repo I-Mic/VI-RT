@@ -22,16 +22,22 @@ protected:
 
     std::unique_ptr<rgb::rgb_t<float>[]> const image_plane;
     std::unique_ptr<render::renderer_t> const renderer;
+	std::string const output_fn;
 
 public:
 
     size_t const width;
     size_t const height;
 
-    image_t(std::unique_ptr<render::renderer_t> renderer, size_t const w, size_t const h) noexcept;
+    image_t(
+		std::unique_ptr<render::renderer_t> renderer,
+		size_t const w, size_t const h,
+		std::string output_fn
+	) noexcept;
+
     virtual ~image_t();
 
-    virtual bool output_image(std::string const& filename) const = 0;
+    virtual bool output_image() const = 0;
 };
 
 };
