@@ -94,7 +94,7 @@ $(BIN): $(PCH_INC_FILES) $(OBJ_FILES)
 
 # generate each object file according to the corresponding source file
 # create directories as needed
-# https://www.gnu.org/software/make/manual/make.html# Static-Pattern
+# https://www.gnu.org/software/make/manual/make.html#Static-Pattern
 $(OBJ_FILES): $(OBJ_DIR)/%.o : $(SRC_DIR)/%
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -113,3 +113,16 @@ clean:
 ifdef PCH_INC_FILES
 	-rm -rf $(PCH_INC_FILES)
 endif
+
+
+
+# Valgrind flags
+VALGFLAGS 		:= --leak-check=full --show-leak-kinds=all --track-origins=no --verbose
+
+# Valgrind log file
+VALG_OUT 		:= valgrind_log.out
+
+valg_check: $(VALG_OUT)
+
+$(VALG_OUT): $(BIN)
+	valgrind $(VALGFLAGS) --log-file=$@ $^ $(ARGS)
