@@ -132,10 +132,10 @@ void scene_t::load(std::string const& fn){
                     obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 2)
                 };
 
-                mesh_vertices.insert_or_assign(
-                    face.vert_indices[v],
-                    vertice
-                );
+				mesh_vertices.insert_or_assign(
+					face.vert_indices[v],
+					vertice
+				);
 
                 if(face.has_shading_normals()){
                     face.normals_indices.value()[v] =
@@ -147,10 +147,8 @@ void scene_t::load(std::string const& fn){
                         obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 2)
                     };
 
-                    mesh_vertices.insert_or_assign(
-                        face.normals_indices.value()[v],
-                        normal
-                    );
+					if(!mesh_normals.contains(face.normals_indices.value()[v]))
+						mesh_normals[face.normals_indices.value()[v]] = normal;
                 }
 
                 ++indices_iter;
@@ -198,10 +196,10 @@ void scene_t::load(std::string const& fn){
 
     for(tinyobj::material_t const& mat : materials){
 
-        rgb::rgb_t<float> const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
-        rgb::rgb_t<float> const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
-        rgb::rgb_t<float> const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
-        rgb::rgb_t<float> const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
+        rgb::rgb_t const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
+        rgb::rgb_t const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
+        rgb::rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
+        rgb::rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
 
         std::unique_ptr<prim::brdf::brdf_t> brdf {
             std::make_unique<prim::brdf::phong_t>(ka, kd, ks, kt)
@@ -249,6 +247,18 @@ scene_t::get_lights_iterator() const noexcept {
 std::pair<brdfs_iter_t, brdfs_iter_t>
 scene_t::get_brdfs_iterator() const noexcept {
     return std::make_pair(this->brdfs.begin(), this->brdfs.end());
+}
+
+bool scene_t::is_visible(ray::ray_t const& r, float const max_l) const noexcept {
+
+    // iterate over all primitives while visible
+    for(prim::primitive_t const& prim : this->prims){
+        std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
+        if(inter.has_value() && inter.value().depth < max_l)
+			return false;
+    }
+
+    return true;
 }
 
 };

@@ -5,7 +5,7 @@
 
 
 # whether or not to use precompiled headers (comment to disable)
-# USE_PCH			:= yes
+# USE_PCH			:= no
 
 
 

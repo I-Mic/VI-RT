@@ -19,7 +19,9 @@ int main(int const argc, char const* const* const argv){
         return 1;
     }
 
-    for(int i = 1; i < argc; ++i){
+	int status {0};
+
+    for(int i {1}; i < argc; ++i){
 
         try {
             std::unique_ptr<config::config_parser_t> const config_obj {
@@ -29,7 +31,7 @@ int main(int const argc, char const* const* const argv){
             std::unique_ptr<img::image_t> img {config_obj->build_image()};
             if(!img->output_image()){
                 std::cerr << "Error writing output\n";
-                return 2;
+				status = 2;
             }
         }
         catch(std::exception const& e){
@@ -37,5 +39,5 @@ int main(int const argc, char const* const* const argv){
         }
    }
 
-    return 0;
+    return status;
 }

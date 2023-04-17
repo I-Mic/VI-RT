@@ -34,7 +34,7 @@ mesh_t::mesh_t() noexcept : faces{}, vertices{}, normals{} {}
 mesh_t::mesh_t(
     std::vector<face_t> faces,
     std::unordered_map<size_t, vec::vec3_t> vertices,
-	std::unordered_map<size_t, vec::vec3_t> normals,
+    std::unordered_map<size_t, vec::vec3_t> normals,
     prim::bb_t b
 ) noexcept :
     geo::geometry_t{b},

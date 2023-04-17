@@ -50,12 +50,19 @@ public:
     }
 
     rgb_t& operator+=(rgb_t const& rhs) noexcept {
-
         this->r += rhs.r;
         this->g += rhs.g;
         this->b += rhs.b;
 
         return *this;
+    }
+
+    rgb_t operator+(rgb_t const& rhs) const noexcept {
+		return {
+			this->r + rhs.r,
+			this->g + rhs.g,
+			this->b + rhs.b
+		};
     }
 
     //float Y() { what?

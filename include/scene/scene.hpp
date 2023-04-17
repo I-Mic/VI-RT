@@ -46,6 +46,8 @@ public:
 
     std::optional<ray::intersection_t> trace(ray::ray_t const& r) const noexcept;
 
+	bool is_visible(ray::ray_t const& r, float const max_l) const noexcept; 
+
     void print_summary() const;
 };
 

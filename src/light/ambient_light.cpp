@@ -4,7 +4,7 @@
 namespace light {
 
 ambient_light_t::ambient_light_t(rgb::rgb_t<float> const& color) noexcept : 
-    light_t{true},
+    light_t{light::light_type_t::AMBIENT_LIGHT},
     color{color} {}
 
 ambient_light_t::~ambient_light_t() noexcept {}

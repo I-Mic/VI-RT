@@ -13,13 +13,19 @@
 
 namespace light {
 
+enum class light_type_t {
+	NO_LIGHT,
+	AMBIENT_LIGHT,
+	POINT_LIGHT
+};
+
 class light_t {
 
 public:
 
-    bool const is_ambient;
+    light_type_t const type;
 
-    light_t(bool const is_ambient) noexcept : is_ambient{is_ambient} {}
+    light_t(light_type_t const type) noexcept : type{type} {}
 
     virtual ~light_t() = default;
 

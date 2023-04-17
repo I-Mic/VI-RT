@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 
 #include "light/light.hpp"
@@ -29,8 +28,6 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
         return this->background;
 
 
-    // dummy point since it's irrelevant for ambient component
-    vec::vec3_t const dummy {};
     rgb::rgb_t<float> color {};
 
     std::pair<scene::lights_iter_t, scene::lights_iter_t> const lights_range {
@@ -45,13 +42,13 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
 
         std::unique_ptr<light::light_t> const& l {*li};
 
-        if(l->is_ambient){
+        if(l->type == light::light_type_t::AMBIENT_LIGHT){
 
-			std::unique_ptr<prim::brdf::brdf_t> const& brdf {
+            std::unique_ptr<prim::brdf::brdf_t> const& brdf {
                 *(brdfs_range.first + static_cast<long>(isect.value().material_index))
             };
 
-            color += brdf->ambient(l->compute_radiance(dummy));
+            color += brdf->ambient(l->compute_radiance({}));
         }
     }
 
