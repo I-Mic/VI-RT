@@ -23,14 +23,14 @@ fov_h = 90.0
 
 [scene]
 
-input_fn 	= "models/cornell_box.obj"
+input_fn  = "models/cornell_box_VI.obj"
 
 light_ids = ["light0", "light1"]
 
 	[scene.light0]
 	type = "ambient"
 
-	color = [0.9, 0.9, 0.9]
+	color = [0.05, 0.05, 0.05]
 
 	[scene.light1]
 	type = "point"
@@ -40,7 +40,7 @@ light_ids = ["light0", "light1"]
 
 
 [shader]
-type = "ambient"
+type = "whitted"
 
 bg = [0.05, 0.05, 0.55]
 

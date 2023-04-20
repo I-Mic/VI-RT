@@ -30,7 +30,7 @@ public:
     virtual ~light_t() = default;
 
     // return the light_t RGB radiance for a given point : p
-    virtual rgb::rgb_t<float> compute_radiance(vec::vec3_t const& p) const noexcept = 0;
+    virtual rgb::rgb_t<float> radiance(vec::vec3_t const& p) const noexcept = 0;
 
     // return a point p and rgb::rgb_t radiance for a given probability pair prob[2]
     virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_l(

@@ -54,6 +54,12 @@ public:
     rgb::rgb_t<float> ambient(
         rgb::rgb_t<float> const& radiance
     ) const noexcept override;
+
+    rgb::rgb_t<float> diffuse(
+        rgb::rgb_t<float> const& radiance, float const cosl
+    ) const noexcept override;
+
+    bool is_specular_zero() const noexcept override;
 };
 
 };

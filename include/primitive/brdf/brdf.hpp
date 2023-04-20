@@ -54,6 +54,12 @@ public:
     virtual rgb::rgb_t<float> ambient(
         rgb::rgb_t<float> const& radiance
     ) const noexcept = 0;
+
+    virtual rgb::rgb_t<float> diffuse(
+        rgb::rgb_t<float> const& radiance, float const cosl
+    ) const noexcept = 0;
+
+    virtual bool is_specular_zero() const noexcept = 0;
 };
 
 };

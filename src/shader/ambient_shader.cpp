@@ -38,7 +38,7 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
         this->scene->get_brdfs_iterator()
     };
 
-    for(scene::lights_iter_t li {lights_range.first}; li < lights_range.second; ++li){
+    for(scene::lights_iter_t li {lights_range.first}; li != lights_range.second; ++li){
 
         std::unique_ptr<light::light_t> const& l {*li};
 
@@ -48,7 +48,7 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
                 *(brdfs_range.first + static_cast<long>(isect.value().material_index))
             };
 
-            color += brdf->ambient(l->compute_radiance({}));
+            color += brdf->ambient(l->radiance({}));
         }
     }
 

@@ -163,7 +163,8 @@ void scene_t::load(std::string const& fn){
                 mesh_vertices.at(face.vert_indices[2]) -
                 mesh_vertices.at(face.vert_indices[0])
             };
-            vec::vec3_t const geo_normal {v1.cross_product(v2)};
+            vec::vec3_t geo_normal {v1.cross_product(v2)};
+			geo_normal.normalize();
             face.geo_normal = geo_normal;
 
             prim::bb_t const face_bb {

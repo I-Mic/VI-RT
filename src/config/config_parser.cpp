@@ -15,6 +15,7 @@
 #include "scene/scene.hpp"
 #include "shader/ambient_shader.hpp"
 #include "shader/shader.hpp"
+#include "shader/whitted_shader.hpp"
 #include "toml.hpp"
 #include "toml/exception.hpp"
 #include "toml/get.hpp"
@@ -160,6 +161,17 @@ private:
             };
 
             return std::make_unique<shader::ambient_shader_t>(
+                std::move(scene),
+                rgb::rgb_t<float>::from_array(bg)
+            );
+        }
+        else if(type == "whitted"){
+
+            std::array<float, 3> const bg {
+                toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
+            };
+
+            return std::make_unique<shader::whitted_shader_t>(
                 std::move(scene),
                 rgb::rgb_t<float>::from_array(bg)
             );

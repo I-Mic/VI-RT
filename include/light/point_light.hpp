@@ -20,7 +20,7 @@ public:
 
     ~point_light_t() noexcept;
 
-    rgb::rgb_t<float> compute_radiance(vec::vec3_t const&) const noexcept override;
+    rgb::rgb_t<float> radiance(vec::vec3_t const&) const noexcept override;
 
     std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_l(
         float const lower, float const upper

@@ -43,4 +43,13 @@ rgb::rgb_t<float> phong_t::ambient(rgb::rgb_t<float> const& radiance) const noex
     return this->ka * radiance;
 }
 
+rgb::rgb_t<float> phong_t::diffuse(rgb::rgb_t<float> const& radiance, float cosl) const noexcept {
+	return this->kd * radiance * cosl;
+}
+
+
+bool phong_t::is_specular_zero() const noexcept {
+	return this->ks.is_zero();
+}
+
 };

@@ -9,7 +9,7 @@ ambient_light_t::ambient_light_t(rgb::rgb_t<float> const& color) noexcept :
 
 ambient_light_t::~ambient_light_t() noexcept {}
 
-rgb::rgb_t<float> ambient_light_t::compute_radiance(vec::vec3_t const&) const noexcept {
+rgb::rgb_t<float> ambient_light_t::radiance(vec::vec3_t const&) const noexcept {
     return this->color;
 }
 

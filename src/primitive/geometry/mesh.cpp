@@ -83,10 +83,13 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
     // At this stage we can compute t to find out where the intersection point is on the line.
     float const t {f * edge2.dot_product(q)};
     if (t > EPSILON){
+
+		vec::vec3_t const wo {-1.f * r.dir};
+
         ray::intersection_t const inter {
             r.org + r.dir * t,
-            face.geo_normal,
-            {},
+			face.geo_normal.flip(wo),
+			wo,
             t
         };
 
