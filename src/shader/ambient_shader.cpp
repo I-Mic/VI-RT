@@ -30,26 +30,19 @@ rgb::rgb_t<float> ambient_shader_t::shade(ray::ray_t const& ray) const noexcept 
 
     rgb::rgb_t<float> color {};
 
-    std::pair<scene::lights_iter_t, scene::lights_iter_t> const lights_range {
-        this->scene->get_lights_iterator()
+	auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
+
+	auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
+    std::unique_ptr<prim::brdf::brdf_t> const& brdf {
+        *(brdfs_iter_begin + static_cast<long>(isect.value().material_index))
     };
 
-    std::pair<scene::brdfs_iter_t, scene::brdfs_iter_t> const brdfs_range {
-        this->scene->get_brdfs_iterator()
-    };
-
-    for(scene::lights_iter_t li {lights_range.first}; li != lights_range.second; ++li){
+    for(scene::lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li){
 
         std::unique_ptr<light::light_t> const& l {*li};
 
-        if(l->type == light::light_type_t::AMBIENT_LIGHT){
-
-            std::unique_ptr<prim::brdf::brdf_t> const& brdf {
-                *(brdfs_range.first + static_cast<long>(isect.value().material_index))
-            };
-
-            color += brdf->ambient(l->radiance({}));
-        }
+        if(l->type == light::light_type_t::AMBIENT_LIGHT)
+            color += brdf->ambient() * l->radiance({});
     }
 
     return color;

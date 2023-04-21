@@ -39,17 +39,16 @@ float phong_t::pdf(
     return 0.f;
 }
 
-rgb::rgb_t<float> phong_t::ambient(rgb::rgb_t<float> const& radiance) const noexcept {
-    return this->ka * radiance;
+rgb::rgb_t<float> phong_t::ambient() const noexcept {
+    return this->ka;
 }
 
-rgb::rgb_t<float> phong_t::diffuse(rgb::rgb_t<float> const& radiance, float cosl) const noexcept {
-	return this->kd * radiance * cosl;
+rgb::rgb_t<float> phong_t::diffuse() const noexcept {
+	return this->kd;
 }
 
-
-bool phong_t::is_specular_zero() const noexcept {
-	return this->ks.is_zero();
+rgb::rgb_t<float> phong_t::specular() const noexcept {
+	return this->ks;
 }
 
 };

@@ -26,28 +26,23 @@ rgb::rgb_t<float> whitted_shader_t::direct_lighting(
     ray::intersection_t const& isect
 ) const noexcept {
 
-    std::pair<scene::lights_iter_t, scene::lights_iter_t> const lights_range {
-        this->scene->get_lights_iterator()
-    };
+	auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
-    std::pair<scene::brdfs_iter_t, scene::brdfs_iter_t> const brdfs_range {
-        this->scene->get_brdfs_iterator()
-    };
-
+	auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
     std::unique_ptr<prim::brdf::brdf_t> const& brdf {
-        *(brdfs_range.first + static_cast<long>(isect.material_index))
+        *(brdfs_iter_begin + static_cast<long>(isect.material_index))
     };
 
     rgb::rgb_t<float> color {};
 
-    for(scene::lights_iter_t li {lights_range.first}; li != lights_range.second; ++li){
+    for(scene::lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li){
 
         std::unique_ptr<light::light_t> const& light {*li};
 
         switch(light->type){
 
         case light::light_type_t::AMBIENT_LIGHT:
-            color += brdf->ambient(light->radiance({}));
+            color += brdf->ambient() * light->radiance({});
             break;
 
         case light::light_type_t::POINT_LIGHT: {
@@ -65,7 +60,7 @@ rgb::rgb_t<float> whitted_shader_t::direct_lighting(
 				shadow.adjust_origin(isect.gn);
 
 				if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
-					color += brdf->diffuse(radiance, cosl);
+					color += brdf->diffuse() * radiance * cosl;
 			}
 
             break;
@@ -84,15 +79,12 @@ rgb::rgb_t<float> whitted_shader_t::specular_reflection(
     ray::intersection_t const& isect
 ) const noexcept {
 
-    std::pair<scene::brdfs_iter_t, scene::brdfs_iter_t> const brdfs_range {
-        this->scene->get_brdfs_iterator()
-    };
-
+	auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
     std::unique_ptr<prim::brdf::brdf_t> const& brdf {
-        *(brdfs_range.first + static_cast<long>(isect.material_index))
+        *(brdfs_iter_begin + static_cast<long>(isect.material_index))
     };
 
-	if(brdf->is_specular_zero())
+	if(brdf->specular().is_zero())
 		return {};
 
 	float const cos {isect.gn.dot_product(isect.wo)};
