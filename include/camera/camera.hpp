@@ -25,7 +25,7 @@ public:
 
     virtual ray::ray_t generate_ray(
         size_t const x, size_t const y,
-        float const* const cam_jitter = nullptr
+        std::array<float, 2> = {0.5, 0.5} 
     ) const = 0;
 };
 

@@ -53,11 +53,11 @@ static vec::vec3_t matrix_product(
 }
 
 ray::ray_t perspective_t::generate_ray(
-    size_t const x, size_t const y, float const* const cam_jitter
+    size_t const x, size_t const y, std::array<float, 2> const cam_jitter
 ) const noexcept {
 
-    float const xs {(2.f * (x + 0.5f) / this->width) - 1};
-    float const ys {(2.f * (y + 0.5f) / this->height) - 1};
+    float const xs {(2.f * (x + cam_jitter[0]) / this->width) - 1};
+    float const ys {(2.f * (y + cam_jitter[1]) / this->height) - 1};
 
     float const xc {xs * std::tan(this->fov_w / 2.f)};
     float const yc {ys * std::tan(this->fov_h / 2.f)};

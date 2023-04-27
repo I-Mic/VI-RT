@@ -19,11 +19,13 @@ class renderer_t {
 protected:
     std::unique_ptr<cam::camera_t> const cam;
     std::unique_ptr<shader::shader_t> const shader;
+    unsigned const samples_per_pixel;
 
 public:
     renderer_t(
         std::unique_ptr<cam::camera_t> cam,
-        std::unique_ptr<shader::shader_t> shader
+        std::unique_ptr<shader::shader_t> shader,
+        unsigned const samples_per_pixel
     ) noexcept;
 
     virtual ~renderer_t() = default;

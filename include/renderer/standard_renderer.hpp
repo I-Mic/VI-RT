@@ -12,7 +12,8 @@ public:
 
     standard_renderer_t(
         std::unique_ptr<cam::camera_t> cam,
-        std::unique_ptr<shader::shader_t> shader
+        std::unique_ptr<shader::shader_t> shader,
+        unsigned const samples_per_pixel = 32
     ) noexcept;
 
     ~standard_renderer_t() noexcept;
