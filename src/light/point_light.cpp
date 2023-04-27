@@ -15,10 +15,10 @@ rgb::rgb_t<float> point_light_t::radiance(vec::vec3_t const&) const noexcept {
     return this->color;
 }
 
-std::tuple<vec::vec3_t, rgb::rgb_t<float>> point_light_t::sample_l(
+std::tuple<vec::vec3_t, rgb::rgb_t<float>,float> point_light_t::sample_l(
     float const lower, float const upper
 ) const noexcept {
-    return std::make_tuple(this->position, this->color);
+    return std::make_tuple(this->position, this->color,0);
 }
 
 float point_light_t::pdf(vec::vec3_t const& p) const noexcept {

@@ -49,7 +49,7 @@ rgb::rgb_t<float> whitted_shader_t::direct_lighting(
 
         case light::light_type_t::POINT_LIGHT: {
 
-            auto const& [pos, radiance] {light->sample_l(0.f, 0.f)};
+            auto const& [pos, radiance,_] {light->sample_l(0.f, 0.f)};
 
             vec::vec3_t ldir {pos - isect.p};
             float const ldistance {ldir.norm()};

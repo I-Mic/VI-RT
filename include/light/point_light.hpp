@@ -22,7 +22,7 @@ public:
 
     rgb::rgb_t<float> radiance(vec::vec3_t const&) const noexcept override;
 
-    std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_l(
+    std::tuple<vec::vec3_t, rgb::rgb_t<float>, float> sample_l(
         float const lower, float const upper
     ) const noexcept override;
 

@@ -16,7 +16,8 @@ namespace light {
 enum class light_type_t {
     NO_LIGHT,
     AMBIENT_LIGHT,
-    POINT_LIGHT
+    POINT_LIGHT,
+    AREA_LIGHT
 };
 
 class light_t {
@@ -33,7 +34,7 @@ public:
     virtual rgb::rgb_t<float> radiance(vec::vec3_t const& p) const noexcept = 0;
 
     // return a point p and rgb::rgb_t radiance for a given probability pair prob[2]
-    virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_l(
+    virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>, float> sample_l(
         float const lower, float const upper
     ) const noexcept = 0;
 

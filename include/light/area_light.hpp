@@ -4,26 +4,30 @@
 //  Created by Luis Paulo Santos on 14/03/2023.
 //
 
-#ifndef AMBIENT_LIGHT_HPP
-#define AMBIENT_LIGHT_HPP
+#ifndef AREA_LIGHT_HPP
+#define AREA_LIGHT_HPP
 
 #include "light/light.hpp"
 #include "utils/rgb.hpp"
 #include "utils/vector.hpp"
+#include "primitive/geometry/triangle.hpp"
 
 namespace light {
 
-class ambient_light_t : public light_t {
+class area_light_t : public light_t {
 
 private:
 
-    rgb::rgb_t<float> const color;
+    rgb::rgb_t<float> const itensity;
+    rgb::rgb_t<float> const power;
+    prim::geo::triangle_t gem;
+    float pdf;
 
 public:
 
-    ambient_light_t(rgb::rgb_t<float> const& color) noexcept;
+    area_light_t(rgb::rgb_t<float> const& color) noexcept;
 
-    ~ambient_light_t() noexcept;
+    ~area_light_t() noexcept;
 
     rgb::rgb_t<float> radiance(vec::vec3_t const&) const noexcept override;
 
@@ -36,4 +40,4 @@ public:
 
 };
 
-#endif /* AMBIENT_LIGHT_HPP */
+#endif /* AREA_LIGHT_HPP */
