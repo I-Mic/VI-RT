@@ -23,16 +23,16 @@ public:
     ray_t(){}
     ray_t(vec::vec3_t const& o, vec::vec3_t const& d): org{o}, dir{d} {}
 
-	void adjust_origin(vec::vec3_t const& normal) noexcept {
+    void adjust_origin(vec::vec3_t const& normal) noexcept {
 
-		vec::vec3_t offset {EPSILON * normal};
+        vec::vec3_t offset {EPSILON * normal};
         if(this->dir.dot_product(normal) < 0.f)
-            offset *= -1.f; 
+            offset *= -1.f;
 
         this->org.x += offset.x;
         this->org.y += offset.y;
         this->org.z += offset.z;
-	}
+    }
 };
 
 };

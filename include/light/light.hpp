@@ -14,9 +14,9 @@
 namespace light {
 
 enum class light_type_t {
-	NO_LIGHT,
-	AMBIENT_LIGHT,
-	POINT_LIGHT
+    NO_LIGHT,
+    AMBIENT_LIGHT,
+    POINT_LIGHT
 };
 
 class light_t {

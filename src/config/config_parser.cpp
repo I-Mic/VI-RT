@@ -19,6 +19,7 @@
 #include "toml.hpp"
 #include "toml/exception.hpp"
 #include "toml/get.hpp"
+#include "toml/value.hpp"
 #include "utils/vector.hpp"
 
 namespace config {
@@ -171,10 +172,17 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
-            return std::make_unique<shader::whitted_shader_t>(
-                std::move(scene),
-                rgb::rgb_t<float>::from_array(bg)
-            );
+            if(toml::find(this->toml_obj, table_name).contains("max_depth"))
+                return std::make_unique<shader::whitted_shader_t>(
+                    std::move(scene),
+                    rgb::rgb_t<float>::from_array(bg),
+                    toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
+                );
+            else
+                return std::make_unique<shader::whitted_shader_t>(
+                    std::move(scene),
+                    rgb::rgb_t<float>::from_array(bg)
+                );
         }
         else
             throw std::domain_error("Unknown type " + type + " for asset " + table_name);

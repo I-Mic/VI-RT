@@ -27,4 +27,10 @@ newmtl mirror_mat
 Ka 0 0 0
 Kd 0 0 0
 Ks 0.9 0.9 0.9
-Ns 10000
+Ns 100000000
+
+newmtl gold
+Ka 0.828 0.684 0.215
+Kd 0 0 0
+Ks 0.828 0.684 0.215
+Ns 1000
