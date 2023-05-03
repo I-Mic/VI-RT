@@ -9,7 +9,6 @@
 
 #include "light/light.hpp"
 #include "utils/rgb.hpp"
-#include "utils/vector.hpp"
 
 namespace light {
 
@@ -22,16 +21,9 @@ private:
 public:
 
     ambient_light_t(rgb::rgb_t<float> const& color) noexcept;
-
     ~ambient_light_t() noexcept;
 
-    rgb::rgb_t<float> radiance(vec::vec3_t const&) const noexcept override;
-
-    std::tuple<vec::vec3_t, rgb::rgb_t<float>, float> sample_l(
-        float const lower, float const upper
-    ) const noexcept override;
-
-    float pdf(vec::vec3_t const& p) const noexcept override;
+    light_properties_t get_properties(light_parameters_t const&) const noexcept override;
 };
 
 };

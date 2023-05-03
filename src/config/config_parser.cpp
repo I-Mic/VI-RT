@@ -8,12 +8,15 @@
 #include "image/image.hpp"
 #include "image/image_ppm.hpp"
 #include "light/ambient_light.hpp"
+#include "light/area_light.hpp"
 #include "light/light.hpp"
 #include "light/point_light.hpp"
+#include "primitive/geometry/triangle.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/standard_renderer.hpp"
 #include "scene/scene.hpp"
 #include "shader/ambient_shader.hpp"
+#include "shader/distributed_shader.hpp"
 #include "shader/shader.hpp"
 #include "shader/whitted_shader.hpp"
 #include "toml.hpp"
@@ -127,6 +130,36 @@ private:
                     )
                 );
             }
+            else if(type == "area"){
+
+                std::array<float, 3> const power {
+                    toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "power")
+                };
+
+                std::array<float, 3> const arr_v1 {
+                    toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "v1")
+                };
+                std::array<float, 3> const arr_v2 {
+                    toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "v2")
+                };
+                std::array<float, 3> const arr_v3 {
+                    toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "v3")
+                };
+
+				vec::vec3_t const v1 {vec::vec3_t::from_array(arr_v1)};
+				vec::vec3_t const v2 {vec::vec3_t::from_array(arr_v2)};
+				vec::vec3_t const v3 {vec::vec3_t::from_array(arr_v3)};
+				vec::vec3_t const normal {vec::vec3_t::surface_normal(v1, v2, v3)};
+
+				prim::geo::triangle_t const triangle {v1, v2, v3, normal};
+
+                lights.push_back(
+                    std::make_unique<light::area_light_t>(
+                        rgb::rgb_t<float>::from_array(power),
+						triangle
+                    )
+                );
+            }
             else
                 throw std::domain_error("Unknown type " + type + " for asset " + table_name);
         }
@@ -184,6 +217,24 @@ private:
                     rgb::rgb_t<float>::from_array(bg)
                 );
         }
+        else if(type == "distributed"){
+
+            std::array<float, 3> const bg {
+                toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
+            };
+
+            if(toml::find(this->toml_obj, table_name).contains("max_depth"))
+                return std::make_unique<shader::distributed_shader_t>(
+                    std::move(scene),
+                    rgb::rgb_t<float>::from_array(bg),
+                    toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
+                );
+            else
+                return std::make_unique<shader::distributed_shader_t>(
+                    std::move(scene),
+                    rgb::rgb_t<float>::from_array(bg)
+                );
+        }
         else
             throw std::domain_error("Unknown type " + type + " for asset " + table_name);
     }
@@ -199,10 +250,17 @@ private:
 
         if(type == "standard"){
 
-            return std::make_unique<render::standard_renderer_t>(
-                std::move(cam),
-                std::move(shader)
-            );
+            if(toml::find(this->toml_obj, table_name).contains("spp"))
+                return std::make_unique<render::standard_renderer_t>(
+                    std::move(cam),
+                    std::move(shader),
+                    toml::find<unsigned>(this->toml_obj, table_name, "spp")
+                );
+            else
+                return std::make_unique<render::standard_renderer_t>(
+                    std::move(cam),
+                    std::move(shader)
+                );
         }
         else
             throw std::domain_error("Unknown type " + type + " for asset " + table_name);
@@ -221,10 +279,17 @@ private:
         size_t const height {toml::find<size_t>(this->toml_obj, table_name, "height")};
 
         std::string const type {toml::find<std::string>(this->toml_obj, table_name, "type")};
-        if(type == "ppm")
-            return std::make_unique<img::image_ppm_t>(
-                std::move(renderer), width, height, output_fn
-            );
+        if(type == "ppm"){
+            if(toml::find(this->toml_obj, table_name).contains("threads"))
+                return std::make_unique<img::image_ppm_t>(
+                    std::move(renderer), width, height, output_fn,
+                    toml::find<unsigned>(this->toml_obj, table_name, "threads")
+                );
+            else
+                return std::make_unique<img::image_ppm_t>(
+                    std::move(renderer), width, height, output_fn
+                );
+        }
         else
             throw std::domain_error("Unknown type " + type + " for asset " + table_name);
     }
@@ -240,7 +305,3 @@ std::unique_ptr<config_parser_t> config_parser_t::from_toml(std::string const& f
 }
 
 };
-
-// read id foreach table t
-// read type foreach t.id
-// construct and return structure

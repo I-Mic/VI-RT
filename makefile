@@ -5,7 +5,7 @@
 
 
 # whether or not to use precompiled headers (comment to disable)
-# USE_PCH			:= no
+# USE_PCH			:= 1
 
 
 
@@ -45,7 +45,7 @@ STD				:= c++20
 CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD)
 
 # include flags
-CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include 
+CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include
 CXXFLAGS        += -I$(LIB_DIR)/toml11/include
 
 # linker flags (e.g. -L/path/to/lib)
@@ -71,10 +71,10 @@ endif
 
 
 # profiles
-release: CXXFLAGS += -O2 -DNDEBUG
+release: CXXFLAGS += -O2 -DNDEBUG -g3 -ggdb
 release: all
 
-debug: CXXFLAGS += -O0 -g3 -gdwarf-4
+debug: CXXFLAGS += -O0 -g3 -ggdb#-gdwarf-4
 debug: all
 
 

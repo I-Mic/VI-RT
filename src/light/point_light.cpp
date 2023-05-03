@@ -4,25 +4,18 @@
 
 namespace light {
 
-point_light_t::point_light_t(rgb::rgb_t<float> const& color, vec::vec3_t const& pos) noexcept : 
+point_light_t::point_light_t(rgb::rgb_t<float> const& color, vec::vec3_t const& pos) noexcept :
     light_t{light::light_type_t::POINT_LIGHT},
     color{color},
-	position{pos} {}
+    position{pos} {}
 
 point_light_t::~point_light_t() noexcept {}
 
-rgb::rgb_t<float> point_light_t::radiance(vec::vec3_t const&) const noexcept {
-    return this->color;
-}
-
-std::tuple<vec::vec3_t, rgb::rgb_t<float>,float> point_light_t::sample_l(
-    float const lower, float const upper
-) const noexcept {
-    return std::make_tuple(this->position, this->color,0);
-}
-
-float point_light_t::pdf(vec::vec3_t const& p) const noexcept {
-    return 0.f;
+light_properties_t point_light_t::get_properties(light_parameters_t const&) const noexcept {
+    return {
+		.radiance{std::make_optional(this->color)},
+		.point{std::make_optional(this->position)},
+	};
 }
 
 };

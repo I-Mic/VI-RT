@@ -33,24 +33,32 @@ public:
     rgb_t& operator=(rgb_t const& rgb) = default;
     rgb_t& operator=(rgb_t&& rgb) = default;
 
-	static rgb_t from_array(std::array<T, 3> const& arr){
-		return {arr[0], arr[1], arr[2]};
-	}
+    static rgb_t from_array(std::array<T, 3> const& arr){
+        return {arr[0], arr[1], arr[2]};
+    }
 
+
+    friend rgb_t& operator/=(rgb_t& lhs, float const rhs) noexcept {
+
+        static_assert(std::is_same<T, float>::value);
+
+        lhs = lhs / rhs;
+        return lhs;
+    }
 
     friend rgb_t operator*(rgb_t const& lhs, rgb_t const& rhs) noexcept {
 
         static_assert(std::is_same<T, float>::value);
 
         return {
-            (lhs.r * rhs.r),
-            (lhs.g * rhs.g),
-            (lhs.b * rhs.b)
+            lhs.r * rhs.r,
+            lhs.g * rhs.g,
+            lhs.b * rhs.b
         };
     }
 
     friend rgb_t operator*(float const f, rgb_t const& rhs) noexcept {
-		return rhs * f;
+        return rhs * f;
     }
 
     friend rgb_t operator*(rgb_t const& lhs, float const f) noexcept {
@@ -58,9 +66,20 @@ public:
         static_assert(std::is_same<T, float>::value);
 
         return {
-            (lhs.r * f),
-            (lhs.g * f),
-            (lhs.b * f)
+            lhs.r * f,
+            lhs.g * f,
+            lhs.b * f
+        };
+    }
+
+    friend rgb_t operator/(rgb_t const& lhs, float const f) noexcept {
+
+        static_assert(std::is_same<T, float>::value);
+
+        return {
+            lhs.r / f,
+            lhs.g / f,
+            lhs.b / f
         };
     }
 
@@ -73,16 +92,19 @@ public:
     }
 
     rgb_t operator+(rgb_t const& rhs) const noexcept {
-		return {
-			this->r + rhs.r,
-			this->g + rhs.g,
-			this->b + rhs.b
-		};
+        return {
+            this->r + rhs.r,
+            this->g + rhs.g,
+            this->b + rhs.b
+        };
     }
 
-	bool is_zero() const noexcept {
-		return this->r == 0 && this->g == 0 && this->b == 0;
-	}
+    bool is_zero() const noexcept {
+        return
+            this->r == static_cast<T>(0) &&
+            this->g == static_cast<T>(0) &&
+            this->b == static_cast<T>(0);
+    }
 
     //float Y() { what?
     //    return (r*0.2126 + g*0.7152 + b*0.0722 );

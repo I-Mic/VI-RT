@@ -132,10 +132,10 @@ void scene_t::load(std::string const& fn){
                     obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 2)
                 };
 
-				mesh_vertices.insert_or_assign(
-					face.vert_indices[v],
-					vertice
-				);
+                mesh_vertices.insert_or_assign(
+                    face.vert_indices[v],
+                    vertice
+                );
 
                 if(face.has_shading_normals()){
                     face.normals_indices.value()[v] =
@@ -147,25 +147,30 @@ void scene_t::load(std::string const& fn){
                         obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 2)
                     };
 
-					if(!mesh_normals.contains(face.normals_indices.value()[v]))
-						mesh_normals[face.normals_indices.value()[v]] = normal;
+                    if(!mesh_normals.contains(face.normals_indices.value()[v]))
+                        mesh_normals[face.normals_indices.value()[v]] = normal;
                 }
 
                 ++indices_iter;
             }
 
-
-            vec::vec3_t const v1 {
+            /*vec::vec3_t const v1 {
                 mesh_vertices.at(face.vert_indices[1]) -
-                mesh_vertices.at(face.vert_indices[0])
+                    mesh_vertices.at(face.vert_indices[0])
             };
             vec::vec3_t const v2 {
                 mesh_vertices.at(face.vert_indices[2]) -
-                mesh_vertices.at(face.vert_indices[0])
+                    mesh_vertices.at(face.vert_indices[0])
             };
             vec::vec3_t geo_normal {v1.cross_product(v2)};
-			geo_normal.normalize();
-            face.geo_normal = geo_normal;
+            geo_normal.normalize();
+            face.geo_normal = geo_normal;*/
+
+            face.geo_normal = vec::vec3_t::surface_normal(
+                mesh_vertices.at(face.vert_indices[0]),
+                mesh_vertices.at(face.vert_indices[1]),
+                mesh_vertices.at(face.vert_indices[2])
+            );
 
             prim::bb_t const face_bb {
                 mesh_vertices.at(face.vert_indices[0]),
@@ -236,6 +241,31 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
         }
     }
 
+    /*if(intersects)
+        return std::make_optional(min_isect);
+
+    for(std::unique_ptr<light::light_t> const& l : this->lights){
+
+        if(l->type == light::light_type_t::AREA_LIGHT){
+
+            light::light_properties_t const lprops {
+                l->get_properties()
+            };
+
+            std::optional<ray::intersection_t> const inter {
+                lprops.light_geom.value()->intersect(r)
+            };
+            if(!inter.has_value())
+                continue;
+
+            intersects = true;
+            if(inter.value().depth < min_isect.depth){
+                min_isect = inter.value();
+                min_isect.le = std::make_optional(lprops.radiance.value());
+            }
+        }
+    }*/
+
     return intersects ? std::make_optional(min_isect) : std::nullopt;
 }
 
@@ -256,7 +286,7 @@ bool scene_t::is_visible(ray::ray_t const& r, float const max_l) const noexcept 
     for(prim::primitive_t const& prim : this->prims){
         std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
         if(inter.has_value() && inter.value().depth < max_l)
-			return false;
+            return false;
     }
 
     return true;

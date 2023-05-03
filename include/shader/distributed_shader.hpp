@@ -1,15 +1,11 @@
-#ifndef WHITTED_SHADER_HPP
-#define WHITTED_SHADER_HPP
+#ifndef DISTRIBUTED_SHADER_HPP
+#define DISTRIBUTED_SHADER_HPP
 
-#include "rays/intersection.hpp"
-#include "rays/ray.hpp"
-#include "scene/scene.hpp"
 #include "shader/shader.hpp"
-#include "utils/rgb.hpp"
 
 namespace shader {
 
-class whitted_shader_t : public shader_t {
+class distributed_shader_t : public shader_t {
 
 private:
     rgb::rgb_t<float> const background;
@@ -24,17 +20,17 @@ private:
     rgb::rgb_t<float> shade(ray::ray_t const& ray, size_t const depth) const noexcept;
 
 public:
-    whitted_shader_t(
+    distributed_shader_t(
         std::unique_ptr<scene::scene_t> scene,
         rgb::rgb_t<float> const& bg,
         unsigned const max_depth = 4
     ) noexcept;
 
-    ~whitted_shader_t() noexcept;
+    ~distributed_shader_t() noexcept;
 
     rgb::rgb_t<float> shade(ray::ray_t const& ray) const noexcept override;
 };
 
 }
 
-#endif //WHITTED_SHADER_HPP
+#endif //DISTRIBUTED_SHADER_HPP

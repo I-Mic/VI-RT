@@ -22,13 +22,11 @@ perspective_t::perspective_t(
     f.normalize();
     vec::vec3_t r {f.cross_product(up)};
     r.normalize();
-	vec::vec3_t real_up {r.cross_product(f)};
-	real_up.normalize();
+    vec::vec3_t real_up {r.cross_product(f)};
+    real_up.normalize();
 
-	//flip image
-	real_up *= -1.f;
-
-	//f *= 10.f;
+    // flip the image
+    real_up *= -1.f;
 
     this->cam_to_world_matrix[0] = {r.x, r.y, r.z};
     this->cam_to_world_matrix[1] = {real_up.x, real_up.y, real_up.z};
@@ -56,14 +54,14 @@ ray::ray_t perspective_t::generate_ray(
     size_t const x, size_t const y, std::array<float, 2> const cam_jitter
 ) const noexcept {
 
-    float const xs {(2.f * (x + cam_jitter[0]) / this->width) - 1};
+    float const xs {(2.f * (x + cam_jitter[0]) / this->width)  - 1};
     float const ys {(2.f * (y + cam_jitter[1]) / this->height) - 1};
 
     float const xc {xs * std::tan(this->fov_w / 2.f)};
     float const yc {ys * std::tan(this->fov_h / 2.f)};
 
     vec::vec3_t ray_dir {matrix_product(this->cam_to_world_matrix, {xc, yc, 1.f})};
-	ray_dir.normalize();
+    ray_dir.normalize();
 
     return {this->eye, ray_dir};
 }

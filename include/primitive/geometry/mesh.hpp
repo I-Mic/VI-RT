@@ -28,6 +28,8 @@ struct face_t {
     vec::vec3_t geo_normal;           // geometric normal
     std::optional<std::array<size_t, 3>> normals_indices;
     prim::bb_t bb;      // face bounding box
+	vec::vec3_t edge1;
+	vec::vec3_t edge2;
 
     face_t() noexcept;
     bool has_shading_normals() const noexcept;

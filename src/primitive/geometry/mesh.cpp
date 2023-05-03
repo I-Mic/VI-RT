@@ -21,12 +21,11 @@ namespace prim::geo {
 face_t::face_t() noexcept :
     vert_indices{}, geo_normal{},
     normals_indices{std::nullopt},
-    bb{} {}
+    bb{}, edge1{}, edge2{} {}
 
 bool face_t::has_shading_normals() const noexcept {
     return this->normals_indices.has_value();
 }
-
 
 
 mesh_t::mesh_t() noexcept : faces{}, vertices{}, normals{} {}
@@ -55,14 +54,11 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
         return std::nullopt;
 
     vec::vec3_t const& v0 {this->vertices.at(face.vert_indices[0])};
-    vec::vec3_t const& v1 {this->vertices.at(face.vert_indices[1])};
-    vec::vec3_t const& v2 {this->vertices.at(face.vert_indices[2])};
+    //vec::vec3_t const& v1 {this->vertices.at(face.vert_indices[1])};
+    //vec::vec3_t const& v2 {this->vertices.at(face.vert_indices[2])};
 
-    vec::vec3_t const edge1 {v1 - v0};
-    vec::vec3_t const edge2 {v2 - v0};
-
-    vec::vec3_t const h {r.dir.cross_product(edge2)};
-    float const a {edge1.dot_product(h)};
+    vec::vec3_t const h {r.dir.cross_product(face.edge2)};
+    float const a {face.edge1.dot_product(h)};
 
     if (a > -EPSILON && a < EPSILON)
         return std::nullopt;    // This ray is parallel to this triangle.
@@ -75,21 +71,21 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
         return std::nullopt;
 
 
-    vec::vec3_t const q {s.cross_product(edge1)};
+    vec::vec3_t const q {s.cross_product(face.edge1)};
     float const v {f * r.dir.dot_product(q)};
     if (v < 0.f || u + v > 1.f)
         return std::nullopt;
 
     // At this stage we can compute t to find out where the intersection point is on the line.
-    float const t {f * edge2.dot_product(q)};
+    float const t {f * face.edge2.dot_product(q)};
     if (t > EPSILON){
 
-		vec::vec3_t const wo {-1.f * r.dir};
+        vec::vec3_t const wo {-1.f * r.dir};
 
         ray::intersection_t const inter {
             r.org + r.dir * t,
-			face.geo_normal.flip(wo),
-			wo,
+            face.geo_normal.flip(wo),
+            wo,
             t
         };
 

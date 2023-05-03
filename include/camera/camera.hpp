@@ -25,7 +25,7 @@ public:
 
     virtual ray::ray_t generate_ray(
         size_t const x, size_t const y,
-        std::array<float, 2> = {0.5, 0.5} 
+        std::array<float, 2> const jitter = {0.5f, 0.5f}
     ) const = 0;
 };
 

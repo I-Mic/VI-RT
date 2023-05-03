@@ -11,13 +11,9 @@ namespace render {
 standard_renderer_t::standard_renderer_t(
     std::unique_ptr<cam::camera_t> cam,
     std::unique_ptr<shader::shader_t> shader,
-    unsigned const samples_per_pixel 
+    unsigned const samples_per_pixel
 ) noexcept :
-    renderer_t{
-        std::move(cam),
-        std::move(shader),
-        samples_per_pixel
-    }
+    renderer_t{std::move(cam), std::move(shader), samples_per_pixel}
 {
     std::srand(std::time(nullptr));
 }
@@ -32,7 +28,7 @@ rgb::rgb_t<float> standard_renderer_t::render_pixel(
 
     for(unsigned spp {0}; spp < this->samples_per_pixel; ++spp){
 
-        std::array<float, 2> const jitter { 
+        std::array<float, 2> const jitter {
             std::rand() / static_cast<float>(RAND_MAX),
             std::rand() / static_cast<float>(RAND_MAX)
         };
@@ -41,7 +37,7 @@ rgb::rgb_t<float> standard_renderer_t::render_pixel(
         color += this->shader->shade(primary_ray);
     }
 
-    color = color * (1.f / static_cast<float>(this->samples_per_pixel));
+    color /= static_cast<float>(this->samples_per_pixel);
 
     return color;
 }

@@ -18,24 +18,21 @@ class area_light_t : public light_t {
 
 private:
 
-    rgb::rgb_t<float> const itensity;
+    float const pdf;
     rgb::rgb_t<float> const power;
-    prim::geo::triangle_t gem;
-    float pdf;
+    rgb::rgb_t<float> const intensity;
+    prim::geo::triangle_t const geom;
 
 public:
 
-    area_light_t(rgb::rgb_t<float> const& color) noexcept;
+    area_light_t(
+        rgb::rgb_t<float> const& power,
+        prim::geo::triangle_t const& geom
+    ) noexcept;
 
     ~area_light_t() noexcept;
 
-    rgb::rgb_t<float> radiance(vec::vec3_t const&) const noexcept override;
-
-    std::tuple<vec::vec3_t, rgb::rgb_t<float>, float> sample_l(
-        float const lower, float const upper
-    ) const noexcept override;
-
-    float pdf(vec::vec3_t const& p) const noexcept override;
+    light_properties_t get_properties(light_parameters_t const&) const noexcept override;
 };
 
 };

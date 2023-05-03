@@ -27,9 +27,19 @@ public:
     vec3_t& operator=(vec3_t const& v) noexcept = default;
     vec3_t& operator=(vec3_t&& v) noexcept = default;
 
-	static vec3_t from_array(std::array<float, 3> const& arr){
-		return {arr[0], arr[1], arr[2]};
-	}
+    static vec3_t from_array(std::array<float, 3> const& arr) noexcept {
+        return {arr[0], arr[1], arr[2]};
+    }
+
+    static vec3_t surface_normal(
+        vec::vec3_t const& v1, vec::vec3_t const& v2, vec::vec3_t const& v3
+    ) noexcept {
+        vec::vec3_t const edge1 {v2 - v1};
+        vec::vec3_t const edge2 {v3 - v1};
+        vec::vec3_t normal {edge1.cross_product(edge2)};
+        normal.normalize();
+        return normal;
+    }
 
     vec3_t operator+(vec3_t const& rhs) const noexcept {
         return {

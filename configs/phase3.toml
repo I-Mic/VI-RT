@@ -7,7 +7,7 @@ output_fn 	= "output.ppm"
 width 		= 1024
 height 		= 1024
 
-threads     = 1
+threads     = 4
 
 
 [camera]
@@ -35,14 +35,16 @@ light_ids = ["light0", "light1"]
 	color = [0.05, 0.05, 0.05]
 
 	[scene.light1]
-	type = "point"
+	type = "area"
 
-	color = [0.65, 0.65, 0.65]
-	pos = [288.0, 508.0, 282.0]
+	power = [0.65, 0.65, 0.65]
+	v1 = [288.0, 508.0, 282.0]
+	v2 = [288.0, 508.0, 278.0]
+	v3 = [284.0, 508.0, 282.0]
 
 
 [shader]
-type = "whitted"
+type = "distributed"
 
 bg = [0.05, 0.05, 0.55]
 
