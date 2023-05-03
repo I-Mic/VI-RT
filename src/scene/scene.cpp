@@ -154,17 +154,6 @@ void scene_t::load(std::string const& fn){
                 ++indices_iter;
             }
 
-            /*vec::vec3_t const v1 {
-                mesh_vertices.at(face.vert_indices[1]) -
-                    mesh_vertices.at(face.vert_indices[0])
-            };
-            vec::vec3_t const v2 {
-                mesh_vertices.at(face.vert_indices[2]) -
-                    mesh_vertices.at(face.vert_indices[0])
-            };
-            vec::vec3_t geo_normal {v1.cross_product(v2)};
-            geo_normal.normalize();
-            face.geo_normal = geo_normal;*/
 
             face.geo_normal = vec::vec3_t::surface_normal(
                 mesh_vertices.at(face.vert_indices[0]),
@@ -172,16 +161,23 @@ void scene_t::load(std::string const& fn){
                 mesh_vertices.at(face.vert_indices[2])
             );
 
-            prim::bb_t const face_bb {
+            face.bb = {
                 mesh_vertices.at(face.vert_indices[0]),
                 mesh_vertices.at(face.vert_indices[1]),
                 mesh_vertices.at(face.vert_indices[2])
             };
-            face.bb = face_bb;
+			face.edge1 = {
+				mesh_vertices.at(face.vert_indices[1]) -
+				mesh_vertices.at(face.vert_indices[0])
+            };
+			face.edge2 = {
+				mesh_vertices.at(face.vert_indices[2]) - 
+				mesh_vertices.at(face.vert_indices[0])
+            };
 
             faces.push_back(face);
 
-            mesh_bb = prim::bb_t::from_union_of(face_bb, mesh_bb);
+            mesh_bb = prim::bb_t::from_union_of(face.bb, mesh_bb);
         }
 
         std::unique_ptr<prim::geo::geometry_t> mesh {
