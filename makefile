@@ -74,14 +74,14 @@ endif
 release: CXXFLAGS += -O2 -DNDEBUG -g3 -ggdb
 release: all
 
-debug: CXXFLAGS += -O0 -g3 -ggdb#-gdwarf-4
+debug: CXXFLAGS += -O0 -g3 -ggdb
 debug: all
 
 
 
 # make default goal (using make with no specified recipe)
-#.DEFAULT_GOAL := release
-.DEFAULT_GOAL := debug
+#.DEFAULT_GOAL := debug
+.DEFAULT_GOAL := release
 
 all: $(BIN)
 

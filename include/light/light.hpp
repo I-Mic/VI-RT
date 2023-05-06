@@ -32,6 +32,7 @@ struct light_properties_t {
     std::optional<vec::vec3_t> point;
     std::optional<float> pdf;
     prim::geo::triangle_t const* light_geom {nullptr};
+    std::optional<rgb::rgb_t<float>> power;
 };
 
 class light_t {

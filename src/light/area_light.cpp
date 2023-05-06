@@ -3,6 +3,7 @@
 #include "utils/vector.hpp"
 
 #include <cmath>
+#include <optional>
 
 
 namespace light {
@@ -26,22 +27,19 @@ light_properties_t area_light_t::get_properties(light_parameters_t const& params
     if(params.rand_pair.has_value()){
 
         float const sqrt_r0 {std::sqrt(params.rand_pair.value()[0])};
-        float const alpha {1.f - sqrt_r0};
-        float const beta  {(1.f - params.rand_pair.value()[1]) * sqrt_r0};
-        float const gamma {params.rand_pair.value()[1] * sqrt_r0};
+        float const alpha   {1.f - sqrt_r0};
+        float const beta    {(1.f - params.rand_pair.value()[1]) * sqrt_r0};
+        float const gamma   {params.rand_pair.value()[1] * sqrt_r0};
 
-        point = {
-            alpha * this->geom.v1.x + beta * this->geom.v2.x + gamma * this->geom.v3.x,
-            alpha * this->geom.v1.y + beta * this->geom.v2.y + gamma * this->geom.v3.y,
-            alpha * this->geom.v1.z + beta * this->geom.v2.z + gamma * this->geom.v3.z
-        };
+        point = alpha * this->geom.v1 + beta * this->geom.v2 + gamma * this->geom.v3;
     }
 
     return {
         .radiance{std::make_optional(this->intensity)},
         .point{std::make_optional(point)},
         .pdf{std::make_optional(this->pdf)},
-        .light_geom{&(this->geom)}
+        .light_geom{&(this->geom)},
+        .power{std::make_optional(this->power)}
     };
 }
 

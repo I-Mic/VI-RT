@@ -146,17 +146,17 @@ private:
                     toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "v3")
                 };
 
-				vec::vec3_t const v1 {vec::vec3_t::from_array(arr_v1)};
-				vec::vec3_t const v2 {vec::vec3_t::from_array(arr_v2)};
-				vec::vec3_t const v3 {vec::vec3_t::from_array(arr_v3)};
-				vec::vec3_t const normal {vec::vec3_t::surface_normal(v1, v2, v3)};
+                vec::vec3_t const v1 {vec::vec3_t::from_array(arr_v1)};
+                vec::vec3_t const v2 {vec::vec3_t::from_array(arr_v2)};
+                vec::vec3_t const v3 {vec::vec3_t::from_array(arr_v3)};
+                vec::vec3_t const normal {vec::vec3_t::surface_normal(v1, v2, v3)};
 
-				prim::geo::triangle_t const triangle {v1, v2, v3, normal};
+                prim::geo::triangle_t const triangle {v1, v2, v3, normal};
 
                 lights.push_back(
                     std::make_unique<light::area_light_t>(
                         rgb::rgb_t<float>::from_array(power),
-						triangle
+                        triangle
                     )
                 );
             }
@@ -223,12 +223,22 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
-            if(toml::find(this->toml_obj, table_name).contains("max_depth"))
-                return std::make_unique<shader::distributed_shader_t>(
-                    std::move(scene),
-                    rgb::rgb_t<float>::from_array(bg),
-                    toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
-                );
+            if(toml::find(this->toml_obj, table_name).contains("max_depth")){
+
+                if(toml::find(this->toml_obj, table_name).contains("monte_carlo"))
+                    return std::make_unique<shader::distributed_shader_t>(
+                        std::move(scene),
+                        rgb::rgb_t<float>::from_array(bg),
+                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
+                        toml::find<bool>(this->toml_obj, table_name, "monte_carlo")
+                    );
+                else
+                    return std::make_unique<shader::distributed_shader_t>(
+                        std::move(scene),
+                        rgb::rgb_t<float>::from_array(bg),
+                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
+                    );
+            }
             else
                 return std::make_unique<shader::distributed_shader_t>(
                     std::move(scene),

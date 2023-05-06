@@ -166,17 +166,17 @@ void scene_t::load(std::string const& fn){
                 mesh_vertices.at(face.vert_indices[1]),
                 mesh_vertices.at(face.vert_indices[2])
             };
-			face.edge1 = {
-				mesh_vertices.at(face.vert_indices[1]) -
-				mesh_vertices.at(face.vert_indices[0])
+
+            face.edge1 = {
+                mesh_vertices.at(face.vert_indices[1]) -
+                mesh_vertices.at(face.vert_indices[0])
             };
-			face.edge2 = {
-				mesh_vertices.at(face.vert_indices[2]) - 
-				mesh_vertices.at(face.vert_indices[0])
+            face.edge2 = {
+                mesh_vertices.at(face.vert_indices[2]) -
+                mesh_vertices.at(face.vert_indices[0])
             };
 
             faces.push_back(face);
-
             mesh_bb = prim::bb_t::from_union_of(face.bb, mesh_bb);
         }
 
@@ -224,6 +224,27 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
     min_isect.depth = std::numeric_limits<float>::max();
 
     // iterate over all primitives
+    for(std::unique_ptr<light::light_t> const& l : this->lights){
+
+        if(l->type == light::light_type_t::AREA_LIGHT){
+
+            light::light_properties_t const lprops {l->get_properties()};
+
+            std::optional<ray::intersection_t> const inter {lprops.light_geom->intersect(r)};
+            if(!inter.has_value())
+                continue;
+
+            intersects = true;
+            if(inter.value().depth < min_isect.depth){
+                min_isect = inter.value();
+                min_isect.le = std::make_optional(lprops.power.value());
+            }
+        }
+    }
+
+    if(intersects)
+        return std::make_optional(min_isect);
+
     for(prim::primitive_t const& prim : this->prims){
 
         std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
@@ -237,30 +258,7 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
         }
     }
 
-    /*if(intersects)
-        return std::make_optional(min_isect);
 
-    for(std::unique_ptr<light::light_t> const& l : this->lights){
-
-        if(l->type == light::light_type_t::AREA_LIGHT){
-
-            light::light_properties_t const lprops {
-                l->get_properties()
-            };
-
-            std::optional<ray::intersection_t> const inter {
-                lprops.light_geom.value()->intersect(r)
-            };
-            if(!inter.has_value())
-                continue;
-
-            intersects = true;
-            if(inter.value().depth < min_isect.depth){
-                min_isect = inter.value();
-                min_isect.le = std::make_optional(lprops.radiance.value());
-            }
-        }
-    }*/
 
     return intersects ? std::make_optional(min_isect) : std::nullopt;
 }

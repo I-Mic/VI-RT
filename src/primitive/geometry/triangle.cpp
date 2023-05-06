@@ -9,7 +9,7 @@ triangle_t::triangle_t(
     vec::vec3_t const& normal
 ) noexcept :
     v1{v1}, v2{v2}, v3{v3},
-    edge1{v2 - v1}, edge2{v3 - v2}, edge3{v1 - v3},
+    edge1{v2 - v1}, edge2{v3 - v1}, edge3{v2 - v3},
     normal{normal}, bb{v1, v2, v3} {}
 
 triangle_t::~triangle_t() noexcept {}

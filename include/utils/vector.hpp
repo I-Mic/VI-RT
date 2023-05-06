@@ -143,10 +143,7 @@ public:
     // flip a vector such that it points to the same "side" as v (positive cosine)
     // based on pbrt book, sec 2.4, pag 72
     vec3_t flip(vec3_t const& v) const noexcept {
-        return
-            (this->dot_product(v) < 0.f)
-                ? (-1.f * *this)
-                : *this;
+        return this->dot_product(v) < 0.f ? (-1.f * *this) : *this;
     }
 };
 

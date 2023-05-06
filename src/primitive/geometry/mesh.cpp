@@ -54,8 +54,6 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
         return std::nullopt;
 
     vec::vec3_t const& v0 {this->vertices.at(face.vert_indices[0])};
-    //vec::vec3_t const& v1 {this->vertices.at(face.vert_indices[1])};
-    //vec::vec3_t const& v2 {this->vertices.at(face.vert_indices[2])};
 
     vec::vec3_t const h {r.dir.cross_product(face.edge2)};
     float const a {face.edge1.dot_product(h)};

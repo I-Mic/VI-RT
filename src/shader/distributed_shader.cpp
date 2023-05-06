@@ -1,6 +1,9 @@
 #include "shader/distributed_shader.hpp"
+#include "light/light.hpp"
+#include "primitive/brdf/brdf.hpp"
 #include "utils/vector.hpp"
 
+#include <iostream>
 #include <ctime>
 #include <cstdlib>
 
@@ -9,16 +12,87 @@ namespace shader {
 distributed_shader_t::distributed_shader_t(
     std::unique_ptr<scene::scene_t> scene,
     rgb::rgb_t<float> const& bg,
-    unsigned const max_depth
+    unsigned const max_depth,
+    bool const use_monte_carlo_sampling
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
-    max_depth{max_depth}
+    max_depth{max_depth},
+    use_monte_carlo_sampling{use_monte_carlo_sampling}
 {
     std::srand(std::time(nullptr));
 }
 
 distributed_shader_t::~distributed_shader_t() noexcept {}
+
+
+rgb::rgb_t<float> distributed_shader_t::direct_lighting(
+    ray::intersection_t const& isect,
+    std::unique_ptr<light::light_t> const& light,
+    std::unique_ptr<prim::brdf::brdf_t> const& brdf
+) const noexcept {
+
+    rgb::rgb_t<float> color {};
+
+    switch(light->type){
+
+    case light::light_type_t::AMBIENT_LIGHT:
+        color += brdf->ambient() * light->get_properties().radiance.value();
+        break;
+
+    case light::light_type_t::POINT_LIGHT: {
+
+        light::light_properties_t const lprops {light->get_properties()};
+
+        vec::vec3_t ldir {lprops.point.value() - isect.p};
+        float const ldistance {ldir.norm()};
+        ldir.normalize();
+
+        float const cosl {ldir.dot_product(isect.sn)};
+        if(cosl > 0.f){
+
+            ray::ray_t shadow {isect.p, ldir};
+            shadow.adjust_origin(isect.gn);
+
+            if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
+                color += brdf->diffuse() * lprops.radiance.value() * cosl;
+        }
+
+        break;
+    }
+
+    case light::light_type_t::AREA_LIGHT: {
+
+        std::array<float, 2> const rand_pair {
+            std::rand() / static_cast<float>(RAND_MAX),
+            std::rand() / static_cast<float>(RAND_MAX)
+        };
+        auto const& [radiance, pos, pdf, lgeom, _] {
+            light->get_properties({ .rand_pair{std::make_optional(rand_pair)} })
+        };
+
+        vec::vec3_t ldir {pos.value() - isect.p};
+        float const ldistance {ldir.norm()};
+        ldir.normalize();
+
+        float const cosl {ldir.dot_product(isect.sn)};
+        float const cosl_la {ldir.dot_product(lgeom->normal)};
+        if(cosl > 0.f && cosl_la <= 0.f){
+
+            ray::ray_t shadow {isect.p, ldir};
+            shadow.adjust_origin(isect.gn);
+
+            if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
+                color += brdf->diffuse() * radiance.value() * cosl / pdf.value();
+        }
+    }
+
+    default:
+        break;
+    }
+
+    return color;
+}
 
 rgb::rgb_t<float> distributed_shader_t::direct_lighting(
     ray::intersection_t const& isect
@@ -33,68 +107,16 @@ rgb::rgb_t<float> distributed_shader_t::direct_lighting(
 
     rgb::rgb_t<float> color {};
 
-    for(scene::lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li){
-
-        std::unique_ptr<light::light_t> const& light {*li};
-
-        switch(light->type){
-
-        case light::light_type_t::AMBIENT_LIGHT:
-            color += brdf->ambient() * light->get_properties().radiance.value();
-            break;
-
-        case light::light_type_t::POINT_LIGHT: {
-
-            auto const& [radiance, pos, _, __] {light->get_properties()};
-
-            vec::vec3_t ldir {pos.value() - isect.p};
-            float const ldistance {ldir.norm()};
-            ldir.normalize();
-
-            float const cosl {ldir.dot_product(isect.sn)};
-            if(cosl > 0.f){
-
-                ray::ray_t shadow {isect.p, ldir};
-                shadow.adjust_origin(isect.gn);
-
-                if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
-                    color += brdf->diffuse() * radiance.value() * cosl;
-            }
-
-            break;
-        }
-
-        case light::light_type_t::AREA_LIGHT: {
-
-            std::array<float, 2> const rand_pair {
-                std::rand() / static_cast<float>(RAND_MAX),
-                std::rand() / static_cast<float>(RAND_MAX)
-            };
-            auto const& [radiance, pos, pdf, lgeom] {
-                light->get_properties({ .rand_pair{std::make_optional(rand_pair)} })
-            };
-
-            vec::vec3_t ldir {pos.value() - isect.p};
-            float const ldistance {ldir.norm()};
-            ldir.normalize();
-
-            float const cosl {ldir.dot_product(isect.sn)};
-            float const cosl_la {ldir.dot_product(lgeom->normal)};
-            if(cosl > 0.f && cosl_la <= 0.f ){
-
-                ray::ray_t shadow {isect.p, ldir};
-                shadow.adjust_origin(isect.gn);
-
-                if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
-                    color += brdf->diffuse() * radiance.value() * cosl / pdf.value();
-            }
-        }
-
-        default:
-            break;
-        }
+    if(!this->use_monte_carlo_sampling)
+        for(scene::lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li)
+            color += this->direct_lighting(isect, *li, brdf);
+    else {
+        long const num_of_lights {lights_iter_end - lights_iter_begin};
+        long const light_index {std::rand() % num_of_lights};
+        color +=
+            this->direct_lighting(isect, *(lights_iter_begin + light_index), brdf) *
+            static_cast<float>(num_of_lights);
     }
-
 
     return color;
 }
@@ -108,9 +130,6 @@ rgb::rgb_t<float> distributed_shader_t::specular_reflection(
         *(brdfs_iter_begin + static_cast<long>(isect.material_index))
     };
 
-    if(brdf->specular().is_zero())
-        return {};
-
     float const cos {isect.gn.dot_product(isect.wo)};
     vec::vec3_t const rdir {2.f * cos * isect.gn - isect.wo};
     ray::ray_t specular {isect.p, rdir};
@@ -118,6 +137,7 @@ rgb::rgb_t<float> distributed_shader_t::specular_reflection(
 
     return brdf->specular() * this->shade(specular, depth + 1);
 }
+
 
 rgb::rgb_t<float> distributed_shader_t::shade(ray::ray_t const& ray, size_t const depth) const noexcept {
 

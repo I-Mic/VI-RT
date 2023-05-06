@@ -49,9 +49,9 @@ rgb::rgb_t<float> whitted_shader_t::direct_lighting(
 
         case light::light_type_t::POINT_LIGHT: {
 
-            auto const& [radiance, pos, _, __] {light->get_properties()};
+            light::light_properties_t const lprops {light->get_properties()};
 
-            vec::vec3_t ldir {pos.value() - isect.p};
+            vec::vec3_t ldir {lprops.point.value() - isect.p};
             float const ldistance {ldir.norm()};
             ldir.normalize();
 
@@ -62,7 +62,7 @@ rgb::rgb_t<float> whitted_shader_t::direct_lighting(
                 shadow.adjust_origin(isect.gn);
 
                 if(this->scene->is_visible(shadow, ldistance - ray::ray_t::EPSILON))
-                    color += brdf->diffuse() * radiance.value() * cosl;
+                    color += brdf->diffuse() * lprops.radiance.value() * cosl;
             }
 
             break;
@@ -86,14 +86,12 @@ rgb::rgb_t<float> whitted_shader_t::specular_reflection(
         *(brdfs_iter_begin + static_cast<long>(isect.material_index))
     };
 
-
     float const cos {isect.gn.dot_product(isect.wo)};
     vec::vec3_t const rdir {2.f * cos * isect.gn - isect.wo};
     ray::ray_t specular {isect.p, rdir};
     specular.adjust_origin(isect.gn);
 
     return brdf->specular() * this->shade(specular, depth + 1);
-    //return this->shade(specular);
 }
 
 rgb::rgb_t<float> whitted_shader_t::shade(ray::ray_t const& ray, size_t const depth) const noexcept {

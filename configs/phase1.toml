@@ -4,15 +4,15 @@ use_degrees = true
 type = "ppm"
 
 output_fn 	= "output.ppm"
-width 		= 1024
-height 		= 1024
+width 		= 640
+height 		= 480
 
 
 [camera]
 type = "perspective"
 
-width 		= 1024
-height 		= 1024
+width 		= 640
+height 		= 480
 
 eye = [280.0, 275.0, -330.0]
 at  = [280.0, 265.0, 0.0]
