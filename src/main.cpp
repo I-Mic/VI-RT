@@ -19,7 +19,7 @@ int main(int const argc, char const* const* const argv){
         return 1;
     }
 
-	int status {0};
+    int status {0};
 
     for(int i {1}; i < argc; ++i){
 
@@ -31,7 +31,7 @@ int main(int const argc, char const* const* const argv){
             std::unique_ptr<img::image_t> img {config_obj->build_image()};
             if(!img->output_image()){
                 std::cerr << "Error writing output\n";
-				status = 2;
+                status = 2;
             }
         }
         catch(std::exception const& e){

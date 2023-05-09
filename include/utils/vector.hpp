@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <array>
+#include <tuple>
 
 namespace vec {
 
@@ -74,6 +75,17 @@ public:
             this->x * f,
             this->y * f,
             this->z * f
+        };
+    }
+
+    template<std::floating_point T>
+    vec3_t operator/(T const rhs) const noexcept {
+
+        float const f {static_cast<float>(rhs)};
+        return {
+            this->x / f,
+            this->y / f,
+            this->z / f
         };
     }
 
@@ -144,6 +156,31 @@ public:
     // based on pbrt book, sec 2.4, pag 72
     vec3_t flip(vec3_t const& v) const noexcept {
         return this->dot_product(v) < 0.f ? (-1.f * *this) : *this;
+    }
+
+    std::tuple<vec3_t, vec3_t> coordinate_system() const noexcept {
+        vec3_t v2 {};
+
+        if(std::abs(this->x) > std::abs(this->y))
+            v2 =
+                vec3_t{-this->z, 0.f, this->x} /
+                std::sqrt(this->x * this->x + this->z + this->z);
+        else
+            v2 =
+                vec3_t{0.f, this->z, -this->y} /
+                std::sqrt(this->y * this->y + this->z + this->z);
+
+        vec3_t const v3 {this->cross_product(v2)};
+
+        return std::make_tuple(v2, v3);
+    }
+
+    vec3_t rotate(vec3_t const& rx, vec3_t const& ry, vec3_t const& rz) const noexcept {
+        return {
+            this->x * rx.x + this->y * ry.x + this->z * rz.x,
+            this->x * rx.y + this->y * ry.y + this->z * rz.y,
+            this->x * rx.z + this->y * ry.z + this->z * rz.z
+        };
     }
 };
 

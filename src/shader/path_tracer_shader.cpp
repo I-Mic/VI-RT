@@ -1,15 +1,16 @@
-#include "shader/distributed_shader.hpp"
+#include "shader/path_tracer_shader.hpp"
 #include "light/light.hpp"
 #include "primitive/brdf/brdf.hpp"
 #include "utils/vector.hpp"
 
+#include <cmath>
 #include <ctime>
 #include <cstdlib>
 #include <optional>
 
 namespace shader {
 
-distributed_shader_t::distributed_shader_t(
+path_tracer_shader_t::path_tracer_shader_t(
     std::unique_ptr<scene::scene_t> scene,
     rgb::rgb_t<float> const& bg,
     unsigned const max_depth,
@@ -23,10 +24,10 @@ distributed_shader_t::distributed_shader_t(
     std::srand(std::time(nullptr));
 }
 
-distributed_shader_t::~distributed_shader_t() noexcept {}
+path_tracer_shader_t::~path_tracer_shader_t() noexcept {}
 
 
-rgb::rgb_t<float> distributed_shader_t::direct_lighting(
+rgb::rgb_t<float> path_tracer_shader_t::direct_lighting(
     ray::intersection_t const& isect,
     std::unique_ptr<light::light_t> const& light,
     std::unique_ptr<prim::brdf::brdf_t> const& brdf
@@ -71,6 +72,8 @@ rgb::rgb_t<float> distributed_shader_t::direct_lighting(
             light->get_properties(
                 {
                     .rand_pair{std::make_optional(rand_pair)},
+                    .point{std::make_optional(isect.p)},
+                    .wi{std::make_optional(isect.wo)}
                 }
             )
         };
@@ -98,7 +101,7 @@ rgb::rgb_t<float> distributed_shader_t::direct_lighting(
     return color;
 }
 
-rgb::rgb_t<float> distributed_shader_t::direct_lighting(
+rgb::rgb_t<float> path_tracer_shader_t::direct_lighting(
     ray::intersection_t const& isect
 ) const noexcept {
 
@@ -125,7 +128,7 @@ rgb::rgb_t<float> distributed_shader_t::direct_lighting(
     return color;
 }
 
-rgb::rgb_t<float> distributed_shader_t::specular_reflection(
+rgb::rgb_t<float> path_tracer_shader_t::specular_reflection(
     ray::intersection_t const& isect, size_t const depth
 ) const noexcept {
 
@@ -136,14 +139,52 @@ rgb::rgb_t<float> distributed_shader_t::specular_reflection(
 
     float const cos {isect.gn.dot_product(isect.wo)};
     vec::vec3_t const rdir {2.f * cos * isect.gn - isect.wo};
-    ray::ray_t specular {isect.p, rdir};
-    specular.adjust_origin(isect.gn);
 
-    return brdf->specular() * this->shade(specular, depth + 1);
+    if(brdf->specular_exp() >= 1000.f){
+        ray::ray_t specular {isect.p, rdir};
+        specular.adjust_origin(isect.gn);
+
+        return brdf->specular() * this->shade(specular, depth + 1);
+    }
+    else {
+        std::array<float, 2> const rand_pair {
+            std::rand() / static_cast<float>(RAND_MAX),
+            std::rand() / static_cast<float>(RAND_MAX)
+        };
+
+        float const cos_theta {std::pow(rand_pair[1], 1.f / (brdf->specular_exp() + 1))};
+        float const aux_r1 {std::pow(rand_pair[1], 2.f / (brdf->specular_exp() + 1))};
+
+        vec::vec3_t const s_around_n {
+            static_cast<float>(std::cos(2.f * M_PI * rand_pair[0]) * std::sqrt(1.f - aux_r1)),
+            static_cast<float>(std::sin(2.f * M_PI * rand_pair[0]) * std::sqrt(1.f - aux_r1)),
+            cos_theta
+        };
+
+        float const pdf {
+            static_cast<float>(
+                (brdf->specular_exp() + 1.f) *
+                std::pow(cos_theta, brdf->specular_exp()) /
+                (2.f * M_PI)
+            )
+        };
+
+        auto const& [rx, ry] {rdir.coordinate_system()};
+        vec::vec3_t const sdir {s_around_n.rotate(rx, ry, rdir)};
+
+        ray::ray_t specular {isect.p, sdir};
+        specular.adjust_origin(isect.gn);
+
+        return
+            brdf->specular() *
+            this->shade(specular, depth + 1) *
+            std::pow(cos_theta, brdf->specular_exp()) /
+            (2.f * M_PI * pdf);
+    }
 }
 
 
-rgb::rgb_t<float> distributed_shader_t::shade(
+rgb::rgb_t<float> path_tracer_shader_t::shade(
     ray::ray_t const& ray, size_t const depth
 ) const noexcept {
 
@@ -166,7 +207,7 @@ rgb::rgb_t<float> distributed_shader_t::shade(
     return color;
 }
 
-rgb::rgb_t<float> distributed_shader_t::shade(ray::ray_t const& ray) const noexcept {
+rgb::rgb_t<float> path_tracer_shader_t::shade(ray::ray_t const& ray) const noexcept {
     return this->shade(ray, 0);
 }
 

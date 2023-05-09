@@ -17,6 +17,7 @@
 #include "scene/scene.hpp"
 #include "shader/ambient_shader.hpp"
 #include "shader/distributed_shader.hpp"
+#include "shader/path_tracer_shader.hpp"
 #include "shader/shader.hpp"
 #include "shader/whitted_shader.hpp"
 #include "toml.hpp"
@@ -241,6 +242,34 @@ private:
             }
             else
                 return std::make_unique<shader::distributed_shader_t>(
+                    std::move(scene),
+                    rgb::rgb_t<float>::from_array(bg)
+                );
+        }
+        else if(type == "path_tracer"){
+
+            std::array<float, 3> const bg {
+                toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
+            };
+
+            if(toml::find(this->toml_obj, table_name).contains("max_depth")){
+
+                if(toml::find(this->toml_obj, table_name).contains("monte_carlo"))
+                    return std::make_unique<shader::path_tracer_shader_t>(
+                        std::move(scene),
+                        rgb::rgb_t<float>::from_array(bg),
+                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
+                        toml::find<bool>(this->toml_obj, table_name, "monte_carlo")
+                    );
+                else
+                    return std::make_unique<shader::path_tracer_shader_t>(
+                        std::move(scene),
+                        rgb::rgb_t<float>::from_array(bg),
+                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
+                    );
+            }
+            else
+                return std::make_unique<shader::path_tracer_shader_t>(
                     std::move(scene),
                     rgb::rgb_t<float>::from_array(bg)
                 );

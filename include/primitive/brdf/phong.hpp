@@ -21,6 +21,7 @@ private:
     rgb::rgb_t<float> const kd;
     rgb::rgb_t<float> const ks;
     rgb::rgb_t<float> const kt;
+    float const ns;
 
 public:
 
@@ -28,7 +29,8 @@ public:
         rgb::rgb_t<float> const& ka,
         rgb::rgb_t<float> const& kd,
         rgb::rgb_t<float> const& ks,
-        rgb::rgb_t<float> const& kt
+        rgb::rgb_t<float> const& kt,
+        float const ns
     ) noexcept;
 
     ~phong_t() noexcept;
@@ -56,6 +58,8 @@ public:
     rgb::rgb_t<float> diffuse() const noexcept override;
 
     rgb::rgb_t<float> specular() const noexcept override;
+
+    float specular_exp() const noexcept override;
 };
 
 };

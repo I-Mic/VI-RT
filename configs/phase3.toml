@@ -30,9 +30,10 @@ input_fn  = "models/cornell_box_VI.obj"
 #light_ids = ["l3", "l4", "l5", "l6"]
 #light_ids = ["l3", "l4"]
 #light_ids = ["l0", "l1", "l3", "l7", "l9", "l5"]
-light_ids = ["l1"]
+light_ids = ["l1", "l2", "l0"]
 #light_ids = ["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l9", "l10", "l8"]
-#light_ids = ["l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l9", "l10", "l8"]
+#light_ids = ["l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10"]
+#light_ids = ["l1", "l2"]
 
     [scene.l0]
     type = "ambient"
@@ -52,7 +53,7 @@ light_ids = ["l1"]
     [scene.l2]
     type = "area"
 
-    power = [1.0, 1.0, 1.0]
+    power = [0.9, 0.9, 0.9]
     v1 = [228.0, 548.7, 229.6]
     v2 = [328.0, 548.7, 229.6]
     v3 = [228.0, 548.7, 329.6]
@@ -123,13 +124,14 @@ light_ids = ["l1"]
 
 
 [shader]
-type = "distributed"
+#type = "distributed"
+type = "path_tracer"
 
 bg = [0.05, 0.05, 0.55]
 
 max_depth = 4
 
-monte_carlo = true
+monte_carlo = false
 
 
 [renderer]

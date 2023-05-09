@@ -202,9 +202,10 @@ void scene_t::load(std::string const& fn){
         rgb::rgb_t const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
         rgb::rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
         rgb::rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
+        float const ns {mat.shininess};
 
         std::unique_ptr<prim::brdf::brdf_t> brdf {
-            std::make_unique<prim::brdf::phong_t>(ka, kd, ks, kt)
+            std::make_unique<prim::brdf::phong_t>(ka, kd, ks, kt, ns)
         };
 
         this->brdfs.push_back(std::move(brdf));
@@ -257,8 +258,6 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
             min_isect.material_index = prim.material_index;
         }
     }
-
-
 
     return intersects ? std::make_optional(min_isect) : std::nullopt;
 }

@@ -14,10 +14,12 @@ phong_t::phong_t(
     rgb::rgb_t<float> const& ka,
     rgb::rgb_t<float> const& kd,
     rgb::rgb_t<float> const& ks,
-    rgb::rgb_t<float> const& kt
+    rgb::rgb_t<float> const& kt,
+    float const ns
 ) noexcept :
     ka{ka}, kd{kd},
-    ks{ks}, kt{kt} {}
+    ks{ks}, kt{kt},
+    ns{ns} {}
 
 phong_t::~phong_t() noexcept {}
 
@@ -49,6 +51,10 @@ rgb::rgb_t<float> phong_t::diffuse() const noexcept {
 
 rgb::rgb_t<float> phong_t::specular() const noexcept {
 	return this->ks;
+}
+
+float phong_t::specular_exp() const noexcept {
+    return this->ns;
 }
 
 };

@@ -56,6 +56,8 @@ public:
     virtual rgb::rgb_t<float> diffuse() const noexcept = 0;
 
     virtual rgb::rgb_t<float> specular() const noexcept = 0;
+
+    virtual float specular_exp() const noexcept = 0;
 };
 
 };
