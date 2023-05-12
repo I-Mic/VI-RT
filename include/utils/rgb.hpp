@@ -46,6 +46,17 @@ public:
         return lhs;
     }
 
+    friend rgb_t operator/(rgb_t const& lhs, rgb_t const& rhs) noexcept {
+
+        static_assert(std::is_same<T, float>::value);
+
+        return {
+            lhs.r / rhs.r,
+            lhs.g / rhs.g,
+            lhs.b / rhs.b
+        };
+    }
+
     friend rgb_t operator*(rgb_t const& lhs, rgb_t const& rhs) noexcept {
 
         static_assert(std::is_same<T, float>::value);
@@ -106,10 +117,9 @@ public:
             this->b == static_cast<T>(0);
     }
 
-    //float Y() { what?
-    //    return (r*0.2126 + g*0.7152 + b*0.0722 );
-    //
-    //}
+    float y() const noexcept {
+        return this->r * 0.2126 + this->g * 0.7152 + this->b * 0.0722;
+    }
 };
 
 };

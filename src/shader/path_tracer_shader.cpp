@@ -1,6 +1,8 @@
 #include "shader/path_tracer_shader.hpp"
 #include "light/light.hpp"
 #include "primitive/brdf/brdf.hpp"
+#include "rays/ray.hpp"
+#include "utils/rgb.hpp"
 #include "utils/vector.hpp"
 
 #include <cmath>
@@ -14,12 +16,12 @@ path_tracer_shader_t::path_tracer_shader_t(
     std::unique_ptr<scene::scene_t> scene,
     rgb::rgb_t<float> const& bg,
     unsigned const max_depth,
-    bool const use_monte_carlo_sampling
+    float const p_continue
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
     max_depth{max_depth},
-    use_monte_carlo_sampling{use_monte_carlo_sampling}
+    p_continue{p_continue}
 {
     std::srand(std::time(nullptr));
 }
@@ -72,8 +74,6 @@ rgb::rgb_t<float> path_tracer_shader_t::direct_lighting(
             light->get_properties(
                 {
                     .rand_pair{std::make_optional(rand_pair)},
-                    .point{std::make_optional(isect.p)},
-                    .wi{std::make_optional(isect.wo)}
                 }
             )
         };
@@ -112,24 +112,15 @@ rgb::rgb_t<float> path_tracer_shader_t::direct_lighting(
         *(brdfs_iter_begin + static_cast<long>(isect.material_index))
     };
 
-    rgb::rgb_t<float> color {};
-
-    if(!this->use_monte_carlo_sampling)
-        for(scene::lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li)
-            color += this->direct_lighting(isect, *li, brdf);
-    else {
-        long const num_of_lights {lights_iter_end - lights_iter_begin};
-        long const light_index {std::rand() % num_of_lights};
-        color +=
-            this->direct_lighting(isect, *(lights_iter_begin + light_index), brdf) *
-            static_cast<float>(num_of_lights);
-    }
-
-    return color;
+    long const num_of_lights {lights_iter_end - lights_iter_begin};
+    long const light_index {std::rand() % num_of_lights};
+    return
+        this->direct_lighting(isect, *(lights_iter_begin + light_index), brdf) *
+        static_cast<float>(num_of_lights);
 }
 
 rgb::rgb_t<float> path_tracer_shader_t::specular_reflection(
-    ray::intersection_t const& isect, size_t const depth
+    ray::intersection_t const& isect, unsigned const depth
 ) const noexcept {
 
     auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
@@ -172,20 +163,57 @@ rgb::rgb_t<float> path_tracer_shader_t::specular_reflection(
         auto const& [rx, ry] {rdir.coordinate_system()};
         vec::vec3_t const sdir {s_around_n.rotate(rx, ry, rdir)};
 
-        ray::ray_t specular {isect.p, sdir};
-        specular.adjust_origin(isect.gn);
+        ray::ray_t specular_ray {isect.p, sdir};
+        specular_ray.adjust_origin(isect.gn);
 
         return
             brdf->specular() *
-            this->shade(specular, depth + 1) *
+            this->shade(specular_ray, depth + 1) *
             std::pow(cos_theta, brdf->specular_exp()) /
             (2.f * M_PI * pdf);
     }
 }
 
+rgb::rgb_t<float> path_tracer_shader_t::diffuse_reflection(
+    ray::intersection_t const& isect,
+    unsigned const depth
+) const noexcept {
+
+    auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
+    std::unique_ptr<prim::brdf::brdf_t> const& brdf {
+        *(brdfs_iter_begin + static_cast<long>(isect.material_index))
+    };
+
+    std::array<float, 2> const rand_pair {
+        std::rand() / static_cast<float>(RAND_MAX),
+        std::rand() / static_cast<float>(RAND_MAX)
+    };
+
+    vec::vec3_t const d_around_z {
+        static_cast<float>(std::cos(2.f * M_PI * rand_pair[0]) * std::sqrt(1.f - rand_pair[1])),
+        static_cast<float>(std::sin(2.f * M_PI * rand_pair[0]) * std::sqrt(1.f - rand_pair[1])),
+        std::sqrt(rand_pair[1])
+    };
+
+    float const cos_theta {d_around_z.z};
+    float const pdf {static_cast<float>(cos_theta / M_PI)};
+
+    rgb::rgb_t<float> color {};
+
+    auto const& [rx, ry] {isect.gn.coordinate_system()};
+    vec::vec3_t const ddir {d_around_z.rotate(rx, ry, isect.gn)};
+
+    ray::ray_t diffuse_ray {isect.p, ddir};
+    //diffuse_ray.adjust_origin({0.f, 0.f, 1.f});
+
+    if(!isect.le.has_value())
+        color += brdf->diffuse() * cos_theta * this->shade(diffuse_ray, depth + 1) / pdf;
+
+    return color;
+}
 
 rgb::rgb_t<float> path_tracer_shader_t::shade(
-    ray::ray_t const& ray, size_t const depth
+    ray::ray_t const& ray, unsigned const depth
 ) const noexcept {
 
     rgb::rgb_t<float> color {};
@@ -197,10 +225,33 @@ rgb::rgb_t<float> path_tracer_shader_t::shade(
             color = this->background;
         else if(isect.value().le.has_value())
             return isect.value().le.value();
-        else {
-            rgb::rgb_t<float> const specular {this->specular_reflection(isect.value(), depth)};
-            rgb::rgb_t<float> const direct {this->direct_lighting(isect.value())};
-            color = specular + direct;
+        else if(depth < this->max_depth) {
+
+            auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
+            std::unique_ptr<prim::brdf::brdf_t> const& brdf {
+                *(brdfs_iter_begin + static_cast<long>(isect.value().material_index))
+            };
+
+            std::array<float, 2> const rand_pair {
+                std::rand() / static_cast<float>(RAND_MAX),
+                std::rand() / static_cast<float>(RAND_MAX)
+            };
+            float const sp {brdf->specular().y() / (brdf->specular().y() + brdf->diffuse().y())};
+            rgb::rgb_t<float> lcolor {};
+
+            if(rand_pair[0] < sp){
+                if(rand_pair[1] < this->p_continue){
+                    lcolor += this->specular_reflection(isect.value(), depth) / sp;
+                    lcolor /= this->p_continue;
+                }
+            }
+            else
+                if(rand_pair[1] < this->p_continue){
+                    lcolor += this->diffuse_reflection(isect.value(), depth) / (1.f - sp);
+                    lcolor /= this->p_continue;
+                }
+
+            color += this->direct_lighting(isect.value()) + lcolor;
         }
     }
 

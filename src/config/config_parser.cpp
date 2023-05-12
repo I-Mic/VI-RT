@@ -254,12 +254,12 @@ private:
 
             if(toml::find(this->toml_obj, table_name).contains("max_depth")){
 
-                if(toml::find(this->toml_obj, table_name).contains("monte_carlo"))
+                if(toml::find(this->toml_obj, table_name).contains("p_continue"))
                     return std::make_unique<shader::path_tracer_shader_t>(
                         std::move(scene),
                         rgb::rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
-                        toml::find<bool>(this->toml_obj, table_name, "monte_carlo")
+                        toml::find<float>(this->toml_obj, table_name, "p_continue")
                     );
                 else
                     return std::make_unique<shader::path_tracer_shader_t>(
@@ -311,19 +311,25 @@ private:
 
         std::string const table_name {"image"};
 
-        std::string output_fn {
-            toml::find<std::string>(this->toml_obj, table_name, "output_fn")
-        };
+        std::string output_fn {toml::find<std::string>(this->toml_obj, table_name, "output_fn")};
         size_t const width {toml::find<size_t>(this->toml_obj, table_name, "width")};
         size_t const height {toml::find<size_t>(this->toml_obj, table_name, "height")};
 
         std::string const type {toml::find<std::string>(this->toml_obj, table_name, "type")};
         if(type == "ppm"){
-            if(toml::find(this->toml_obj, table_name).contains("threads"))
-                return std::make_unique<img::image_ppm_t>(
-                    std::move(renderer), width, height, output_fn,
-                    toml::find<unsigned>(this->toml_obj, table_name, "threads")
-                );
+            if(toml::find(this->toml_obj, table_name).contains("threads")){
+                if(toml::find(this->toml_obj, table_name).contains("normalize"))
+                    return std::make_unique<img::image_ppm_t>(
+                        std::move(renderer), width, height, output_fn,
+                        toml::find<unsigned>(this->toml_obj, table_name, "threads"),
+                        toml::find<bool>(this->toml_obj, table_name, "normalize")
+                    );
+                else
+                    return std::make_unique<img::image_ppm_t>(
+                        std::move(renderer), width, height, output_fn,
+                        toml::find<unsigned>(this->toml_obj, table_name, "threads")
+                    );
+            }
             else
                 return std::make_unique<img::image_ppm_t>(
                     std::move(renderer), width, height, output_fn

@@ -10,7 +10,7 @@ class path_tracer_shader_t : public shader_t {
 private:
     rgb::rgb_t<float> const background;
     unsigned const max_depth;
-    bool const use_monte_carlo_sampling;
+    float const p_continue;
 
     rgb::rgb_t<float> direct_lighting(
         ray::intersection_t const& isect,
@@ -19,18 +19,23 @@ private:
     ) const noexcept;
     rgb::rgb_t<float> direct_lighting(ray::intersection_t const& isect) const noexcept;
     rgb::rgb_t<float> specular_reflection(
-		ray::intersection_t const& isect,
-		size_t const depth
-	) const noexcept;
+        ray::intersection_t const& isect,
+        unsigned const depth
+    ) const noexcept;
 
-    rgb::rgb_t<float> shade(ray::ray_t const& ray, size_t const depth) const noexcept;
+    rgb::rgb_t<float> diffuse_reflection(
+        ray::intersection_t const& isect,
+        unsigned const depth
+    ) const noexcept;
+
+    rgb::rgb_t<float> shade(ray::ray_t const& ray, unsigned const depth) const noexcept;
 
 public:
     path_tracer_shader_t(
         std::unique_ptr<scene::scene_t> scene,
         rgb::rgb_t<float> const& bg,
         unsigned const max_depth = 4,
-        bool const use_monte_carlo_sampling = true
+        float const p_continue = 0.5f
     ) noexcept;
 
     ~path_tracer_shader_t() noexcept;

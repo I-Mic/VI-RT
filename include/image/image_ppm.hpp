@@ -19,10 +19,13 @@ private:
 
     std::unique_ptr<rgb::rgb_t<unsigned char>[]> const image_to_save;
     unsigned const num_of_threads;
+    bool const normalize;
 
 	void shade_pixels() const;
 
-    void tone_map() const noexcept;
+    void tone_map() const;
+    void clamp_tone_map() const;
+    void normalize_tone_map() const;
 
 
 public:
@@ -31,7 +34,8 @@ public:
 		std::unique_ptr<render::renderer_t> renderer,
 		size_t const w, size_t const h,
 		std::string output_fn,
-		unsigned const num_of_threads = 8
+		unsigned const num_of_threads = 8,
+        bool const normalize = false
 	);
 
     bool output_image() const override;

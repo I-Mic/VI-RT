@@ -20,10 +20,10 @@ private:
     rgb::rgb_t<float> direct_lighting(ray::intersection_t const& isect) const noexcept;
     rgb::rgb_t<float> specular_reflection(
 		ray::intersection_t const& isect,
-		size_t const depth
+		unsigned const depth
 	) const noexcept;
 
-    rgb::rgb_t<float> shade(ray::ray_t const& ray, size_t const depth) const noexcept;
+    rgb::rgb_t<float> shade(ray::ray_t const& ray, unsigned const depth) const noexcept;
 
 public:
     distributed_shader_t(

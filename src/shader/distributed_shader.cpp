@@ -126,7 +126,7 @@ rgb::rgb_t<float> distributed_shader_t::direct_lighting(
 }
 
 rgb::rgb_t<float> distributed_shader_t::specular_reflection(
-    ray::intersection_t const& isect, size_t const depth
+    ray::intersection_t const& isect, unsigned const depth
 ) const noexcept {
 
     auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
@@ -144,7 +144,7 @@ rgb::rgb_t<float> distributed_shader_t::specular_reflection(
 
 
 rgb::rgb_t<float> distributed_shader_t::shade(
-    ray::ray_t const& ray, size_t const depth
+    ray::ray_t const& ray, unsigned const depth
 ) const noexcept {
 
     rgb::rgb_t<float> color {};
