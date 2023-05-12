@@ -19,8 +19,8 @@ Kd 0 0 1
 Ks 0 0 0
 
 newmtl yellow
-Ka 1 1 0
-Kd 1 1 0
+Ka 0.75 0.38 0
+Kd 0.75 0.38 0
 Ks 0 0 0
 
 newmtl light

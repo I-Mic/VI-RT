@@ -241,16 +241,16 @@ rgb::rgb_t<float> path_tracer_shader_t::shade(
 
 
             if(rand_pair[0] < sp){
-                //if(rand_pair[1] < this->p_continue){
+                if(rand_pair[1] < this->p_continue){
                     lcolor += this->specular_reflection(isect.value(), depth) / sp;
-                    //lcolor /= this->p_continue;
-                //}
+                    lcolor /= this->p_continue;
+                }
             }
             else
-                //if(rand_pair[1] < this->p_continue){
+                if(rand_pair[1] < this->p_continue){
                     lcolor += this->diffuse_reflection(isect.value(), depth) / (1.f - sp);
-                //    lcolor /= this->p_continue;
-                //}
+                    lcolor /= this->p_continue;
+                }
 
 
             color += this->direct_lighting(isect.value()) + lcolor;
