@@ -8,7 +8,7 @@ width         = 1024
 height        = 1024
 
 threads     = 1
-#normalize   = true
+normalize   = true
 
 
 [camera]
@@ -40,15 +40,15 @@ light_ids = ["l1", "l2", "l0"]
     [scene.l0]
     type = "ambient"
 
-    color = [0.05, 0.05, 0.05]
+    color = [0.0, 0.0, 0.0]
     #color = [0.05, 0.01, 0.01]
 
 
     [scene.l1]
     type = "area"
 
-
-    power = [0.1, 0.1, 0.1]
+    power = [0.05, 0.05, 0.05]
+    #power = [0.1, 0.1, 0.1]
     v1 = [328.0, 548.7, 329.6]
     v2 = [228.0, 548.7, 329.6]
     v3 = [328.0, 548.7, 229.6]
@@ -58,7 +58,7 @@ light_ids = ["l1", "l2", "l0"]
 
     #power = [0.0001, 0.0001, 0.0001]
     #power = [0.01, 0.01, 0.01]
-    power = [0.1, 0.1, 0.1]
+    power = [0.05, 0.05, 0.05]
     v1 = [228.0, 548.7, 229.6]
     v2 = [328.0, 548.7, 229.6]
     v3 = [228.0, 548.7, 329.6]
@@ -136,6 +136,8 @@ light_ids = ["l1", "l2", "l0"]
 type = "path_tracer"
 
 bg = [0.05, 0.05, 0.55]
+#bg = [0.0, 0.0, 0.0]
+#bg = [0.05, 0.05, 0.05]
 
 max_depth = 4
 
@@ -145,4 +147,4 @@ p_continue = 0.5
 [renderer]
 type = "standard"
 
-spp = 32
+spp = 128

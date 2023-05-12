@@ -93,7 +93,6 @@ public:
     vec3_t& operator*=(T const rhs) noexcept {
 
         float const f {static_cast<float>(rhs)};
-
         this->x *= f;
         this->y *= f;
         this->z *= f;
@@ -164,11 +163,11 @@ public:
         if(std::abs(this->x) > std::abs(this->y))
             v2 =
                 vec3_t{-this->z, 0.f, this->x} /
-                std::sqrt(this->x * this->x + this->z + this->z);
+                std::sqrt(this->x * this->x + this->z * this->z);
         else
             v2 =
                 vec3_t{0.f, this->z, -this->y} /
-                std::sqrt(this->y * this->y + this->z + this->z);
+                std::sqrt(this->y * this->y + this->z * this->z);
 
         vec3_t const v3 {this->cross_product(v2)};
 

@@ -132,10 +132,10 @@ rgb::rgb_t<float> path_tracer_shader_t::specular_reflection(
     vec::vec3_t const rdir {2.f * cos * isect.gn - isect.wo};
 
     if(brdf->specular_exp() >= 1000.f){
-        ray::ray_t specular {isect.p, rdir};
-        specular.adjust_origin(isect.gn);
+        ray::ray_t specular_ray {isect.p, rdir};
+        specular_ray.adjust_origin(isect.gn);
 
-        return brdf->specular() * this->shade(specular, depth + 1);
+        return brdf->specular() * this->shade(specular_ray, depth + 1);
     }
     else {
         std::array<float, 2> const rand_pair {
@@ -204,7 +204,7 @@ rgb::rgb_t<float> path_tracer_shader_t::diffuse_reflection(
     vec::vec3_t const ddir {d_around_z.rotate(rx, ry, isect.gn)};
 
     ray::ray_t diffuse_ray {isect.p, ddir};
-    //diffuse_ray.adjust_origin({0.f, 0.f, 1.f});
+    diffuse_ray.adjust_origin(isect.gn);
 
     if(!isect.le.has_value())
         color += brdf->diffuse() * cos_theta * this->shade(diffuse_ray, depth + 1) / pdf;
@@ -239,17 +239,19 @@ rgb::rgb_t<float> path_tracer_shader_t::shade(
             float const sp {brdf->specular().y() / (brdf->specular().y() + brdf->diffuse().y())};
             rgb::rgb_t<float> lcolor {};
 
+
             if(rand_pair[0] < sp){
-                if(rand_pair[1] < this->p_continue){
+                //if(rand_pair[1] < this->p_continue){
                     lcolor += this->specular_reflection(isect.value(), depth) / sp;
-                    lcolor /= this->p_continue;
-                }
+                    //lcolor /= this->p_continue;
+                //}
             }
             else
-                if(rand_pair[1] < this->p_continue){
+                //if(rand_pair[1] < this->p_continue){
                     lcolor += this->diffuse_reflection(isect.value(), depth) / (1.f - sp);
-                    lcolor /= this->p_continue;
-                }
+                //    lcolor /= this->p_continue;
+                //}
+
 
             color += this->direct_lighting(isect.value()) + lcolor;
         }

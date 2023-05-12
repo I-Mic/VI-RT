@@ -46,11 +46,11 @@ rgb::rgb_t<float> phong_t::ambient() const noexcept {
 }
 
 rgb::rgb_t<float> phong_t::diffuse() const noexcept {
-	return this->kd;
+    return this->kd;
 }
 
 rgb::rgb_t<float> phong_t::specular() const noexcept {
-	return this->ks;
+    return this->ks;
 }
 
 float phong_t::specular_exp() const noexcept {
