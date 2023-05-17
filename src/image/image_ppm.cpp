@@ -5,12 +5,9 @@
 //
 
 #include <fstream>
-#include <limits>
 #include <memory>
 #include <numeric>
-#include <optional>
 #include <thread>
-#include <utility>
 #include <cstring>
 
 #include "image/image_ppm.hpp"
@@ -46,6 +43,62 @@ void image_ppm_t::clamp_tone_map() const {
             to.b = static_cast<unsigned char>(std::min(1.f, from.b) * 255.f);
         }
 }
+
+/*void image_ppm_t::hsv_tone_map() const {
+
+    for(size_t y {0}; y < this->height; ++y)
+
+        for(size_t x {0}; x < this->width; ++x){
+
+            rgb::rgb_t<float>&         from {this->image_plane[y * this->width + x]};
+            rgb::rgb_t<unsigned char>& to {this->image_to_save[y * this->width + x]};
+
+            float const cmax {std::max(std::max(from.r, from.g), from.b)};
+            float const cmin {std::min(std::min(from.r, from.g), from.b)};
+            float const d {cmax - cmin};
+
+            float const hue {
+                d == 0.f
+                    ? 0.f
+                    : (cmax == from.r
+                        ? (static_cast<int>(60.f * (from.g - from.b) / d + 360.f) % 360)
+                        : (cmax == from.g
+                            ? (static_cast<int>(60.f * (from.b - from.r) / d + 120.f) % 360)
+                            : (static_cast<int>(60.f * (from.r - from.g) / d + 240.f) % 360)
+                        )
+                    )
+            };
+            float const saturation {cmax == 0.f ? 0.f : d / cmax};
+            float const value {cmax};
+
+
+            float const c {(saturation > 1.f ? 0.9f : saturation) * value};
+            float const t {c * (1.f - std::abs(-1.f + static_cast<int>(hue / 60.f) % 2))};
+
+            if(hue < 60.f){
+                from = {c, t, 0.f};
+            }
+            else if(hue < 120.f){
+                from = {t, c, 0.f};
+            }
+            else if(hue < 180.f){
+                from = {0.f, c, t};
+            }
+            else if(hue < 240.f){
+                from = {0.f, t, c};
+            }
+            else if(hue < 300.f){
+                from = {t, 0.f, c};
+            }
+            else {
+                from = {c, 0.f, t};
+            }
+
+            to.r = static_cast<unsigned char>(std::min(1.f, from.r) * 255.f);
+            to.g = static_cast<unsigned char>(std::min(1.f, from.g) * 255.f);
+            to.b = static_cast<unsigned char>(std::min(1.f, from.b) * 255.f);
+        }
+}*/
 
 void image_ppm_t::normalize_tone_map() const {
 
@@ -105,6 +158,7 @@ void image_ppm_t::normalize_tone_map() const {
 void image_ppm_t::tone_map() const {
     if(this->normalize)
         this->normalize_tone_map();
+        //this->hsv_tone_map();
     else
         this->clamp_tone_map();
 }
@@ -113,39 +167,31 @@ void image_ppm_t::shade_pixels() const {
 
     auto const worker {
 
-        [this] (size_t const begin_index, size_t const end_index){
+        [this] (size_t const begin_index, size_t const end_index, rgb::rgb_t<float>* const buffer){
 
             size_t x {begin_index % this->width};
             size_t y {begin_index / this->width};
 
-            //size_t const local_size {end_index - begin_index};
-            /*std::unique_ptr<rgb::rgb_t<float>[]> local_image_plane {
-                std::make_unique<rgb::rgb_t<float>[]>(local_size)
-            };*/
+            size_t const local_size {end_index - begin_index};
 
-            for(size_t i {begin_index}; i < end_index; ++i){
-            //for(size_t i {0}; i < local_size; ++i){
+            // sanity check
+            if(y >= this->height)
+                return;
+
+            for(size_t i {0}; i < local_size; ++i){
 
                 if(x >= this->width){
                     x = 0;
                     ++y;
+                    if(y >= this->height)
+                        return;
                 }
-                if(y >= this->height)
-                    return;
 
                 rgb::rgb_t<float> const color {this->renderer->render_pixel(x, y)};
-                //buffer[i] = color;
-                //local_image_plane[i] = color;
-                this->image_plane[i] = color;
+                buffer[i] = color;
 
                 ++x;
             }
-
-            /*std::memcpy(
-                this->image_plane.get() + begin_index,
-                local_image_plane.get(),
-                local_size * sizeof(*this->image_plane.get())
-            );*/
         }
     };
 
@@ -161,16 +207,41 @@ void image_ppm_t::shade_pixels() const {
     };
 
     std::vector<std::thread> threads {};
+    //std::vector<std::pair<std::unique_ptr<rgb::rgb_t<float>[]>, size_t>> buffers {};
     threads.reserve(this->num_of_threads);
-    for(size_t i {0}; i < this->num_of_threads; ++i)
+    //buffers.reserve(this->num_of_threads);
+    for(size_t i {0}; i < this->num_of_threads; ++i){
+
+        size_t const lower_bound {i * local_size};
+        size_t const upper_bound {std::min((i + 1) * local_size, image_plane_size)};
+
+        //buffers.push_back(
+        //    std::make_pair(
+        //        std::make_unique<rgb::rgb_t<float>[]>(upper_bound - lower_bound),
+        //        upper_bound - lower_bound
+        //    )
+        //);
+
         threads.emplace_back(
             worker,
-            i * local_size,
-            std::min((i + 1) * local_size, image_plane_size)
+            lower_bound,
+            upper_bound,
+            this->image_plane.get() + lower_bound //buffers.back().first.get()
         );
+    }
 
     for(std::thread& t : threads)
         t.join();
+
+    /*size_t offset {0};
+    for(std::pair<std::unique_ptr<rgb::rgb_t<float>[]>, size_t> const& buffer : buffers){
+        std::memcpy(
+            this->image_plane.get() + offset,
+            buffer.first.get(),
+            buffer.second * sizeof(*this->image_plane.get())
+        );
+        offset += buffer.second;
+    }*/
 }
 
 bool image_ppm_t::output_image() const {

@@ -25,6 +25,7 @@ private:
 
     void tone_map() const;
     void clamp_tone_map() const;
+    //void hsv_tone_map() const;
     void normalize_tone_map() const;
 
 

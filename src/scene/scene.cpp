@@ -224,7 +224,7 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
     ray::intersection_t min_isect {};
     min_isect.depth = std::numeric_limits<float>::max();
 
-    // iterate over all primitives
+    // iterate over all area lights
     for(std::unique_ptr<light::light_t> const& l : this->lights){
 
         if(l->type == light::light_type_t::AREA_LIGHT){
@@ -243,9 +243,7 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
         }
     }
 
-    if(intersects)
-        return std::make_optional(min_isect);
-
+    // iterate over all primitives
     for(prim::primitive_t const& prim : this->prims){
 
         std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
