@@ -3,7 +3,7 @@ use_degrees = true
 [image]
 type = "ppm"
 
-output_fn 	= "output.ppm"
+output_fn 	= "whitted.ppm"
 width 		= 1024
 height 		= 1024
 

@@ -3,7 +3,7 @@ use_degrees = true
 [image]
 type = "ppm"
 
-output_fn     = "output.ppm"
+output_fn     = "path_tracer.ppm"
 width         = 1024
 height        = 1024
 
@@ -149,5 +149,5 @@ p_continue = 0.5
 [renderer]
 type = "standard"
 
-spp = 128
-#spp = 256
+#spp = 128
+spp = 256

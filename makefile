@@ -106,16 +106,3 @@ $(PCH_INC_FILES): %.$(PCH_EXT) : %
 clean:
 	-rm -rf $(OBJ_DIR) $(BIN_DIR) $(PCH_INC_FILES)
 	-rm -rf *.out *.ppm
-
-
-
-# Valgrind flags
-VALGFLAGS 		:= --leak-check=full --show-leak-kinds=all --track-origins=no --verbose
-
-# Valgrind log file
-VALG_OUT 		:= valgrind_log.out
-
-valg_check: $(VALG_OUT)
-
-$(VALG_OUT): $(BIN)
-	valgrind $(VALGFLAGS) --log-file=$@ $^ $(ARGS)
