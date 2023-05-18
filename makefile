@@ -4,18 +4,18 @@
 
 
 
-# whether or not to use precompiled headers (comment to disable)
-USE_PCH			:= 1
+# whether or not to use precompiled headers (set to 'true' to use)
+USE_PCH			:= true
 
 
 
 # directories
 SRC_DIR 		:= src
-INC_DIR 		:= include
 OBJ_DIR 		:= obj
-LIB_DIR 		:= lib
 BIN_DIR 		:= bin
 
+
+INC_PATHS 		:= include lib/tiny_obj_loader/include lib/toml11/include
 
 
 # files
@@ -43,10 +43,7 @@ STD				:= c++20
 
 # compiler flags
 CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD)
-
-# include flags
-CXXFLAGS 		+= -I$(INC_DIR) -I$(LIB_DIR)/tiny_obj_loader/include
-CXXFLAGS        += -I$(LIB_DIR)/toml11/include
+CXXFLAGS        += $(foreach path,$(INC_PATHS),-I$(path))
 
 # linker flags (e.g. -L/path/to/lib)
 LDFLAGS			:=
@@ -56,7 +53,7 @@ LDLIBS			:=
 
 
 
-ifdef USE_PCH
+ifeq (true, $(USE_PCH))
 
 	ifeq (gcc, $(CXX))
 		PCH_EXT 	:= gch
@@ -99,7 +96,7 @@ $(OBJ_FILES): $(OBJ_DIR)/%.o : $(SRC_DIR)/%
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(PCH_INC_FILES): $(INC_DIR)/%.$(PCH_EXT) : $(INC_DIR)/%
+$(PCH_INC_FILES): %.$(PCH_EXT) : %
 	$(CXX) $(CXXFLAGS) -x c++-header $< -o $@
 
 
@@ -107,12 +104,8 @@ $(PCH_INC_FILES): $(INC_DIR)/%.$(PCH_EXT) : $(INC_DIR)/%
 .PHONY: clean
 
 clean:
-	-rm -rf $(OBJ_DIR)
-	-rm -rf $(BIN_DIR)
+	-rm -rf $(OBJ_DIR) $(BIN_DIR) $(PCH_INC_FILES)
 	-rm -rf *.out *.ppm
-ifdef PCH_INC_FILES
-	-rm -rf $(PCH_INC_FILES)
-endif
 
 
 
