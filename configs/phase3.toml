@@ -3,7 +3,7 @@ use_degrees = true
 [image]
 type = "ppm"
 
-output_fn     = "distributed.ppm"
+output_fn     = "distributed_no_mc.ppm"
 width         = 1024
 height        = 1024
 
@@ -132,8 +132,8 @@ bg = [0.05, 0.05, 0.55]
 
 max_depth = 4
 
-monte_carlo = true
-#monte_carlo = false
+#monte_carlo = true
+monte_carlo = false
 
 
 [renderer]

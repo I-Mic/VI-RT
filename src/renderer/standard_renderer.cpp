@@ -6,11 +6,9 @@
 #include <cstdlib>
 #include <ctime>
 
-namespace render {
-
 standard_renderer_t::standard_renderer_t(
-    std::unique_ptr<cam::camera_t> cam,
-    std::unique_ptr<shader::shader_t> shader,
+    std::unique_ptr<camera_t> cam,
+    std::unique_ptr<shader_t> shader,
     unsigned const samples_per_pixel
 ) noexcept :
     renderer_t{std::move(cam), std::move(shader), samples_per_pixel}
@@ -20,11 +18,11 @@ standard_renderer_t::standard_renderer_t(
 
 standard_renderer_t::~standard_renderer_t() noexcept {}
 
-rgb::rgb_t<float> standard_renderer_t::render_pixel(
+rgb_t<float> standard_renderer_t::render_pixel(
     size_t const x, size_t const y
 ) const {
 
-    rgb::rgb_t<float> color {};
+    rgb_t<float> color {};
 
     for(unsigned spp {0}; spp < this->samples_per_pixel; ++spp){
 
@@ -32,7 +30,7 @@ rgb::rgb_t<float> standard_renderer_t::render_pixel(
             std::rand() / static_cast<float>(RAND_MAX),
             std::rand() / static_cast<float>(RAND_MAX)
         };
-        ray::ray_t const primary_ray {this->cam->generate_ray(x, y, jitter)};
+        ray_t const primary_ray {this->cam->generate_ray(x, y, jitter)};
 
         color += this->shader->shade(primary_ray);
     }
@@ -41,5 +39,3 @@ rgb::rgb_t<float> standard_renderer_t::render_pixel(
 
     return color;
 }
-
-};

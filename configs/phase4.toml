@@ -7,7 +7,7 @@ output_fn     = "path_tracer.ppm"
 width         = 1024
 height        = 1024
 
-threads     = 1
+threads     = 8
 normalize   = true
 #normalize   = false
 
@@ -150,4 +150,5 @@ p_continue = 0.5
 type = "standard"
 
 #spp = 128
-spp = 256
+spp = 64
+#spp = 512

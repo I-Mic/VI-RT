@@ -10,8 +10,6 @@
 #include "shader/shader.hpp"
 #include "image/image.hpp"
 
-namespace config {
-
 class config_parser_t {
 
 private:
@@ -21,10 +19,10 @@ private:
 	config_parser_t& operator=(config_parser_t const&) = delete;
 	config_parser_t& operator=(config_parser_t&&) = delete;
 
-	virtual std::unique_ptr<cam::camera_t> build_camera() const = 0;
-	virtual std::unique_ptr<scene::scene_t> build_scene() const = 0;
-	virtual std::unique_ptr<shader::shader_t> build_shader() const = 0;
-	virtual std::unique_ptr<render::renderer_t> build_renderer() const = 0;
+	virtual std::unique_ptr<camera_t> build_camera() const = 0;
+	virtual std::unique_ptr<scene_t> build_scene() const = 0;
+	virtual std::unique_ptr<shader_t> build_shader() const = 0;
+	virtual std::unique_ptr<renderer_t> build_renderer() const = 0;
 
 protected:
 
@@ -37,9 +35,7 @@ public:
 	static std::unique_ptr<config_parser_t> from_toml(std::string const& fn);
 	// other factories for other types of configurations
 
-	virtual std::unique_ptr<img::image_t> build_image() const = 0;
-};
-
+	virtual std::unique_ptr<image_t> build_image() const = 0;
 };
 
 #endif //CONFIG_PARSER_HPP

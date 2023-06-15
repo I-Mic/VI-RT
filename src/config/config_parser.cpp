@@ -26,8 +26,6 @@
 #include "toml/value.hpp"
 #include "utils/vector.hpp"
 
-namespace config {
-
 static float to_rads(float const d) noexcept {
     return 3.1415f * d / 180.f;
 }
@@ -43,7 +41,7 @@ private:
     toml::value const toml_obj;
     bool const use_degrees;
 
-    std::unique_ptr<cam::camera_t> build_camera() const override {
+    std::unique_ptr<camera_t> build_camera() const override {
 
         std::string const table_name {"camera"};
         std::string const type {toml::find<std::string>(this->toml_obj, table_name, "type")};
@@ -68,10 +66,10 @@ private:
             float const fov_w {toml::find<float>(this->toml_obj, table_name, "fov_w")};
             float const fov_h {toml::find<float>(this->toml_obj, table_name, "fov_h")};
 
-            return std::make_unique<cam::perspective_t>(
-                vec::vec3_t::from_array(eye),
-                vec::vec3_t::from_array(at),
-                vec::vec3_t::from_array(up),
+            return std::make_unique<perspective_t>(
+                vec3_t::from_array(eye),
+                vec3_t::from_array(at),
+                vec3_t::from_array(up),
                 width, height,
                 this->use_degrees ? to_rads(fov_w) : fov_w,
                 this->use_degrees ? to_rads(fov_h) : fov_h
@@ -82,7 +80,7 @@ private:
     }
 
 
-    std::unique_ptr<scene::scene_t> build_scene() const override {
+    std::unique_ptr<scene_t> build_scene() const override {
 
         std::string const table_name {"scene"};
 
@@ -91,7 +89,7 @@ private:
         };
 
 
-        std::vector<std::unique_ptr<light::light_t>> lights {};
+        std::vector<std::unique_ptr<light_t>> lights {};
         std::vector<std::string> const light_ids {
             toml::find<std::vector<std::string>>(this->toml_obj, table_name, "light_ids")
         };
@@ -109,8 +107,8 @@ private:
                 };
 
                 lights.push_back(
-                    std::make_unique<light::ambient_light_t>(
-                        rgb::rgb_t<float>::from_array(color)
+                    std::make_unique<ambient_light_t>(
+                        rgb_t<float>::from_array(color)
                     )
                 );
             }
@@ -125,9 +123,9 @@ private:
                 };
 
                 lights.push_back(
-                    std::make_unique<light::point_light_t>(
-                        rgb::rgb_t<float>::from_array(color),
-                        vec::vec3_t::from_array(pos)
+                    std::make_unique<point_light_t>(
+                        rgb_t<float>::from_array(color),
+                        vec3_t::from_array(pos)
                     )
                 );
             }
@@ -147,16 +145,16 @@ private:
                     toml::find<std::array<float, 3>>(this->toml_obj, table_name, id, "v3")
                 };
 
-                vec::vec3_t const v1 {vec::vec3_t::from_array(arr_v1)};
-                vec::vec3_t const v2 {vec::vec3_t::from_array(arr_v2)};
-                vec::vec3_t const v3 {vec::vec3_t::from_array(arr_v3)};
-                vec::vec3_t const normal {vec::vec3_t::surface_normal(v1, v2, v3)};
+                vec3_t const v1 {vec3_t::from_array(arr_v1)};
+                vec3_t const v2 {vec3_t::from_array(arr_v2)};
+                vec3_t const v3 {vec3_t::from_array(arr_v3)};
+                vec3_t const normal {vec3_t::surface_normal(v1, v2, v3)};
 
-                prim::geo::triangle_t const triangle {v1, v2, v3, normal};
+                triangle_t const triangle {v1, v2, v3, normal};
 
                 lights.push_back(
-                    std::make_unique<light::area_light_t>(
-                        rgb::rgb_t<float>::from_array(power),
+                    std::make_unique<area_light_t>(
+                        rgb_t<float>::from_array(power),
                         triangle
                     )
                 );
@@ -165,15 +163,15 @@ private:
                 throw std::domain_error("Unknown type " + type + " for asset " + table_name);
         }
 
-        return std::make_unique<scene::scene_t>(
+        return std::make_unique<scene_t>(
             std::move(input_fn),
             std::move(lights)
         );
     }
 
-    std::unique_ptr<shader::shader_t> build_shader() const override {
+    std::unique_ptr<shader_t> build_shader() const override {
 
-        std::unique_ptr<scene::scene_t> scene {this->build_scene()};
+        std::unique_ptr<scene_t> scene {this->build_scene()};
 
         if(!scene->is_loaded()){
             std::cerr << "Error loading scene!\n";
@@ -195,9 +193,9 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
-            return std::make_unique<shader::ambient_shader_t>(
+            return std::make_unique<ambient_shader_t>(
                 std::move(scene),
-                rgb::rgb_t<float>::from_array(bg)
+                rgb_t<float>::from_array(bg)
             );
         }
         else if(type == "whitted"){
@@ -207,15 +205,15 @@ private:
             };
 
             if(toml::find(this->toml_obj, table_name).contains("max_depth"))
-                return std::make_unique<shader::whitted_shader_t>(
+                return std::make_unique<whitted_shader_t>(
                     std::move(scene),
-                    rgb::rgb_t<float>::from_array(bg),
+                    rgb_t<float>::from_array(bg),
                     toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                 );
             else
-                return std::make_unique<shader::whitted_shader_t>(
+                return std::make_unique<whitted_shader_t>(
                     std::move(scene),
-                    rgb::rgb_t<float>::from_array(bg)
+                    rgb_t<float>::from_array(bg)
                 );
         }
         else if(type == "distributed"){
@@ -227,23 +225,23 @@ private:
             if(toml::find(this->toml_obj, table_name).contains("max_depth")){
 
                 if(toml::find(this->toml_obj, table_name).contains("monte_carlo"))
-                    return std::make_unique<shader::distributed_shader_t>(
+                    return std::make_unique<distributed_shader_t>(
                         std::move(scene),
-                        rgb::rgb_t<float>::from_array(bg),
+                        rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
                         toml::find<bool>(this->toml_obj, table_name, "monte_carlo")
                     );
                 else
-                    return std::make_unique<shader::distributed_shader_t>(
+                    return std::make_unique<distributed_shader_t>(
                         std::move(scene),
-                        rgb::rgb_t<float>::from_array(bg),
+                        rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                     );
             }
             else
-                return std::make_unique<shader::distributed_shader_t>(
+                return std::make_unique<distributed_shader_t>(
                     std::move(scene),
-                    rgb::rgb_t<float>::from_array(bg)
+                    rgb_t<float>::from_array(bg)
                 );
         }
         else if(type == "path_tracer"){
@@ -255,23 +253,23 @@ private:
             if(toml::find(this->toml_obj, table_name).contains("max_depth")){
 
                 if(toml::find(this->toml_obj, table_name).contains("p_continue"))
-                    return std::make_unique<shader::path_tracer_shader_t>(
+                    return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
-                        rgb::rgb_t<float>::from_array(bg),
+                        rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
                         toml::find<float>(this->toml_obj, table_name, "p_continue")
                     );
                 else
-                    return std::make_unique<shader::path_tracer_shader_t>(
+                    return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
-                        rgb::rgb_t<float>::from_array(bg),
+                        rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                     );
             }
             else
-                return std::make_unique<shader::path_tracer_shader_t>(
+                return std::make_unique<path_tracer_shader_t>(
                     std::move(scene),
-                    rgb::rgb_t<float>::from_array(bg)
+                    rgb_t<float>::from_array(bg)
                 );
         }
         else
@@ -279,10 +277,10 @@ private:
     }
 
 
-    std::unique_ptr<render::renderer_t> build_renderer() const override {
+    std::unique_ptr<renderer_t> build_renderer() const override {
 
-        std::unique_ptr<cam::camera_t> cam {this->build_camera()};
-        std::unique_ptr<shader::shader_t> shader {this->build_shader()};
+        std::unique_ptr<camera_t> cam {this->build_camera()};
+        std::unique_ptr<shader_t> shader {this->build_shader()};
 
         std::string const table_name {"renderer"};
         std::string const type {toml::find<std::string>(this->toml_obj, table_name, "type")};
@@ -290,13 +288,13 @@ private:
         if(type == "standard"){
 
             if(toml::find(this->toml_obj, table_name).contains("spp"))
-                return std::make_unique<render::standard_renderer_t>(
+                return std::make_unique<standard_renderer_t>(
                     std::move(cam),
                     std::move(shader),
                     toml::find<unsigned>(this->toml_obj, table_name, "spp")
                 );
             else
-                return std::make_unique<render::standard_renderer_t>(
+                return std::make_unique<standard_renderer_t>(
                     std::move(cam),
                     std::move(shader)
                 );
@@ -305,9 +303,9 @@ private:
             throw std::domain_error("Unknown type " + type + " for asset " + table_name);
     }
 
-    std::unique_ptr<img::image_t> build_image() const override {
+    std::unique_ptr<image_t> build_image() const override {
 
-        std::unique_ptr<render::renderer_t> renderer {this->build_renderer()};
+        std::unique_ptr<renderer_t> renderer {this->build_renderer()};
 
         std::string const table_name {"image"};
 
@@ -319,19 +317,19 @@ private:
         if(type == "ppm"){
             if(toml::find(this->toml_obj, table_name).contains("threads")){
                 if(toml::find(this->toml_obj, table_name).contains("normalize"))
-                    return std::make_unique<img::image_ppm_t>(
+                    return std::make_unique<image_ppm_t>(
                         std::move(renderer), width, height, output_fn,
                         toml::find<unsigned>(this->toml_obj, table_name, "threads"),
                         toml::find<bool>(this->toml_obj, table_name, "normalize")
                     );
                 else
-                    return std::make_unique<img::image_ppm_t>(
+                    return std::make_unique<image_ppm_t>(
                         std::move(renderer), width, height, output_fn,
                         toml::find<unsigned>(this->toml_obj, table_name, "threads")
                     );
             }
             else
-                return std::make_unique<img::image_ppm_t>(
+                return std::make_unique<image_ppm_t>(
                     std::move(renderer), width, height, output_fn
                 );
         }
@@ -348,5 +346,3 @@ public:
 std::unique_ptr<config_parser_t> config_parser_t::from_toml(std::string const& fn){
     return std::make_unique<toml_config_parser_t>(fn);
 }
-
-};

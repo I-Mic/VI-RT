@@ -12,19 +12,15 @@
 #include "scene/scene.hpp"
 
 
-namespace accel {
-
 class accel_t {
 
 public:
 
     accel_t();
 
-    void build(scene::scene_t const& s);
+    void build(scene_t const& s);
 
-    bool trace(scene::scene_t const& s, ray::ray_t const& r, ray::intersection_t const& isect);
-};
-
+    bool trace(scene_t const& s, ray_t const& r, intersection_t const& isect);
 };
 
 

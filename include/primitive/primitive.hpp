@@ -11,16 +11,12 @@
 
 #include "primitive/geometry/geometry.hpp"
 
-namespace prim {
-
 struct primitive_t {
 
-    std::unique_ptr<geo::geometry_t> geo;
+    std::unique_ptr<geometry_t> geo;
     size_t const material_index;
 
-    primitive_t(std::unique_ptr<geo::geometry_t> geo, size_t const material_index) noexcept;
-};
-
+    primitive_t(std::unique_ptr<geometry_t> geo, size_t const material_index) noexcept;
 };
 
 #endif /* PRIMITIVE_HPP */

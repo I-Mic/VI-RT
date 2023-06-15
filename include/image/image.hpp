@@ -14,14 +14,12 @@
 #include "renderer/renderer.hpp"
 
 
-namespace img {
-
 class image_t {
 
 protected:
 
-    std::unique_ptr<rgb::rgb_t<float>[]> const image_plane;
-    std::unique_ptr<render::renderer_t> const renderer;
+    std::unique_ptr<rgb_t<float>[]> const image_plane;
+    std::unique_ptr<renderer_t> const renderer;
 	std::string const output_fn;
 
 public:
@@ -30,7 +28,7 @@ public:
     size_t const height;
 
     image_t(
-		std::unique_ptr<render::renderer_t> renderer,
+		std::unique_ptr<renderer_t> renderer,
 		size_t const w, size_t const h,
 		std::string output_fn
 	) noexcept;
@@ -38,8 +36,6 @@ public:
     virtual ~image_t();
 
     virtual bool output_image() const = 0;
-};
-
 };
 
 #endif /* IMAGE_HPP */

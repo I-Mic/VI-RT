@@ -11,24 +11,20 @@
 #include "rays/ray.hpp"
 
 
-namespace prim {
-
 struct bb_t {
 
 public:
-    vec::vec3_t min;
-    vec::vec3_t max;
+    vec3_t min;
+    vec3_t max;
 
     bb_t() noexcept;
-    bb_t(vec::vec3_t const& p1) noexcept;
-    bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) noexcept;
-    bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2, vec::vec3_t const& p3) noexcept;
+    bb_t(vec3_t const& p1) noexcept;
+    bb_t(vec3_t const& p1, vec3_t const& p2) noexcept;
+    bb_t(vec3_t const& p1, vec3_t const& p2, vec3_t const& p3) noexcept;
 
     static bb_t from_union_of(bb_t const& b1, bb_t const& b2) noexcept;
 
-    bool intersects(ray::ray_t const& r) const;
-};
-
+    bool intersects(ray_t const& r) const;
 };
 
 #endif /* BB_HPP */

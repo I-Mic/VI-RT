@@ -27,12 +27,10 @@
 #include "tiny_obj_loader.h"
 
 
-namespace scene {
-
-scene_t::scene_t(std::vector<std::unique_ptr<light::light_t>> lights) noexcept :
+scene_t::scene_t(std::vector<std::unique_ptr<light_t>> lights) noexcept :
     success{false}, prims{}, lights{std::move(lights)}, brdfs{} {}
 
-scene_t::scene_t(std::string const& fn, std::vector<std::unique_ptr<light::light_t>> lights):
+scene_t::scene_t(std::string const& fn, std::vector<std::unique_ptr<light_t>> lights):
     success{false}, prims{}, lights{std::move(lights)}, brdfs{}
 {
     this->load(fn);
@@ -105,10 +103,10 @@ void scene_t::load(std::string const& fn){
     // iterate over shapes
     for(tinyobj::shape_t const& shape : shapes){
 
-        std::vector<prim::geo::face_t> faces {};
-        std::unordered_map<size_t, vec::vec3_t> mesh_vertices {};
-        std::unordered_map<size_t, vec::vec3_t> mesh_normals  {};
-        prim::bb_t mesh_bb {};
+        std::vector<face_t> faces {};
+        std::unordered_map<size_t, vec3_t> mesh_vertices {};
+        std::unordered_map<size_t, vec3_t> mesh_normals  {};
+        bb_t mesh_bb {};
 
 
         using indices_iter_t = std::vector<tinyobj::index_t>::const_iterator;
@@ -117,7 +115,7 @@ void scene_t::load(std::string const& fn){
             indices_iter != shape.mesh.indices.end();
         ){
 
-            prim::geo::face_t face {};
+            face_t face {};
             if(indices_iter->normal_index > -1)
                 face.normals_indices = std::make_optional<std::array<size_t, 3>>();
 
@@ -126,7 +124,7 @@ void scene_t::load(std::string const& fn){
 
                 face.vert_indices[v] = static_cast<size_t>(indices_iter->vertex_index);
 
-                vec::vec3_t const vertice {
+                vec3_t const vertice {
                     obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3),
                     obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 1),
                     obj_vertices.at(static_cast<size_t>(indices_iter->vertex_index) * 3 + 2)
@@ -141,7 +139,7 @@ void scene_t::load(std::string const& fn){
                     face.normals_indices.value()[v] =
                         static_cast<size_t>(indices_iter->normal_index);
 
-                    vec::vec3_t const normal {
+                    vec3_t const normal {
                         obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3),
                         obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 1),
                         obj_normals.at(static_cast<size_t>(indices_iter->normal_index) * 3 + 2)
@@ -155,7 +153,7 @@ void scene_t::load(std::string const& fn){
             }
 
 
-            face.geo_normal = vec::vec3_t::surface_normal(
+            face.geo_normal = vec3_t::surface_normal(
                 mesh_vertices.at(face.vert_indices[0]),
                 mesh_vertices.at(face.vert_indices[1]),
                 mesh_vertices.at(face.vert_indices[2])
@@ -177,11 +175,11 @@ void scene_t::load(std::string const& fn){
             };
 
             faces.push_back(face);
-            mesh_bb = prim::bb_t::from_union_of(face.bb, mesh_bb);
+            mesh_bb = bb_t::from_union_of(face.bb, mesh_bb);
         }
 
-        std::unique_ptr<prim::geo::geometry_t> mesh {
-            std::make_unique<prim::geo::mesh_t>(
+        std::unique_ptr<geometry_t> mesh {
+            std::make_unique<mesh_t>(
                 std::move(faces),
                 std::move(mesh_vertices),
                 std::move(mesh_normals),
@@ -198,14 +196,14 @@ void scene_t::load(std::string const& fn){
 
     for(tinyobj::material_t const& mat : materials){
 
-        rgb::rgb_t const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
-        rgb::rgb_t const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
-        rgb::rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
-        rgb::rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
+        rgb_t const ka {mat.ambient[0],       mat.ambient[1],       mat.ambient[2]};
+        rgb_t const kd {mat.diffuse[0],       mat.diffuse[1],       mat.diffuse[2]};
+        rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
+        rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
         float const ns {mat.shininess};
 
-        std::unique_ptr<prim::brdf::brdf_t> brdf {
-            std::make_unique<prim::brdf::phong_t>(ka, kd, ks, kt, ns)
+        std::unique_ptr<brdf_t> brdf {
+            std::make_unique<phong_t>(ka, kd, ks, kt, ns)
         };
 
         this->brdfs.push_back(std::move(brdf));
@@ -218,20 +216,20 @@ bool scene_t::is_loaded() const noexcept {
     return this->success;
 }
 
-std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noexcept {
+std::optional<intersection_t> scene_t::trace(ray_t const& r) const noexcept {
 
     bool intersects {false};
-    ray::intersection_t min_isect {};
+    intersection_t min_isect {};
     min_isect.depth = std::numeric_limits<float>::max();
 
     // iterate over all area lights
-    for(std::unique_ptr<light::light_t> const& l : this->lights){
+    for(std::unique_ptr<light_t> const& l : this->lights){
 
-        if(l->type == light::light_type_t::AREA_LIGHT){
+        if(l->type == light_type_t::AREA_LIGHT){
 
-            light::light_properties_t const lprops {l->get_properties()};
+            light_properties_t const lprops {l->get_properties()};
 
-            std::optional<ray::intersection_t> const inter {lprops.light_geom->intersect(r)};
+            std::optional<intersection_t> const inter {lprops.light_geom->intersect(r)};
             if(!inter.has_value())
                 continue;
 
@@ -244,9 +242,9 @@ std::optional<ray::intersection_t> scene_t::trace(ray::ray_t const& r) const noe
     }
 
     // iterate over all primitives
-    for(prim::primitive_t const& prim : this->prims){
+    for(primitive_t const& prim : this->prims){
 
-        std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
+        std::optional<intersection_t> const inter {prim.geo->intersect(r)};
         if(!inter.has_value())
             continue;
 
@@ -271,16 +269,14 @@ scene_t::get_brdfs_iterator() const noexcept {
     return std::make_pair(this->brdfs.begin(), this->brdfs.end());
 }
 
-bool scene_t::is_visible(ray::ray_t const& r, float const max_l) const noexcept {
+bool scene_t::is_visible(ray_t const& r, float const max_l) const noexcept {
 
     // iterate over all primitives while visible
-    for(prim::primitive_t const& prim : this->prims){
-        std::optional<ray::intersection_t> const inter {prim.geo->intersect(r)};
+    for(primitive_t const& prim : this->prims){
+        std::optional<intersection_t> const inter {prim.geo->intersect(r)};
         if(inter.has_value() && inter.value().depth < max_l)
             return false;
     }
 
     return true;
 }
-
-};

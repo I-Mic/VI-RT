@@ -11,7 +11,6 @@
 #include "config/config_parser.hpp"
 #include "image/image.hpp"
 
-
 int main(int const argc, char const* const* const argv){
 
     if(argc == 1){
@@ -24,11 +23,11 @@ int main(int const argc, char const* const* const argv){
     for(int i {1}; i < argc; ++i){
 
         try {
-            std::unique_ptr<config::config_parser_t> const config_obj {
-                config::config_parser_t::from_toml(argv[i])
+            std::unique_ptr<config_parser_t> const config_obj {
+                config_parser_t::from_toml(argv[i])
             };
 
-            std::unique_ptr<img::image_t> img {config_obj->build_image()};
+            std::unique_ptr<image_t> img {config_obj->build_image()};
             if(!img->output_image()){
                 std::cerr << "Error writing output\n";
                 status = 2;

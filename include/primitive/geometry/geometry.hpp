@@ -13,24 +13,20 @@
 #include "rays/ray.hpp"
 #include "rays/intersection.hpp"
 
-namespace prim::geo {
-
 class geometry_t {
 
 protected:
     // geometric primitive bounding box
-    prim::bb_t const bb;
+    bb_t const bb;
 
 public:
 
     geometry_t() noexcept = default;
-    geometry_t(prim::bb_t const& bb) noexcept : bb{bb} {}
+    geometry_t(bb_t const& bb) noexcept : bb{bb} {}
 
     virtual ~geometry_t() = default;
 
-    virtual std::optional<ray::intersection_t> intersect(ray::ray_t const& r) const = 0;
-};
-
+    virtual std::optional<intersection_t> intersect(ray_t const& r) const = 0;
 };
 
 #endif /* GEOMETRY_HPP */

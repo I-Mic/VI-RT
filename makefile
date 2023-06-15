@@ -42,7 +42,7 @@ CXX 			:= clang++
 STD				:= c++20
 
 # compiler flags
-CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD)
+CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD) -g3 -ggdb
 CXXFLAGS        += $(foreach path,$(INC_PATHS),-I$(path))
 
 # linker flags (e.g. -L/path/to/lib)
@@ -68,10 +68,10 @@ endif
 
 
 # profiles
-release: CXXFLAGS += -O2 -DNDEBUG -g3 -ggdb
+release: CXXFLAGS += -O2 -DNDEBUG
 release: all
 
-debug: CXXFLAGS += -O0 -g3 -ggdb
+debug: CXXFLAGS += -O0
 debug: all
 
 

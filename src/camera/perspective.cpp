@@ -9,20 +9,18 @@
 #include "camera/perspective.hpp"
 #include "utils/vector.hpp"
 
-namespace cam {
-
 perspective_t::perspective_t(
-    vec::vec3_t const& eye, vec::vec3_t const& at, vec::vec3_t const& up,
+    vec3_t const& eye, vec3_t const& at, vec3_t const& up,
     size_t const w, size_t const h, float const fov_w, float const fov_h
 ) noexcept :
     camera_t{w, h}, eye{eye}, at{at}, up{up},
     fov_w{fov_w}, fov_h{fov_h}, cam_to_world_matrix{}
 {
-    vec::vec3_t f {at - eye};
+    vec3_t f {at - eye};
     f.normalize();
-    vec::vec3_t r {f.cross_product(up)};
+    vec3_t r {f.cross_product(up)};
     r.normalize();
-    vec::vec3_t real_up {r.cross_product(f)};
+    vec3_t real_up {r.cross_product(f)};
     real_up.normalize();
 
     // flip the image
@@ -34,7 +32,7 @@ perspective_t::perspective_t(
 }
 
 
-static vec::vec3_t matrix_product(
+static vec3_t matrix_product(
     std::array<std::array<float, 3>, 3> const& cam_to_world_matrix,
     std::array<float, 3> const& p
 ) noexcept {
@@ -50,7 +48,7 @@ static vec::vec3_t matrix_product(
     return {res[0], res[1], res[2]};
 }
 
-ray::ray_t perspective_t::generate_ray(
+ray_t perspective_t::generate_ray(
     size_t const x, size_t const y, std::array<float, 2> const cam_jitter
 ) const noexcept {
 
@@ -60,10 +58,8 @@ ray::ray_t perspective_t::generate_ray(
     float const xc {xs * std::tan(this->fov_w / 2.f)};
     float const yc {ys * std::tan(this->fov_h / 2.f)};
 
-    vec::vec3_t ray_dir {matrix_product(this->cam_to_world_matrix, {xc, yc, 1.f})};
+    vec3_t ray_dir {matrix_product(this->cam_to_world_matrix, {xc, yc, 1.f})};
     ray_dir.normalize();
 
     return {this->eye, ray_dir};
 }
-
-};

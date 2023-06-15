@@ -5,13 +5,11 @@
 #include "rays/ray.hpp"
 #include "utils/vector.hpp"
 
-namespace prim {
-
 bb_t::bb_t() noexcept : min{0.f, 0.f, 0.f}, max{0.f, 0.f, 0.f} {}
 
-bb_t::bb_t(vec::vec3_t const& p1) noexcept : min{p1}, max{p1} {}
+bb_t::bb_t(vec3_t const& p1) noexcept : min{p1}, max{p1} {}
 
-bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) noexcept :
+bb_t::bb_t(vec3_t const& p1, vec3_t const& p2) noexcept :
     min{
         std::min(p1.x, p2.x),
         std::min(p1.y, p2.y),
@@ -23,7 +21,7 @@ bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2) noexcept :
         std::max(p1.z, p2.z)
     }{}
 
-bb_t::bb_t(vec::vec3_t const& p1, vec::vec3_t const& p2, vec::vec3_t const& p3) noexcept :
+bb_t::bb_t(vec3_t const& p1, vec3_t const& p2, vec3_t const& p3) noexcept :
     min{
         std::min(std::min(p1.x, p2.x), p3.x),
         std::min(std::min(p1.y, p2.y), p3.y),
@@ -75,7 +73,7 @@ static bool get_t0_and_t1(
     return t0 <= t1;
 }
 
-bool bb_t::intersects(ray::ray_t const& r) const {
+bool bb_t::intersects(ray_t const& r) const {
 
     float t0 {0.f};
     float t1 {std::numeric_limits<float>::max()};
@@ -85,5 +83,3 @@ bool bb_t::intersects(ray::ray_t const& r) const {
         get_t0_and_t1(r.dir.y, r.org.y, this->min.y, this->max.y, t0, t1) &&
         get_t0_and_t1(r.dir.z, r.org.z, this->min.z, this->max.z, t0, t1);
 }
-
-};

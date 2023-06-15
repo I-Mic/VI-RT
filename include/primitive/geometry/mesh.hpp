@@ -20,31 +20,29 @@
 
 // partially inspired in pbrt book (3rd ed.), sec 3.6, pag 152
 
-namespace prim::geo {
-
 struct face_t {
 
     std::array<size_t, 3> vert_indices;
-    vec::vec3_t geo_normal;           // geometric normal
+    vec3_t geo_normal;           // geometric normal
     std::optional<std::array<size_t, 3>> normals_indices;
-    prim::bb_t bb;      // face bounding box
-	vec::vec3_t edge1;
-	vec::vec3_t edge2;
+    bb_t bb;      // face bounding box
+	vec3_t edge1;
+	vec3_t edge2;
 
     face_t() noexcept;
     bool has_shading_normals() const noexcept;
 };
 
 
-class mesh_t : public geo::geometry_t {
+class mesh_t : public geometry_t {
 
 private:
     std::vector<face_t> const faces;
-    std::unordered_map<size_t, vec::vec3_t> const vertices;
-    std::unordered_map<size_t, vec::vec3_t> const normals;
+    std::unordered_map<size_t, vec3_t> const vertices;
+    std::unordered_map<size_t, vec3_t> const normals;
 
-    std::optional<ray::intersection_t> triangle_intersect(
-        ray::ray_t const& r,
+    std::optional<intersection_t> triangle_intersect(
+        ray_t const& r,
 		face_t const& face
     ) const noexcept;
 
@@ -52,16 +50,14 @@ public:
     mesh_t() noexcept;
     mesh_t(
         std::vector<face_t> faces,
-        std::unordered_map<size_t, vec::vec3_t> vertices,
-        std::unordered_map<size_t, vec::vec3_t> normals,
-        prim::bb_t b
+        std::unordered_map<size_t, vec3_t> vertices,
+        std::unordered_map<size_t, vec3_t> normals,
+        bb_t b
     ) noexcept;
 
     ~mesh_t() noexcept;
 
-    std::optional<ray::intersection_t> intersect(ray::ray_t const& r) const override;
-};
-
+    std::optional<intersection_t> intersect(ray_t const& r) const override;
 };
 
 #endif /* MESH_HPP */

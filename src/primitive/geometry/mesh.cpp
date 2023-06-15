@@ -16,8 +16,6 @@
 #include "rays/ray.hpp"
 #include "utils/vector.hpp"
 
-namespace prim::geo {
-
 face_t::face_t() noexcept :
     vert_indices{}, geo_normal{},
     normals_indices{std::nullopt},
@@ -32,11 +30,11 @@ mesh_t::mesh_t() noexcept : faces{}, vertices{}, normals{} {}
 
 mesh_t::mesh_t(
     std::vector<face_t> faces,
-    std::unordered_map<size_t, vec::vec3_t> vertices,
-    std::unordered_map<size_t, vec::vec3_t> normals,
-    prim::bb_t b
+    std::unordered_map<size_t, vec3_t> vertices,
+    std::unordered_map<size_t, vec3_t> normals,
+    bb_t b
 ) noexcept :
-    geo::geometry_t{b},
+    geometry_t{b},
     faces{std::move(faces)},
     vertices{std::move(vertices)},
     normals{std::move(normals)} {}
@@ -44,8 +42,8 @@ mesh_t::mesh_t(
 mesh_t::~mesh_t() noexcept {}
 
 
-std::optional<ray::intersection_t> mesh_t::triangle_intersect(
-    ray::ray_t const& r, face_t const& face
+std::optional<intersection_t> mesh_t::triangle_intersect(
+    ray_t const& r, face_t const& face
 ) const noexcept {
 
     static float constexpr EPSILON {0.0000001f};
@@ -53,9 +51,9 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
     if(!face.bb.intersects(r))
         return std::nullopt;
 
-    vec::vec3_t const& v0 {this->vertices.at(face.vert_indices[0])};
+    vec3_t const& v0 {this->vertices.at(face.vert_indices[0])};
 
-    vec::vec3_t const h {r.dir.cross_product(face.edge2)};
+    vec3_t const h {r.dir.cross_product(face.edge2)};
     float const a {face.edge1.dot_product(h)};
 
     if (a > -EPSILON && a < EPSILON)
@@ -63,13 +61,13 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
 
 
     float const f {1.f / a};
-    vec::vec3_t const s {r.org - v0};
+    vec3_t const s {r.org - v0};
     float const u {f * s.dot_product(h)};
     if (u < 0.f || u > 1.f)
         return std::nullopt;
 
 
-    vec::vec3_t const q {s.cross_product(face.edge1)};
+    vec3_t const q {s.cross_product(face.edge1)};
     float const v {f * r.dir.dot_product(q)};
     if (v < 0.f || u + v > 1.f)
         return std::nullopt;
@@ -78,9 +76,9 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
     float const t {f * face.edge2.dot_product(q)};
     if (t > EPSILON){
 
-        vec::vec3_t const wo {-1.f * r.dir};
+        vec3_t const wo {-1.f * r.dir};
 
-        ray::intersection_t const inter {
+        intersection_t const inter {
             r.org + r.dir * t,
             face.geo_normal.flip(wo),
             wo,
@@ -94,10 +92,10 @@ std::optional<ray::intersection_t> mesh_t::triangle_intersect(
     return std::nullopt;
 }
 
-std::optional<ray::intersection_t> mesh_t::intersect(ray::ray_t const& r) const {
+std::optional<intersection_t> mesh_t::intersect(ray_t const& r) const {
 
     bool intersects {false};
-    ray::intersection_t min_isect {};
+    intersection_t min_isect {};
     min_isect.depth = std::numeric_limits<float>::max();
 
     // intersect the ray with the mesh BB
@@ -107,7 +105,7 @@ std::optional<ray::intersection_t> mesh_t::intersect(ray::ray_t const& r) const 
     // If it intersects then loop through the faces
     for(face_t const& face : this->faces){
 
-        std::optional<ray::intersection_t> inter {this->triangle_intersect(r, face)};
+        std::optional<intersection_t> inter {this->triangle_intersect(r, face)};
         if (!inter.has_value())
             continue;
 
@@ -118,5 +116,3 @@ std::optional<ray::intersection_t> mesh_t::intersect(ray::ray_t const& r) const 
 
     return intersects ? std::make_optional(min_isect) : std::nullopt;
 }
-
-};

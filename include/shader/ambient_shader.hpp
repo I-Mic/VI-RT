@@ -6,21 +6,17 @@
 #include "shader/shader.hpp"
 #include "utils/rgb.hpp"
 
-namespace shader {
-
 class ambient_shader_t : public shader_t {
 
 private:
-	rgb::rgb_t<float> const background;
+	rgb_t<float> const background;
 
 public:
-	ambient_shader_t(std::unique_ptr<scene::scene_t> scene, rgb::rgb_t<float> const& bg) noexcept;
+	ambient_shader_t(std::unique_ptr<scene_t> scene, rgb_t<float> const& bg) noexcept;
 
 	~ambient_shader_t() noexcept;
 
-	rgb::rgb_t<float> shade(ray::ray_t const& ray) const noexcept override;
-};
-
+	rgb_t<float> shade(ray_t const& ray) const noexcept override;
 };
 
 #endif //AMBIENT_SHADER_HPP

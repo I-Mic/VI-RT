@@ -6,13 +6,11 @@
 #include <optional>
 
 
-namespace light {
-
 area_light_t::area_light_t(
-    rgb::rgb_t<float> const& power,
-    prim::geo::triangle_t const& geom
+    rgb_t<float> const& power,
+    triangle_t const& geom
 ) noexcept :
-    light_t{light::light_type_t::AREA_LIGHT},
+    light_t{light_type_t::AREA_LIGHT},
     pdf{1.f / geom.area()},
     power{power},
     intensity{power * this->pdf},
@@ -22,7 +20,7 @@ area_light_t::~area_light_t() noexcept {}
 
 light_properties_t area_light_t::get_properties(light_parameters_t const& params) const noexcept {
 
-    vec::vec3_t point {};
+    vec3_t point {};
     float pdf {this->pdf};
 
     if(params.rand_pair.has_value()){
@@ -48,5 +46,3 @@ light_properties_t area_light_t::get_properties(light_parameters_t const& params
         .power{std::make_optional(this->power)}
     };
 }
-
-};

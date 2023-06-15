@@ -11,8 +11,6 @@
 #include "utils/rgb.hpp"
 
 
-namespace prim::brdf {
-
 enum class brdf_types_t {
     SPECULAR_REF   = 0b0001,
     DIFFUSE_REF    = 0b0010,
@@ -30,37 +28,34 @@ public:
     virtual ~brdf_t() = default;
 
     // return the brdf_t RGB value for a pair of (incident, scattering) directions : (wi,wo)
-    virtual rgb::rgb_t<float> compute_radiance(
-        vec::vec3_t const& wi,
-        vec::vec3_t const& wo,
+    virtual rgb_t<float> compute_radiance(
+        vec3_t const& wi,
+        vec3_t const& wo,
         brdf_types_t const type = brdf_types_t::BRDF_ALL
     ) const noexcept = 0;
 
     // return an outgoing direction wo and brdf
     // RGB value for a given wi and probability pair prob[2]
-    virtual std::tuple<vec::vec3_t, rgb::rgb_t<float>> sample_f(
-        vec::vec3_t const& wi,
+    virtual std::tuple<vec3_t, rgb_t<float>> sample_f(
+        vec3_t const& wi,
         float const lower, float const upper,
         brdf_types_t const type = brdf_types_t::BRDF_ALL
     ) const noexcept = 0;
 
     // return the probability of sampling wo given wi
     virtual float pdf(
-        vec::vec3_t const& wi,
-        vec::vec3_t const& wo,
+        vec3_t const& wi,
+        vec3_t const& wo,
         brdf_types_t const type = brdf_types_t::BRDF_ALL
     ) const noexcept = 0;
 
-    virtual rgb::rgb_t<float> ambient() const noexcept = 0;
+    virtual rgb_t<float> ambient() const noexcept = 0;
 
-    virtual rgb::rgb_t<float> diffuse() const noexcept = 0;
+    virtual rgb_t<float> diffuse() const noexcept = 0;
 
-    virtual rgb::rgb_t<float> specular() const noexcept = 0;
+    virtual rgb_t<float> specular() const noexcept = 0;
 
     virtual float specular_exp() const noexcept = 0;
 };
-
-};
-
 
 #endif /* BRDF_HPP */

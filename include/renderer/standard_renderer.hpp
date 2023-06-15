@@ -3,24 +3,19 @@
 
 #include "renderer/renderer.hpp"
 
-
-namespace render {
-
 class standard_renderer_t : public renderer_t {
 
 public:
 
     standard_renderer_t(
-        std::unique_ptr<cam::camera_t> cam,
-        std::unique_ptr<shader::shader_t> shader,
+        std::unique_ptr<camera_t> cam,
+        std::unique_ptr<shader_t> shader,
         unsigned const samples_per_pixel = 32
     ) noexcept;
 
     ~standard_renderer_t() noexcept;
 
-    rgb::rgb_t<float> render_pixel(size_t const x, size_t const y) const override;
+    rgb_t<float> render_pixel(size_t const x, size_t const y) const override;
 };
 
-};
-
-#endif
+#endif //STANDARD_RENDERER_HPP

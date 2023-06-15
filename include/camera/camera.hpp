@@ -10,8 +10,6 @@
 #include "rays/ray.hpp"
 
 // based on pbrt book, sec 6.1, pag. 356
-namespace cam {
-
 class camera_t {
 
 protected:
@@ -23,12 +21,10 @@ public:
 
     virtual ~camera_t();
 
-    virtual ray::ray_t generate_ray(
+    virtual ray_t generate_ray(
         size_t const x, size_t const y,
         std::array<float, 2> const jitter = {0.5f, 0.5f}
     ) const = 0;
-};
-
 };
 
 #endif /* CAMERA_HPP */

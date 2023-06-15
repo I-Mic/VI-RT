@@ -11,13 +11,11 @@
 #include "image/image.hpp"
 #include "utils/rgb.hpp"
 
-namespace img {
-
 class image_ppm_t : public image_t {
 
 private:
 
-    std::unique_ptr<rgb::rgb_t<unsigned char>[]> const image_to_save;
+    std::unique_ptr<rgb_t<unsigned char>[]> const image_to_save;
     unsigned const num_of_threads;
     bool const normalize;
 
@@ -32,7 +30,7 @@ private:
 public:
 
     image_ppm_t(
-		std::unique_ptr<render::renderer_t> renderer,
+		std::unique_ptr<renderer_t> renderer,
 		size_t const w, size_t const h,
 		std::string output_fn,
 		unsigned const num_of_threads = 8,
@@ -40,8 +38,6 @@ public:
 	);
 
     bool output_image() const override;
-};
-
 };
 
 #endif /* IMAGE_PPM_HPP */

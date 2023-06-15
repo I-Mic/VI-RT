@@ -11,8 +11,6 @@
 #include <array>
 #include <tuple>
 
-namespace vec {
-
 struct vec3_t {
 
 public:
@@ -32,12 +30,10 @@ public:
         return {arr[0], arr[1], arr[2]};
     }
 
-    static vec3_t surface_normal(
-        vec::vec3_t const& v1, vec::vec3_t const& v2, vec::vec3_t const& v3
-    ) noexcept {
-        vec::vec3_t const edge1 {v2 - v1};
-        vec::vec3_t const edge2 {v3 - v1};
-        vec::vec3_t normal {edge1.cross_product(edge2)};
+    static vec3_t surface_normal(vec3_t const& v1, vec3_t const& v2, vec3_t const& v3) noexcept {
+        vec3_t const edge1 {v2 - v1};
+        vec3_t const edge2 {v3 - v1};
+        vec3_t normal {edge1.cross_product(edge2)};
         normal.normalize();
         return normal;
     }
@@ -182,8 +178,5 @@ public:
         };
     }
 };
-
-};
-
 
 #endif /* VECTOR_HPP */

@@ -10,8 +10,6 @@
 #include <type_traits>
 #include <array>
 
-namespace rgb {
-
 template<typename T>
 struct rgb_t {
 
@@ -120,8 +118,6 @@ public:
     float y() const noexcept {
         return this->r * 0.2126 + this->g * 0.7152 + this->b * 0.0722;
     }
-};
-
 };
 
 #endif /* RGB_HPP */
