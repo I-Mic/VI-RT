@@ -222,22 +222,12 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
-            if(toml::find(this->toml_obj, table_name).contains("max_depth")){
-
-                if(toml::find(this->toml_obj, table_name).contains("monte_carlo"))
-                    return std::make_unique<distributed_shader_t>(
-                        std::move(scene),
-                        rgb_t<float>::from_array(bg),
-                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
-                        toml::find<bool>(this->toml_obj, table_name, "monte_carlo")
-                    );
-                else
-                    return std::make_unique<distributed_shader_t>(
-                        std::move(scene),
-                        rgb_t<float>::from_array(bg),
-                        toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
-                    );
-            }
+            if(toml::find(this->toml_obj, table_name).contains("max_depth"))
+                return std::make_unique<distributed_shader_t>(
+                    std::move(scene),
+                    rgb_t<float>::from_array(bg),
+                    toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
+                );
             else
                 return std::make_unique<distributed_shader_t>(
                     std::move(scene),

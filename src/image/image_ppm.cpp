@@ -93,7 +93,7 @@ void image_ppm_t::shade_pixels() const {
 
     auto const worker {
 
-        [this] (size_t const begin_index, size_t const end_index, rgb_t<float>* const buffer){
+        [this](size_t const begin_index, size_t const end_index, rgb_t<float>* const buffer){
 
             size_t x {begin_index % this->width};
             size_t y {begin_index / this->width};
@@ -119,14 +119,13 @@ void image_ppm_t::shade_pixels() const {
     size_t const image_plane_size {this->width * this->height};
     size_t const local_size {
         static_cast<size_t>(
-            std::ceil(
-                static_cast<double>(image_plane_size) /
-                static_cast<double>(num_of_threads)
-            )
+            std::ceil(static_cast<double>(image_plane_size) / static_cast<double>(num_of_threads))
         )
     };
 
     std::vector<std::thread> threads {};
+    // better than calling constructor with argument = this->num_of_threads directly
+    // this avoids default constructing objects that would be reassigned afterwards
     threads.reserve(this->num_of_threads);
 
     for(size_t lower_bound {0}; lower_bound < image_plane_size; lower_bound += local_size)
@@ -145,7 +144,6 @@ bool image_ppm_t::output_image() const {
 
     //shade each pixel
     this->shade_pixels();
-
     // convert from float to {0,1,..., 255}
     this->tone_map();
 
@@ -154,10 +152,8 @@ bool image_ppm_t::output_image() const {
     if(ofs.fail())
         return false;
 
-
     ofs << "P6\n" << this->width << " " << this->height << "\n255\n";
 
-    // loop over each pixel in the image, clamp and convert to byte format
     for(size_t y {0}; y < this->height; ++y)
 
         for(size_t x {0}; x < this->width; ++x)

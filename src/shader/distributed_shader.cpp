@@ -10,13 +10,11 @@
 distributed_shader_t::distributed_shader_t(
     std::unique_ptr<scene_t> scene,
     rgb_t<float> const& bg,
-    unsigned const max_depth,
-    bool const use_monte_carlo_sampling
+    unsigned const max_depth
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
-    max_depth{max_depth},
-    use_monte_carlo_sampling{use_monte_carlo_sampling}
+    max_depth{max_depth}
 {
     std::srand(std::time(nullptr));
 }
@@ -109,18 +107,11 @@ rgb_t<float> distributed_shader_t::direct_lighting(
 
     rgb_t<float> color {};
 
-    if(!this->use_monte_carlo_sampling)
-        for(lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li)
-            color += this->direct_lighting(isect, *li, brdf);
-    else {
-        long const num_of_lights {lights_iter_end - lights_iter_begin};
-        long const light_index {std::rand() % num_of_lights};
-        color +=
-            this->direct_lighting(isect, *(lights_iter_begin + light_index), brdf) *
-            static_cast<float>(num_of_lights);
-    }
-
-    return color;
+    long const num_of_lights {lights_iter_end - lights_iter_begin};
+    long const light_index {std::rand() % num_of_lights};
+    return
+        this->direct_lighting(isect, *(lights_iter_begin + light_index), brdf) *
+        static_cast<float>(num_of_lights);
 }
 
 rgb_t<float> distributed_shader_t::specular_reflection(

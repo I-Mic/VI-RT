@@ -8,7 +8,6 @@ class distributed_shader_t : public shader_t {
 private:
     rgb_t<float> const background;
     unsigned const max_depth;
-    bool const use_monte_carlo_sampling;
 
     rgb_t<float> direct_lighting(
         intersection_t const& isect,
@@ -27,8 +26,7 @@ public:
     distributed_shader_t(
         std::unique_ptr<scene_t> scene,
         rgb_t<float> const& bg,
-        unsigned const max_depth = 4,
-        bool const use_monte_carlo_sampling = true
+        unsigned const max_depth = 4
     ) noexcept;
 
     ~distributed_shader_t() noexcept;
