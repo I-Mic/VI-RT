@@ -24,7 +24,7 @@ public:
     void adjust_origin(vec3_t const& normal) noexcept {
 
         vec3_t offset {EPSILON * normal};
-        if(this->dir.dot_product(normal) < 0.f)
+        if(this->dir.dot(normal) < 0.f)
             offset *= -1.f;
 
         this->org.x += offset.x;

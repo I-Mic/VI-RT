@@ -119,7 +119,10 @@ void image_ppm_t::shade_pixels() const {
     size_t const image_plane_size {this->width * this->height};
     size_t const local_size {
         static_cast<size_t>(
-            std::ceil(static_cast<double>(image_plane_size) / static_cast<double>(num_of_threads))
+            std::ceil(
+                static_cast<double>(image_plane_size) /
+                static_cast<double>(this->num_of_threads)
+            )
         )
     };
 

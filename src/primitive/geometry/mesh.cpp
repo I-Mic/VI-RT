@@ -53,8 +53,8 @@ std::optional<intersection_t> mesh_t::triangle_intersect(
 
     vec3_t const& v0 {this->vertices.at(face.vert_indices[0])};
 
-    vec3_t const h {r.dir.cross_product(face.edge2)};
-    float const a {face.edge1.dot_product(h)};
+    vec3_t const h {r.dir.cross(face.edge2)};
+    float const a {face.edge1.dot(h)};
 
     if (a > -EPSILON && a < EPSILON)
         return std::nullopt;    // This ray is parallel to this triangle.
@@ -62,29 +62,22 @@ std::optional<intersection_t> mesh_t::triangle_intersect(
 
     float const f {1.f / a};
     vec3_t const s {r.org - v0};
-    float const u {f * s.dot_product(h)};
+    float const u {f * s.dot(h)};
     if (u < 0.f || u > 1.f)
         return std::nullopt;
 
 
-    vec3_t const q {s.cross_product(face.edge1)};
-    float const v {f * r.dir.dot_product(q)};
+    vec3_t const q {s.cross(face.edge1)};
+    float const v {f * r.dir.dot(q)};
     if (v < 0.f || u + v > 1.f)
         return std::nullopt;
 
+
     // At this stage we can compute t to find out where the intersection point is on the line.
-    float const t {f * face.edge2.dot_product(q)};
+    float const t {f * face.edge2.dot(q)};
     if (t > EPSILON){
-
         vec3_t const wo {-1.f * r.dir};
-
-        intersection_t const inter {
-            r.org + r.dir * t,
-            face.geo_normal.flip(wo),
-            wo,
-            t
-        };
-
+        intersection_t const inter {r.org + r.dir * t, face.geo_normal.flip(wo), wo, t};
         return std::make_optional(inter);
     }
 

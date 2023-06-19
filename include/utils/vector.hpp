@@ -33,9 +33,24 @@ public:
     static vec3_t surface_normal(vec3_t const& v1, vec3_t const& v2, vec3_t const& v3) noexcept {
         vec3_t const edge1 {v2 - v1};
         vec3_t const edge2 {v3 - v1};
-        vec3_t normal {edge1.cross_product(edge2)};
+        vec3_t normal {edge1.cross(edge2)};
         normal.normalize();
         return normal;
+    }
+
+    // = v1 - 2.f * dot(v1, v2) * v2
+    static vec3_t reflect(vec3_t const& v1, vec3_t const& v2) noexcept {
+        float const dot {v1.dot(v2)};
+        vec3_t const r {2.f * dot * v2 - v1};
+        return r;
+    }
+
+    vec3_t operator-() const noexcept {
+        return {
+            -this->x,
+            -this->y,
+            -this->z
+        };
     }
 
     vec3_t operator+(vec3_t const& rhs) const noexcept {
@@ -117,13 +132,13 @@ public:
         }
     }
 
-    float dot_product(vec3_t const& v) const noexcept {
+    float dot(vec3_t const& v) const noexcept {
         return this->x * v.x +
                this->y * v.y +
                this->z * v.z;
     }
 
-    vec3_t cross_product(vec3_t const& v) const noexcept {
+    vec3_t cross(vec3_t const& v) const noexcept {
 
         return {
             this->y * v.z - this->z * v.y,
@@ -150,7 +165,7 @@ public:
     // flip a vector such that it points to the same "side" as v (positive cosine)
     // based on pbrt book, sec 2.4, pag 72
     vec3_t flip(vec3_t const& v) const noexcept {
-        return this->dot_product(v) < 0.f ? (-1.f * *this) : *this;
+        return this->dot(v) < 0.f ? (-1.f * *this) : *this;
     }
 
     std::tuple<vec3_t, vec3_t> coordinate_system() const noexcept {
@@ -165,7 +180,7 @@ public:
                 vec3_t{0.f, this->z, -this->y} /
                 std::sqrt(this->y * this->y + this->z * this->z);
 
-        vec3_t const v3 {this->cross_product(v2)};
+        vec3_t const v3 {this->cross(v2)};
 
         return std::make_tuple(v2, v3);
     }

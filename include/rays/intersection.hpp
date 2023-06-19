@@ -21,10 +21,7 @@ public:
     vec3_t wo;
     float depth;
     size_t material_index;
-    std::optional<rgb_t<float>> le;
-    //int pix_x, pix_y;
-    //size_t face_id;  // ID of the intersected face
-
+    std::optional<rgb_t<float>> le; // has value if intersects an area light
 
     intersection_t() noexcept = default;
     // from pbrt book, section 2.10, pag 116

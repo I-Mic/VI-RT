@@ -1,61 +1,67 @@
-//
-//  VI-RT
-//
-//  Created by Luis Paulo Santos on 30/01/2023.
-//
+#ifndef DIFFUSE_BRDF_HPP
+#define DIFFUSE_BRDF_HPP
 
-#ifndef BRDF_HPP
-#define BRDF_HPP
+#include <optional>
+#include <tuple>
 
 #include "utils/vector.hpp"
 #include "utils/rgb.hpp"
+#include "primitive/brdf/material.hpp"
 
+inline float constexpr TWO_PI {2.f * M_PI};
+inline float constexpr INVERSE_PI {1.f / M_PI};
+inline float constexpr INVERSE_TWO_PI {1.f / (2.f * M_PI)};
 
-enum class brdf_types_t {
-    SPECULAR_REF   = 0b0001,
-    DIFFUSE_REF    = 0b0010,
-    SPECULAR_TRANS = 0b0100,
-    GLOSSY_REF     = 0b1000,
-    BRDF_ALL       = 0b1111
+struct brdf_data_t {
+    // Vectors
+    std::optional<vec3_t> wo; //< Direction to viewer (or opposite direction of incident ray)
+    std::optional<vec3_t> wi; //< Direction to light (or direction of reflecting ray)
+    std::optional<vec3_t> sn; // Shading normal
+    std::optional<vec3_t> half; //< Half vector (microfacet normal)
+    std::optional<std::array<float, 2>> rand_pair;
+    material_t const* material {nullptr};
 };
 
-struct brdf_t {
+
+struct diffuse_brdf_t {
 
 public:
 
-    brdf_t() noexcept = default;
+    diffuse_brdf_t() noexcept = default;
+    virtual ~diffuse_brdf_t() = default;
 
-    virtual ~brdf_t() = default;
-
-    // return the brdf_t RGB value for a pair of (incident, scattering) directions : (wi,wo)
-    virtual rgb_t<float> compute_radiance(
-        vec3_t const& wi,
-        vec3_t const& wo,
-        brdf_types_t const type = brdf_types_t::BRDF_ALL
-    ) const noexcept = 0;
-
-    // return an outgoing direction wo and brdf
-    // RGB value for a given wi and probability pair prob[2]
-    virtual std::tuple<vec3_t, rgb_t<float>> sample_f(
-        vec3_t const& wi,
-        float const lower, float const upper,
-        brdf_types_t const type = brdf_types_t::BRDF_ALL
-    ) const noexcept = 0;
-
-    // return the probability of sampling wo given wi
-    virtual float pdf(
-        vec3_t const& wi,
-        vec3_t const& wo,
-        brdf_types_t const type = brdf_types_t::BRDF_ALL
-    ) const noexcept = 0;
-
-    virtual rgb_t<float> ambient() const noexcept = 0;
-
-    virtual rgb_t<float> diffuse() const noexcept = 0;
-
-    virtual rgb_t<float> specular() const noexcept = 0;
-
-    virtual float specular_exp() const noexcept = 0;
+    virtual rgb_t<float> eval_diffuse(brdf_data_t const& data) const noexcept = 0;
+    virtual float diffuse_term(brdf_data_t const& data) const noexcept = 0;
 };
 
-#endif /* BRDF_HPP */
+struct specular_brdf_t {
+
+public:
+
+    specular_brdf_t() noexcept = default;
+    virtual ~specular_brdf_t() = default;
+
+    virtual rgb_t<float> eval_specular(brdf_data_t const& data) const noexcept = 0;
+    //virtual std::tuple<vec3_t, float> sample_specular_half_vec(
+    //    brdf_data_t const& data
+    //) const noexcept = 0;
+    virtual std::tuple<vec3_t, float> sample_specular(brdf_data_t const& data) const noexcept = 0;
+
+    std::tuple<vec3_t, float> sample_hemisphere(
+        std::array<float, 2> const rand_pair
+    ) const noexcept {
+
+        vec3_t const wi {
+            std::cos(TWO_PI * rand_pair[0]) * std::sqrt(1.f - rand_pair[1]),
+            std::sin(TWO_PI * rand_pair[0]) * std::sqrt(1.f - rand_pair[1]),
+            std::sqrt(rand_pair[1])
+        };
+
+        float const cos_theta {wi.z};
+        float const pdf {cos_theta * INVERSE_PI};
+
+        return std::make_tuple(wi, pdf);
+    }
+};
+
+#endif /* DIFFUSE_BRDF_HPP */

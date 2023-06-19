@@ -22,7 +22,6 @@ enum class light_type_t {
 
 struct light_parameters_t {
     std::optional<std::array<float, 2>> rand_pair;
-    //std::optional<vec3_t> point;
 };
 
 struct light_properties_t {

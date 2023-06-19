@@ -20,8 +20,8 @@ std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const {
     if(!this->bb.intersects(r))
         return std::nullopt;
 
-    vec3_t const h {r.dir.cross_product(this->edge2)};
-    float const a {this->edge1.dot_product(h)};
+    vec3_t const h {r.dir.cross(this->edge2)};
+    float const a {this->edge1.dot(h)};
 
     if(a > -EPSILON && a < EPSILON)
         return std::nullopt;    // This ray is parallel to this triangle.
@@ -29,18 +29,18 @@ std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const {
 
     float const f {1.f / a};
     vec3_t const s {r.org - this->v1};
-    float const u {f * s.dot_product(h)};
+    float const u {f * s.dot(h)};
     if(u < 0.f || u > 1.f)
         return std::nullopt;
 
 
-    vec3_t const q {s.cross_product(this->edge1)};
-    float const v {f * r.dir.dot_product(q)};
+    vec3_t const q {s.cross(this->edge1)};
+    float const v {f * r.dir.dot(q)};
     if(v < 0.f || u + v > 1.f)
         return std::nullopt;
 
     // At this stage we can compute t to find out where the intersection point is on the line.
-    float const t {f * this->edge2.dot_product(q)};
+    float const t {f * this->edge2.dot(q)};
     if(t > EPSILON){
 
         vec3_t const wo {-1.f * r.dir};

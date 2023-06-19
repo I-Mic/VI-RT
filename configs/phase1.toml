@@ -4,15 +4,15 @@ use_degrees = true
 type = "ppm"
 
 output_fn 	= "output.ppm"
-width 		= 640
-height 		= 480
+width 		= 1024
+height 		= 1024
 
 
 [camera]
 type = "perspective"
 
-width 		= 640
-height 		= 480
+width 		= 1024
+height 		= 1024
 
 eye = [280.0, 275.0, -330.0]
 at  = [280.0, 265.0, 0.0]
@@ -23,7 +23,7 @@ fov_h = 90.0
 
 [scene]
 
-input_fn 	= "models/cornell_box.obj"
+input_fn 	= "models/cornell_box_VI.obj"
 
 light_ids = ["light0"]
 

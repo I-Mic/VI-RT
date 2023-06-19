@@ -1,17 +1,17 @@
 #ifndef WHITTED_SHADER_HPP
 #define WHITTED_SHADER_HPP
 
-#include "rays/intersection.hpp"
-#include "rays/ray.hpp"
 #include "scene/scene.hpp"
 #include "shader/shader.hpp"
-#include "utils/rgb.hpp"
+#include "primitive/brdf/brdf.hpp"
 
 class whitted_shader_t : public shader_t {
 
 private:
     rgb_t<float> const background;
     unsigned const max_depth;
+    std::unique_ptr<diffuse_brdf_t> diffuse_brdf;
+    std::unique_ptr<specular_brdf_t> specular_brdf;
 
     rgb_t<float> direct_lighting(intersection_t const& isect) const noexcept;
     rgb_t<float> specular_reflection(

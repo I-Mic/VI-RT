@@ -18,9 +18,9 @@ perspective_t::perspective_t(
 {
     vec3_t f {at - eye};
     f.normalize();
-    vec3_t r {f.cross_product(up)};
+    vec3_t r {f.cross(up)};
     r.normalize();
-    vec3_t real_up {r.cross_product(f)};
+    vec3_t real_up {r.cross(f)};
     real_up.normalize();
 
     // flip the image

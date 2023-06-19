@@ -10,28 +10,16 @@
 #include <vector>
 #include <memory>
 
-#include "light/light.hpp"
-#include "primitive/bb.hpp"
-#include "primitive/brdf/brdf.hpp"
-#include "primitive/geometry/geometry.hpp"
-#include "rays/intersection.hpp"
-#include "rays/ray.hpp"
 #include "scene/scene.hpp"
-#include "primitive/primitive.hpp"
-#include "primitive/geometry/mesh.hpp"
-#include "primitive/brdf/phong.hpp"
-#include "utils/rgb.hpp"
-#include "utils/vector.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-
 scene_t::scene_t(std::vector<std::unique_ptr<light_t>> lights) noexcept :
-    success{false}, prims{}, lights{std::move(lights)}, brdfs{} {}
+    success{false}, prims{}, lights{std::move(lights)}, materials{} {}
 
 scene_t::scene_t(std::string const& fn, std::vector<std::unique_ptr<light_t>> lights):
-    success{false}, prims{}, lights{std::move(lights)}, brdfs{}
+    success{false}, prims{}, lights{std::move(lights)}, materials{}
 {
     this->load(fn);
 }
@@ -73,7 +61,7 @@ static void print_info(tinyobj::ObjReader const& obj_reader){
 void scene_t::print_summary() const {
     std::cout << "#primitives = " << this->prims.size()  << " ; "
               << "#lights = "     << this->lights.size() << " ; "
-              << "#materials = "  << this->brdfs.size()  << '\n';
+              << "#materials = "  << this->materials.size()  << '\n';
 }
 
 /*
@@ -107,7 +95,6 @@ void scene_t::load(std::string const& fn){
         std::unordered_map<size_t, vec3_t> mesh_vertices {};
         std::unordered_map<size_t, vec3_t> mesh_normals  {};
         bb_t mesh_bb {};
-
 
         using indices_iter_t = std::vector<tinyobj::index_t>::const_iterator;
         for(
@@ -202,11 +189,7 @@ void scene_t::load(std::string const& fn){
         rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
         float const ns {mat.shininess};
 
-        std::unique_ptr<brdf_t> brdf {
-            std::make_unique<phong_t>(ka, kd, ks, kt, ns)
-        };
-
-        this->brdfs.push_back(std::move(brdf));
+        this->materials.push_back({ka, kd, ks, kt, ns});
     }
 
     this->success = true;
@@ -264,9 +247,9 @@ scene_t::get_lights_iterator() const noexcept {
     return std::make_pair(this->lights.begin(), this->lights.end());
 }
 
-std::pair<brdfs_iter_t, brdfs_iter_t>
-scene_t::get_brdfs_iterator() const noexcept {
-    return std::make_pair(this->brdfs.begin(), this->brdfs.end());
+std::pair<materials_iter_t, materials_iter_t>
+scene_t::get_materials_iterator() const noexcept {
+    return std::make_pair(this->materials.begin(), this->materials.end());
 }
 
 bool scene_t::is_visible(ray_t const& r, float const max_l) const noexcept {

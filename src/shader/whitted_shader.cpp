@@ -18,7 +18,9 @@ whitted_shader_t::whitted_shader_t(
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
-    max_depth{max_depth} {}
+    max_depth{max_depth},
+    diffuse_brdf{new lambertian_t{}},
+    specular_brdf{new phong_t{}} {}
 
 whitted_shader_t::~whitted_shader_t() noexcept {}
 
@@ -28,9 +30,9 @@ rgb_t<float> whitted_shader_t::direct_lighting(
 
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
-    auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
-    std::unique_ptr<brdf_t> const& brdf {
-        *(brdfs_iter_begin + static_cast<long>(isect.material_index))
+    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
+    material_t const& mat {
+        *(materials_iter_begin + static_cast<long>(isect.material_index))
     };
 
     rgb_t<float> color {};
@@ -42,25 +44,26 @@ rgb_t<float> whitted_shader_t::direct_lighting(
         switch(light->type){
 
         case light_type_t::AMBIENT_LIGHT:
-            color += brdf->ambient() * light->get_properties().radiance.value();
+            color += mat.ka * light->get_properties().radiance.value();
             break;
 
         case light_type_t::POINT_LIGHT: {
 
             light_properties_t const lprops {light->get_properties()};
 
-            vec3_t ldir {lprops.point.value() - isect.p};
-            float const ldistance {ldir.norm()};
-            ldir.normalize();
+            vec3_t wi {lprops.point.value() - isect.p};
+            float const ldistance {wi.norm()};
+            wi.normalize();
 
-            float const cosl {ldir.dot_product(isect.sn)};
-            if(cosl > 0.f){
-
-                ray_t shadow {isect.p, ldir};
-                shadow.adjust_origin(isect.gn);
-
-                if(this->scene->is_visible(shadow, ldistance - ray_t::EPSILON))
-                    color += brdf->diffuse() * lprops.radiance.value() * cosl;
+            ray_t shadow {isect.p, wi};
+            shadow.adjust_origin(isect.sn);
+            if(this->scene->is_visible(shadow, ldistance - ray_t::EPSILON)){
+                brdf_data_t const data {
+                    .wi{std::make_optional(wi)},
+                    .sn{std::make_optional(isect.sn)},
+                    .material{&mat}
+                };
+                color += this->diffuse_brdf->eval_diffuse(data) * lprops.radiance.value();
             }
 
             break;
@@ -79,17 +82,30 @@ rgb_t<float> whitted_shader_t::specular_reflection(
     intersection_t const& isect, size_t const depth
 ) const noexcept {
 
-    auto const& [brdfs_iter_begin, _] {this->scene->get_brdfs_iterator()};
-    std::unique_ptr<brdf_t> const& brdf {
-        *(brdfs_iter_begin + static_cast<long>(isect.material_index))
+    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
+    material_t const& mat {
+        *(materials_iter_begin + static_cast<long>(isect.material_index))
     };
 
-    float const cos {isect.gn.dot_product(isect.wo)};
-    vec3_t const rdir {2.f * cos * isect.gn - isect.wo};
-    ray_t specular {isect.p, rdir};
-    specular.adjust_origin(isect.gn);
+    std::array<float, 2> const rand_pair {0.5f, 0.5f};
 
-    return brdf->specular() * this->shade(specular, depth + 1);
+    brdf_data_t data {
+        .wo{std::make_optional(isect.wo)},
+        .rand_pair{std::make_optional(rand_pair)},
+        .material{&mat}
+    };
+
+    auto const& [wi, pdf] {this->specular_brdf->sample_specular(data)};
+    data.wi = std::make_optional(wi);
+    data.sn = std::make_optional(isect.sn);
+
+    ray_t spec_ray {isect.p, wi};
+    spec_ray.adjust_origin(isect.sn);
+
+    if(!isect.le.has_value())
+        return this->specular_brdf->eval_specular(data) * this->shade(spec_ray, depth + 1) / pdf;
+
+    return {};
 }
 
 rgb_t<float> whitted_shader_t::shade(ray_t const& ray, size_t const depth) const noexcept {
