@@ -3,12 +3,13 @@ use_degrees = true
 [image]
 type = "ppm"
 
-output_fn     = "distributed_no_mc.ppm"
+output_fn     = "distributed.ppm"
 width         = 1024
 height        = 1024
 
 threads     = 1
 normalize   = true
+#normalize   = false
 
 
 [camera]

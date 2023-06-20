@@ -45,6 +45,12 @@ public:
         return r;
     }
 
+    static vec3_t normalize(vec3_t const& v) noexcept {
+        vec3_t v_norm {v};
+        v_norm.normalize();
+        return v_norm;
+    }
+
     vec3_t operator-() const noexcept {
         return {
             -this->x,

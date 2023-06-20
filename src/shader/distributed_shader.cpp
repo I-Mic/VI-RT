@@ -1,5 +1,6 @@
 #include "shader/distributed_shader.hpp"
 #include "primitive/brdf/phong.hpp"
+#include "primitive/brdf/lambert.hpp"
 
 #include <ctime>
 #include <cstdlib>
@@ -13,7 +14,7 @@ distributed_shader_t::distributed_shader_t(
     shader_t{std::move(scene)},
     background{bg},
     max_depth{max_depth},
-    diffuse_brdf{new lambertian_t{}},
+    diffuse_brdf{new lambert_t{}},
     specular_brdf{new phong_t{}}
 {
     std::srand(std::time(nullptr));
@@ -104,15 +105,12 @@ rgb_t<float> distributed_shader_t::direct_lighting(
 
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
-    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
-    material_t const& mat {
-        *(materials_iter_begin + static_cast<long>(isect.material_index))
-    };
+    material_t const* const mat {this->scene->material_at(isect.material_index)};
 
     long const num_of_lights {lights_iter_end - lights_iter_begin};
     long const light_index {std::rand() % num_of_lights};
     return
-        this->direct_lighting(isect, *(lights_iter_begin + light_index), mat) *
+        this->direct_lighting(isect, *(lights_iter_begin + light_index), *mat) *
         static_cast<float>(num_of_lights);
 }
 
@@ -120,22 +118,19 @@ rgb_t<float> distributed_shader_t::specular_reflection(
     intersection_t const& isect, unsigned const depth
 ) const noexcept {
 
-    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
-    material_t const& mat {
-        *(materials_iter_begin + static_cast<long>(isect.material_index))
-    };
+    material_t const* const mat {this->scene->material_at(isect.material_index)};
 
-    std::array<float, 2> const rand_pair {0.5f, 0.5f};
+    std::array<float, 2> const rand_pair {0.5f, 0.5};
 
     brdf_data_t data {
         .wo{std::make_optional(isect.wo)},
+        .sn{std::make_optional(isect.sn)},
         .rand_pair{std::make_optional(rand_pair)},
-        .material{&mat}
+        .material{mat}
     };
 
     auto const& [wi, pdf] {this->specular_brdf->sample_specular(data)};
     data.wi = std::make_optional(wi);
-    data.sn = std::make_optional(isect.sn);
 
     ray_t spec_ray {isect.p, wi};
     spec_ray.adjust_origin(isect.sn);

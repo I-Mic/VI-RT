@@ -108,6 +108,14 @@ public:
         };
     }
 
+    rgb_t operator-(rgb_t const& rhs) const noexcept {
+        return {
+            this->r - rhs.r,
+            this->g - rhs.g,
+            this->b - rhs.b
+        };
+    }
+
     bool is_zero() const noexcept {
         return
             this->r == static_cast<T>(0) &&
@@ -115,7 +123,7 @@ public:
             this->b == static_cast<T>(0);
     }
 
-    float y() const noexcept {
+    float luminance() const noexcept {
         return this->r * 0.2126 + this->g * 0.7152 + this->b * 0.0722;
     }
 };

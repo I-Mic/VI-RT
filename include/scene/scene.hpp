@@ -18,7 +18,6 @@
 #include "rays/intersection.hpp"
 
 using lights_iter_t = std::vector<std::unique_ptr<light_t>>::const_iterator;
-using materials_iter_t = std::vector<material_t>::const_iterator;
 
 class scene_t {
 
@@ -38,11 +37,11 @@ public:
     bool is_loaded() const noexcept;
 
     std::pair<lights_iter_t, lights_iter_t> get_lights_iterator() const noexcept;
-    std::pair<materials_iter_t, materials_iter_t> get_materials_iterator() const noexcept;
+    material_t const* material_at(size_t const index) const noexcept;
 
     std::optional<intersection_t> trace(ray_t const& r) const noexcept;
 
-	bool is_visible(ray_t const& r, float const max_l) const noexcept;
+    bool is_visible(ray_t const& r, float const max_l) const noexcept;
 
     void print_summary() const;
 };

@@ -34,7 +34,7 @@ Kd 0 0 0
 Ks 0.9 0.9 0.9
 Ns 100000000
 
-newmtl gold
+newmtl metal_gold
 Ka 0.828 0.684 0.215
 Kd 0 0 0
 Ks 828 684 215

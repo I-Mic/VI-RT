@@ -10,7 +10,7 @@ height        = 1024
 #threads     = 8
 threads     = 1
 normalize   = false
-#normalize   = false
+#normalize   = true
 
 
 [camera]
@@ -150,6 +150,6 @@ p_continue = 0.5
 [renderer]
 type = "standard"
 
-#spp = 128
-#spp = 64
+#spp = 512
 spp = 512
+#spp = 512

@@ -1,14 +1,6 @@
-#include <memory>
-
-#include "light/light.hpp"
-#include "primitive/brdf/phong.hpp"
-#include "primitive/brdf/brdf.hpp"
-#include "rays/intersection.hpp"
-#include "rays/ray.hpp"
 #include "shader/whitted_shader.hpp"
-#include "scene/scene.hpp"
-#include "utils/rgb.hpp"
-#include "utils/vector.hpp"
+#include "primitive/brdf/phong.hpp"
+#include "primitive/brdf/lambert.hpp"
 
 
 whitted_shader_t::whitted_shader_t(
@@ -19,7 +11,7 @@ whitted_shader_t::whitted_shader_t(
     shader_t{std::move(scene)},
     background{bg},
     max_depth{max_depth},
-    diffuse_brdf{new lambertian_t{}},
+    diffuse_brdf{new lambert_t{}},
     specular_brdf{new phong_t{}} {}
 
 whitted_shader_t::~whitted_shader_t() noexcept {}
@@ -30,10 +22,7 @@ rgb_t<float> whitted_shader_t::direct_lighting(
 
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
-    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
-    material_t const& mat {
-        *(materials_iter_begin + static_cast<long>(isect.material_index))
-    };
+    material_t const* const mat {this->scene->material_at(isect.material_index)};
 
     rgb_t<float> color {};
 
@@ -44,7 +33,7 @@ rgb_t<float> whitted_shader_t::direct_lighting(
         switch(light->type){
 
         case light_type_t::AMBIENT_LIGHT:
-            color += mat.ka * light->get_properties().radiance.value();
+            color += mat->ka * light->get_properties().radiance.value();
             break;
 
         case light_type_t::POINT_LIGHT: {
@@ -61,7 +50,7 @@ rgb_t<float> whitted_shader_t::direct_lighting(
                 brdf_data_t const data {
                     .wi{std::make_optional(wi)},
                     .sn{std::make_optional(isect.sn)},
-                    .material{&mat}
+                    .material{mat}
                 };
                 color += this->diffuse_brdf->eval_diffuse(data) * lprops.radiance.value();
             }
@@ -82,22 +71,19 @@ rgb_t<float> whitted_shader_t::specular_reflection(
     intersection_t const& isect, size_t const depth
 ) const noexcept {
 
-    auto const& [materials_iter_begin, _] {this->scene->get_materials_iterator()};
-    material_t const& mat {
-        *(materials_iter_begin + static_cast<long>(isect.material_index))
-    };
+    material_t const* const mat {this->scene->material_at(isect.material_index)};
 
     std::array<float, 2> const rand_pair {0.5f, 0.5f};
 
     brdf_data_t data {
         .wo{std::make_optional(isect.wo)},
+        .sn{std::make_optional(isect.sn)},
         .rand_pair{std::make_optional(rand_pair)},
-        .material{&mat}
+        .material{mat}
     };
 
     auto const& [wi, pdf] {this->specular_brdf->sample_specular(data)};
     data.wi = std::make_optional(wi);
-    data.sn = std::make_optional(isect.sn);
 
     ray_t spec_ray {isect.p, wi};
     spec_ray.adjust_origin(isect.sn);

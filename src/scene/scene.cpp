@@ -175,8 +175,15 @@ void scene_t::load(std::string const& fn){
         };
 
         // assumes all faces in a mesh use the same material!
+
+        int const material_index {shape.mesh.material_ids.at(0)};
         this->prims.push_back(
-            {std::move(mesh), static_cast<size_t>(shape.mesh.material_ids.at(0))}
+            {
+                std::move(mesh),
+                material_index < 0
+                    ? materials.size() - static_cast<size_t>(-material_index)
+                    : static_cast<size_t>(material_index)
+            }
         );
     }
 
@@ -188,8 +195,10 @@ void scene_t::load(std::string const& fn){
         rgb_t const ks {mat.specular[0],      mat.specular[1],      mat.specular[2]};
         rgb_t const kt {mat.transmittance[0], mat.transmittance[1], mat.transmittance[2]};
         float const ns {mat.shininess};
+        // very bad workaround
+        float const metalness {mat.name.starts_with("metal_") ? 1.f : 0.f};
 
-        this->materials.push_back({ka, kd, ks, kt, ns});
+        this->materials.push_back({ka, kd, ks, kt, ns, metalness});
     }
 
     this->success = true;
@@ -247,9 +256,10 @@ scene_t::get_lights_iterator() const noexcept {
     return std::make_pair(this->lights.begin(), this->lights.end());
 }
 
-std::pair<materials_iter_t, materials_iter_t>
-scene_t::get_materials_iterator() const noexcept {
-    return std::make_pair(this->materials.begin(), this->materials.end());
+material_t const* scene_t::material_at(size_t const index) const noexcept {
+    if(index >= this->materials.size())
+        return nullptr;
+    return &*(this->materials.cbegin() + static_cast<long>(index));
 }
 
 bool scene_t::is_visible(ray_t const& r, float const max_l) const noexcept {
