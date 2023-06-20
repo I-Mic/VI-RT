@@ -15,7 +15,7 @@ OBJ_DIR 		:= obj
 BIN_DIR 		:= bin
 
 
-INC_PATHS 		:= include lib/tiny_obj_loader/include lib/toml11/include
+INC_PATHS 		:= $(SRC_DIR) lib/tiny_obj_loader/include lib/toml11/include
 
 
 # files
@@ -24,7 +24,7 @@ SRC_FILES 		:= $(shell find $(SRC_DIR) -name "*.cpp" -o \
 										   -name "*.c++" -o \
 										   -name "*.cc")
 OBJ_FILES		:= $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%.o,$(SRC_FILES))
-INC_FILES 		:= $(shell find $(INC_DIR) -name "*.hpp" -o \
+INC_FILES 		:= $(shell find $(INC_PATHS) -name "*.hpp" -o \
 										   -name "*.hxx" -o \
 										   -name "*.h++" -o \
 										   -name "*.hh"  -o \
