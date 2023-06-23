@@ -17,9 +17,10 @@ protected:
     size_t const height;
 
 public:
-    camera_t(size_t const width, size_t const height) noexcept;
+    camera_t(size_t const width, size_t const height) noexcept :
+        width{width}, height{height} {}
 
-    virtual ~camera_t();
+    virtual ~camera_t() noexcept = default;
 
     virtual ray_t generate_ray(
         size_t const x, size_t const y,

@@ -19,7 +19,7 @@ private:
 public:
 
     ambient_light_t(rgb_t<float> const& color) noexcept;
-    ~ambient_light_t() noexcept;
+    ~ambient_light_t() noexcept = default;
 
     light_properties_t get_properties(light_parameters_t const&) const noexcept override;
 };

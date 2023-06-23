@@ -8,7 +8,7 @@
 struct material_t {
 
 public:
-    static rgb_t<float> const MIN_DIELECTRICS_F0;
+    static rgb_t<float> const RGB_MIN_DIELECTRICS_F0;
 
     rgb_t<float> ka;
     rgb_t<float> kd;
@@ -16,9 +16,10 @@ public:
     rgb_t<float> kt;
     float ns;
 
+    rgb_t<float> base_color;
     float metalness;
     float roughness;
-    rgb_t<float> f0;
+    rgb_t<float> specular_f0;
     rgb_t<float> diffuse_reflectance;
 
     material_t(

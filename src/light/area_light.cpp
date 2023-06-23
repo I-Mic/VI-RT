@@ -1,10 +1,6 @@
 #include "light/area_light.hpp"
-#include "light/light.hpp"
-#include "utils/vector.hpp"
 
 #include <cmath>
-#include <optional>
-
 
 area_light_t::area_light_t(
     rgb_t<float> const& power,
@@ -15,8 +11,6 @@ area_light_t::area_light_t(
     power{power},
     intensity{power * this->pdf},
     geom{geom} {}
-
-area_light_t::~area_light_t() noexcept {}
 
 light_properties_t area_light_t::get_properties(light_parameters_t const& params) const noexcept {
 

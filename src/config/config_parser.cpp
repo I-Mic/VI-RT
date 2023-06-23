@@ -1,38 +1,27 @@
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <iostream>
 
-#include "config/config_parser.hpp"
-#include "camera/camera.hpp"
 #include "camera/perspective.hpp"
-#include "image/image.hpp"
+#include "config/config_parser.hpp"
 #include "image/image_ppm.hpp"
 #include "light/ambient_light.hpp"
 #include "light/area_light.hpp"
-#include "light/light.hpp"
 #include "light/point_light.hpp"
 #include "primitive/geometry/triangle.hpp"
+#include "primitive/brdf/lambert.hpp"
+#include "primitive/brdf/phong.hpp"
+#include "primitive/brdf/microfacet.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/standard_renderer.hpp"
 #include "scene/scene.hpp"
 #include "shader/ambient_shader.hpp"
 #include "shader/distributed_shader.hpp"
 #include "shader/path_tracer_shader.hpp"
-#include "shader/shader.hpp"
 #include "shader/whitted_shader.hpp"
 #include "toml.hpp"
-#include "toml/exception.hpp"
-#include "toml/get.hpp"
-#include "toml/value.hpp"
-#include "utils/vector.hpp"
-
-static float to_rads(float const d) noexcept {
-    return 3.1415f * d / 180.f;
-}
-
-config_parser_t::config_parser_t() noexcept {}
-
-config_parser_t::~config_parser_t(){}
+#include "utils/math_extra.hpp"
 
 class toml_config_parser_t : public config_parser_t {
 
@@ -71,12 +60,12 @@ private:
                 vec3_t::from_array(at),
                 vec3_t::from_array(up),
                 width, height,
-                this->use_degrees ? to_rads(fov_w) : fov_w,
-                this->use_degrees ? to_rads(fov_h) : fov_h
+                this->use_degrees ? emath::degrees_to_rads(fov_w) : fov_w,
+                this->use_degrees ? emath::degrees_to_rads(fov_h) : fov_h
             );
         }
         else
-            throw std::domain_error("Unknown type " + type + " for asset " + table_name);
+            throw std::domain_error("Unknown type '" + type + "' for asset '" + table_name + "'");
     }
 
 
@@ -160,7 +149,7 @@ private:
                 );
             }
             else
-                throw std::domain_error("Unknown type " + type + " for asset " + table_name);
+            throw std::domain_error("Unknown type '" + type + "' for asset '" + table_name + "'");
         }
 
         return std::make_unique<scene_t>(
@@ -204,15 +193,31 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
+            std::string const specular_brdf_name {
+                toml::find<std::string>(this->toml_obj, table_name, "brdf")
+            };
+
+            std::unique_ptr<specular_brdf_t> specular_brdf {nullptr};
+            if(specular_brdf_name == "phong")
+                specular_brdf.reset(new phong_t{});
+            else if(specular_brdf_name == "microfacet")
+                specular_brdf.reset(new microfacet_t{});
+            else
+                throw std::domain_error("Unknown brdf name '" + specular_brdf_name + "'");
+
             if(toml::find(this->toml_obj, table_name).contains("max_depth"))
                 return std::make_unique<whitted_shader_t>(
                     std::move(scene),
+                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::move(specular_brdf),
                     rgb_t<float>::from_array(bg),
                     toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                 );
             else
                 return std::make_unique<whitted_shader_t>(
                     std::move(scene),
+                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );
         }
@@ -222,15 +227,31 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
+            std::string const specular_brdf_name {
+                toml::find<std::string>(this->toml_obj, table_name, "brdf")
+            };
+
+            std::unique_ptr<specular_brdf_t> specular_brdf {nullptr};
+            if(specular_brdf_name == "phong")
+                specular_brdf.reset(new phong_t{});
+            else if(specular_brdf_name == "microfacet")
+                specular_brdf.reset(new microfacet_t{});
+            else
+                throw std::domain_error("Unknown brdf name '" + specular_brdf_name + "'");
+
             if(toml::find(this->toml_obj, table_name).contains("max_depth"))
                 return std::make_unique<distributed_shader_t>(
                     std::move(scene),
+                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::move(specular_brdf),
                     rgb_t<float>::from_array(bg),
                     toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                 );
             else
                 return std::make_unique<distributed_shader_t>(
                     std::move(scene),
+                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );
         }
@@ -240,11 +261,25 @@ private:
                 toml::find<std::array<float, 3>>(this->toml_obj, table_name, "bg")
             };
 
+            std::string const specular_brdf_name {
+                toml::find<std::string>(this->toml_obj, table_name, "brdf")
+            };
+
+            std::unique_ptr<specular_brdf_t> specular_brdf {nullptr};
+            if(specular_brdf_name == "phong")
+                specular_brdf.reset(new phong_t{});
+            else if(specular_brdf_name == "microfacet")
+                specular_brdf.reset(new microfacet_t{});
+            else
+                throw std::domain_error("Unknown brdf name '" + specular_brdf_name + "'");
+
             if(toml::find(this->toml_obj, table_name).contains("max_depth")){
 
                 if(toml::find(this->toml_obj, table_name).contains("p_continue"))
                     return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
+                        std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                        std::move(specular_brdf),
                         rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
                         toml::find<float>(this->toml_obj, table_name, "p_continue")
@@ -252,6 +287,8 @@ private:
                 else
                     return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
+                        std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                        std::move(specular_brdf),
                         rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
                     );
@@ -259,11 +296,13 @@ private:
             else
                 return std::make_unique<path_tracer_shader_t>(
                     std::move(scene),
+                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );
         }
         else
-            throw std::domain_error("Unknown type " + type + " for asset " + table_name);
+            throw std::domain_error("Unknown type '" + type + "' for asset '" + table_name + "'");
     }
 
 
@@ -290,7 +329,7 @@ private:
                 );
         }
         else
-            throw std::domain_error("Unknown type " + type + " for asset " + table_name);
+            throw std::domain_error("Unknown type '" + type + "' for asset '" + table_name + "'");
     }
 
     std::unique_ptr<image_t> build_image() const override {
@@ -324,7 +363,7 @@ private:
                 );
         }
         else
-            throw std::domain_error("Unknown type " + type + " for asset " + table_name);
+            throw std::domain_error("Unknown type '" + type + "' for asset '" + table_name + "'");
     }
 
 public:

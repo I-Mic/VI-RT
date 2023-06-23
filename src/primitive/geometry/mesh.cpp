@@ -15,18 +15,12 @@
 #include "rays/intersection.hpp"
 #include "rays/ray.hpp"
 #include "utils/vector.hpp"
-
-face_t::face_t() noexcept :
-    vert_indices{}, geo_normal{},
-    normals_indices{std::nullopt},
-    bb{}, edge1{}, edge2{} {}
+#include "utils/math_extra.hpp"
 
 bool face_t::has_shading_normals() const noexcept {
     return this->normals_indices.has_value();
 }
 
-
-mesh_t::mesh_t() noexcept : faces{}, vertices{}, normals{} {}
 
 mesh_t::mesh_t(
     std::vector<face_t> faces,
@@ -39,14 +33,10 @@ mesh_t::mesh_t(
     vertices{std::move(vertices)},
     normals{std::move(normals)} {}
 
-mesh_t::~mesh_t() noexcept {}
-
 
 std::optional<intersection_t> mesh_t::triangle_intersect(
     ray_t const& r, face_t const& face
 ) const noexcept {
-
-    static float constexpr EPSILON {0.0000001f};
 
     if(!face.bb.intersects(r))
         return std::nullopt;
@@ -56,7 +46,7 @@ std::optional<intersection_t> mesh_t::triangle_intersect(
     vec3_t const h {r.dir.cross(face.edge2)};
     float const a {face.edge1.dot(h)};
 
-    if (a > -EPSILON && a < EPSILON)
+    if (a > -emath::EPSILON && a < emath::EPSILON)
         return std::nullopt;    // This ray is parallel to this triangle.
 
 
@@ -75,7 +65,7 @@ std::optional<intersection_t> mesh_t::triangle_intersect(
 
     // At this stage we can compute t to find out where the intersection point is on the line.
     float const t {f * face.edge2.dot(q)};
-    if (t > EPSILON){
+    if (t > emath::EPSILON){
         vec3_t const wo {-1.f * r.dir};
         intersection_t const inter {r.org + r.dir * t, face.geo_normal.flip(wo), wo, t};
         return std::make_optional(inter);
@@ -85,7 +75,7 @@ std::optional<intersection_t> mesh_t::triangle_intersect(
     return std::nullopt;
 }
 
-std::optional<intersection_t> mesh_t::intersect(ray_t const& r) const {
+std::optional<intersection_t> mesh_t::intersect(ray_t const& r) const noexcept {
 
     bool intersects {false};
     intersection_t min_isect {};

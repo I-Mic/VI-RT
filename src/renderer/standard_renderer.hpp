@@ -13,7 +13,7 @@ public:
         unsigned const samples_per_pixel = 32
     ) noexcept;
 
-    ~standard_renderer_t() noexcept;
+    ~standard_renderer_t() noexcept = default;
 
     rgb_t<float> render_pixel(size_t const x, size_t const y) const override;
 };

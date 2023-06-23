@@ -28,7 +28,7 @@ public:
         triangle_t const& geom
     ) noexcept;
 
-    ~area_light_t() noexcept;
+    ~area_light_t() noexcept = default;
 
     light_properties_t get_properties(light_parameters_t const&) const noexcept override;
 };

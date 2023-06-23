@@ -14,7 +14,7 @@ private:
 public:
 	ambient_shader_t(std::unique_ptr<scene_t> scene, rgb_t<float> const& bg) noexcept;
 
-	~ambient_shader_t() noexcept;
+	~ambient_shader_t() noexcept = default;
 
 	rgb_t<float> shade(ray_t const& ray) const noexcept override;
 };

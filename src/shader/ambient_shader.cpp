@@ -8,8 +8,6 @@ ambient_shader_t::ambient_shader_t(
     shader_t{std::move(scene)},
     background{bg} {}
 
-ambient_shader_t::~ambient_shader_t() noexcept {}
-
 rgb_t<float> ambient_shader_t::shade(ray_t const& ray) const noexcept {
 
     std::optional<intersection_t> const isect {this->scene->trace(ray)};
@@ -22,7 +20,7 @@ rgb_t<float> ambient_shader_t::shade(ray_t const& ray) const noexcept {
 
     material_t const* const mat {this->scene->material_at(isect.value().material_index)};
 
-    for(lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li){
+    for(scene_t::lights_citer_t li {lights_iter_begin}; li != lights_iter_end; ++li){
 
         std::unique_ptr<light_t> const& light {*li};
 

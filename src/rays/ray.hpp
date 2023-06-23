@@ -18,8 +18,8 @@ public:
     vec3_t org; // ray origin
     vec3_t dir; // ray direction
 
-    ray_t(){}
-    ray_t(vec3_t const& o, vec3_t const& d): org{o}, dir{d} {}
+    ray_t() noexcept = default;
+    ray_t(vec3_t const& o, vec3_t const& d) noexcept : org{o}, dir{d} {}
 
     void adjust_origin(vec3_t const& normal) noexcept {
 

@@ -2,29 +2,25 @@
 #include "primitive/brdf/phong.hpp"
 #include "primitive/brdf/lambert.hpp"
 #include "primitive/brdf/microfacet.hpp"
+#include "utils/math_extra.hpp"
 
 #include <cmath>
-#include <ctime>
-#include <cstdlib>
 #include <optional>
 
 path_tracer_shader_t::path_tracer_shader_t(
     std::unique_ptr<scene_t> scene,
+    std::unique_ptr<diffuse_brdf_t> diffuse_brdf,
+    std::unique_ptr<specular_brdf_t> specular_brdf,
     rgb_t<float> const& bg,
     unsigned const max_depth,
     float const p_continue
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
+    diffuse_brdf{std::move(diffuse_brdf)},
+    specular_brdf{std::move(specular_brdf)},
     max_depth{max_depth},
-    p_continue{p_continue},
-    diffuse_brdf{new lambert_t{}},
-    specular_brdf{new microfacet_t{}}
-{
-    std::srand(std::time(nullptr));
-}
-
-path_tracer_shader_t::~path_tracer_shader_t() noexcept {}
+    p_continue{p_continue} {}
 
 
 rgb_t<float> path_tracer_shader_t::direct_lighting(
@@ -65,10 +61,7 @@ rgb_t<float> path_tracer_shader_t::direct_lighting(
 
     case light_type_t::AREA_LIGHT: {
 
-        std::array<float, 2> const rand_pair {
-            std::rand() / static_cast<float>(RAND_MAX),
-            std::rand() / static_cast<float>(RAND_MAX)
-        };
+        std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
         light_properties_t const lprops {
             light->get_properties(
                 {
@@ -124,10 +117,7 @@ rgb_t<float> path_tracer_shader_t::specular_reflection(
 
     material_t const* const mat {this->scene->material_at(isect.material_index)};
 
-    std::array<float, 2> const rand_pair {
-        std::rand() / static_cast<float>(RAND_MAX),
-        std::rand() / static_cast<float>(RAND_MAX)
-    };
+    std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
 
     brdf_data_t data {
         .wo{std::make_optional(isect.wo)},
@@ -139,7 +129,7 @@ rgb_t<float> path_tracer_shader_t::specular_reflection(
     auto const& [wi, pdf] {this->specular_brdf->sample_specular(data)};
     data.wi = std::make_optional(wi);
 
-    vec3_t const half {vec3_t::normalize(wi + isect.sn)};
+    vec3_t const half {vec3_t::normalize(wi + isect.wo)};
     data.half = std::make_optional(half);
 
     ray_t spec_ray {isect.p, wi};
@@ -158,10 +148,7 @@ rgb_t<float> path_tracer_shader_t::diffuse_reflection(
 
     material_t const* const mat {this->scene->material_at(isect.material_index)};
 
-    std::array<float, 2> const rand_pair {
-        std::rand() / static_cast<float>(RAND_MAX),
-        std::rand() / static_cast<float>(RAND_MAX)
-    };
+    std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
     auto const& [wi, pdf] {this->specular_brdf->sample_hemisphere(rand_pair)};
 
     auto const& [snx, sny] {isect.sn.coordinate_system()};
@@ -196,10 +183,7 @@ rgb_t<float> path_tracer_shader_t::shade(
             return isect.value().le.value();
         else if(depth < this->max_depth){
 
-            std::array<float, 2> const rand_pair {
-                std::rand() / static_cast<float>(RAND_MAX),
-                std::rand() / static_cast<float>(RAND_MAX)
-            };
+            std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
             material_t const* const mat {this->scene->material_at(isect.value().material_index)};
             float const sp {mat->ks.luminance() / (mat->ks.luminance() + mat->kd.luminance())};
             rgb_t<float> color {};

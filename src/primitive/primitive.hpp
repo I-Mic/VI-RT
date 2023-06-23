@@ -16,7 +16,9 @@ struct primitive_t {
     std::unique_ptr<geometry_t> geo;
     size_t const material_index;
 
-    primitive_t(std::unique_ptr<geometry_t> geo, size_t const material_index) noexcept;
+    primitive_t(std::unique_ptr<geometry_t> geo, size_t const material_index) noexcept :
+        geo{std::move(geo)},
+        material_index{material_index} {}
 };
 
 #endif /* PRIMITIVE_HPP */

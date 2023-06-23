@@ -39,7 +39,7 @@ public:
     light_type_t const type;
 
     light_t(light_type_t const type) noexcept : type{type} {}
-    virtual ~light_t() = default;
+    virtual ~light_t() noexcept = default;
 
     virtual light_properties_t get_properties(
         light_parameters_t const& params = {}

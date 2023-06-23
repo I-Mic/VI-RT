@@ -19,23 +19,23 @@ private:
     unsigned const num_of_threads;
     bool const normalize;
 
-	void shade_pixels() const;
+    void shade_pixels() const;
 
     void tone_map() const;
     void clamp_tone_map() const;
-    //void hsv_tone_map() const;
     void normalize_tone_map() const;
-
 
 public:
 
     image_ppm_t(
-		std::unique_ptr<renderer_t> renderer,
-		size_t const w, size_t const h,
-		std::string output_fn,
-		unsigned const num_of_threads = 8,
+        std::unique_ptr<renderer_t> renderer,
+        size_t const w, size_t const h,
+        std::string output_fn,
+        unsigned const num_of_threads = 8,
         bool const normalize = false
-	);
+    );
+
+    ~image_ppm_t() noexcept = default;
 
     bool output_image() const override;
 };

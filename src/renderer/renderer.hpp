@@ -24,9 +24,12 @@ public:
         std::unique_ptr<camera_t> cam,
         std::unique_ptr<shader_t> shader,
         unsigned const samples_per_pixel
-    ) noexcept;
+    ) noexcept :
+        cam{std::move(cam)},
+        shader{std::move(shader)},
+        samples_per_pixel{samples_per_pixel} {}
 
-    virtual ~renderer_t() = default;
+    virtual ~renderer_t() noexcept = default;
 
     virtual rgb_t<float> render_pixel(
         size_t const x,

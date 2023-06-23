@@ -24,7 +24,7 @@ public:
 
     static bb_t from_union_of(bb_t const& b1, bb_t const& b2) noexcept;
 
-    bool intersects(ray_t const& r) const;
+    bool intersects(ray_t const& r) const noexcept;
 };
 
 #endif /* BB_HPP */

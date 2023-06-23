@@ -1,26 +1,22 @@
 #include "shader/distributed_shader.hpp"
 #include "primitive/brdf/phong.hpp"
 #include "primitive/brdf/lambert.hpp"
+#include "utils/math_extra.hpp"
 
-#include <ctime>
-#include <cstdlib>
 #include <optional>
 
 distributed_shader_t::distributed_shader_t(
     std::unique_ptr<scene_t> scene,
+    std::unique_ptr<diffuse_brdf_t> diffuse_brdf,
+    std::unique_ptr<specular_brdf_t> specular_brdf,
     rgb_t<float> const& bg,
     unsigned const max_depth
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
-    max_depth{max_depth},
-    diffuse_brdf{new lambert_t{}},
-    specular_brdf{new phong_t{}}
-{
-    std::srand(std::time(nullptr));
-}
-
-distributed_shader_t::~distributed_shader_t() noexcept {}
+    diffuse_brdf{std::move(diffuse_brdf)},
+    specular_brdf{std::move(specular_brdf)},
+    max_depth{max_depth} {}
 
 
 rgb_t<float> distributed_shader_t::direct_lighting(
@@ -61,10 +57,7 @@ rgb_t<float> distributed_shader_t::direct_lighting(
 
     case light_type_t::AREA_LIGHT: {
 
-        std::array<float, 2> const rand_pair {
-            std::rand() / static_cast<float>(RAND_MAX),
-            std::rand() / static_cast<float>(RAND_MAX)
-        };
+        std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
         light_properties_t const lprops {
             light->get_properties(
                 {
@@ -120,7 +113,7 @@ rgb_t<float> distributed_shader_t::specular_reflection(
 
     material_t const* const mat {this->scene->material_at(isect.material_index)};
 
-    std::array<float, 2> const rand_pair {0.5f, 0.5};
+    std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
 
     brdf_data_t data {
         .wo{std::make_optional(isect.wo)},

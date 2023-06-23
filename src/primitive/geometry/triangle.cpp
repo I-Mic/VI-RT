@@ -1,4 +1,5 @@
 #include "primitive/geometry/triangle.hpp"
+#include "utils/math_extra.hpp"
 
 triangle_t::triangle_t(
     vec3_t const& v1,
@@ -10,12 +11,8 @@ triangle_t::triangle_t(
     edge1{v2 - v1}, edge2{v3 - v1}, edge3{v2 - v3},
     normal{normal}, bb{v1, v2, v3} {}
 
-triangle_t::~triangle_t() noexcept {}
 
-
-std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const {
-
-    static float constexpr EPSILON {0.0000001f};
+std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const noexcept {
 
     if(!this->bb.intersects(r))
         return std::nullopt;
@@ -23,7 +20,7 @@ std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const {
     vec3_t const h {r.dir.cross(this->edge2)};
     float const a {this->edge1.dot(h)};
 
-    if(a > -EPSILON && a < EPSILON)
+    if(a > -emath::EPSILON && a < emath::EPSILON)
         return std::nullopt;    // This ray is parallel to this triangle.
 
 
@@ -41,7 +38,7 @@ std::optional<intersection_t> triangle_t::intersect(ray_t const& r) const {
 
     // At this stage we can compute t to find out where the intersection point is on the line.
     float const t {f * this->edge2.dot(q)};
-    if(t > EPSILON){
+    if(t > emath::EPSILON){
 
         vec3_t const wo {-1.f * r.dir};
 

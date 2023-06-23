@@ -23,9 +23,9 @@ public:
         vec3_t const& normal
     ) noexcept;
 
-    ~triangle_t() noexcept;
+    ~triangle_t() noexcept = default;
 
-    std::optional<intersection_t> intersect(ray_t const& r) const override;
+    std::optional<intersection_t> intersect(ray_t const& r) const noexcept override;
     float area() const noexcept;
 };
 

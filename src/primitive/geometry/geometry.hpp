@@ -24,9 +24,9 @@ public:
     geometry_t() noexcept = default;
     geometry_t(bb_t const& bb) noexcept : bb{bb} {}
 
-    virtual ~geometry_t() = default;
+    virtual ~geometry_t() noexcept = default;
 
-    virtual std::optional<intersection_t> intersect(ray_t const& r) const = 0;
+    virtual std::optional<intersection_t> intersect(ray_t const& r) const noexcept = 0;
 };
 
 #endif /* GEOMETRY_HPP */

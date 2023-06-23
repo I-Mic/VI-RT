@@ -1,16 +1,18 @@
 #include "primitive/brdf/microfacet.hpp"
+#include "utils/math_extra.hpp"
 
 #include <cmath>
 #include <cstdlib>
 
 
 float microfacet_t::ndf(float const roughness, float const n_dot_h) const noexcept {
-    float const roughness_squared {roughness * roughness};
-    float const b {(roughness_squared - 1.f) * n_dot_h * n_dot_h + 1.f};
-    return roughness_squared * INVERSE_PI / (b * b);
+    float const alpha {roughness * roughness};
+    float const alpha_squared {alpha * alpha};
+    float const b {(alpha_squared - 1.f) * n_dot_h * n_dot_h + 1.f};
+    return alpha_squared * emath::INVERSE_PI / (b * b);
 }
 
-float microfacet_t::geo_attenuation1(float const roughness, float h_dot_wx) const noexcept {
+float microfacet_t::geo_attenuation1(float const roughness, float n_dot_wx) const noexcept {
     /*float const a {
         h_dot_wx / (
             std::max(0.00001f, roughness) *
@@ -21,23 +23,21 @@ float microfacet_t::geo_attenuation1(float const roughness, float h_dot_wx) cons
     return 1.f / (1.f + lambda);*/
 
     /* optimized */
-    float const roughness_squared {roughness * roughness};
-    float const h_dot_wx_squared {h_dot_wx * h_dot_wx};
+    float const alpha {roughness * roughness};
+    float const alpha_squared {alpha * alpha};
+    float const n_dot_wx_squared {n_dot_wx * n_dot_wx};
     return 2.f / (
         1.f + std::sqrt(
-            1.f - roughness_squared + roughness_squared / h_dot_wx_squared
+            1.f - alpha_squared + alpha_squared / n_dot_wx_squared
         )
     );
 }
 
 float microfacet_t::geo_attenuation2(
-    float const roughness,
-    vec3_t const& wi,
-    vec3_t const& wo,
-    vec3_t const& h
+    float const roughness, float const n_dot_wi, float const n_dot_wo
 ) const noexcept {
-    float const g1_wo {this->geo_attenuation1(roughness, h.dot(wo))};
-    float const g1_wi {this->geo_attenuation1(roughness, h.dot(wi))};
+    float const g1_wi {this->geo_attenuation1(roughness, n_dot_wi)};
+    float const g1_wo {this->geo_attenuation1(roughness, n_dot_wo)};
     return 1.f / (1.f + g1_wo + g1_wi);
 }
 
@@ -52,19 +52,19 @@ rgb_t<float> microfacet_t::fresnel_schlick(
 rgb_t<float> microfacet_t::eval_specular(brdf_data_t const& data) const noexcept {
 
     float const roughness {data.material->roughness};
-    rgb_t<float> const& f0 {data.material->f0};
+    rgb_t<float> const& f0 {data.material->specular_f0};
     vec3_t const& sn {data.sn.value()};
     vec3_t const& wi {data.wi.value()};
     vec3_t const& wo {data.wo.value()};
     vec3_t const& half {data.half.value()};
 
-    float const n_dot_h {sn.dot(half)};
-    float const n_dot_wi {sn.dot(wi)};
-    float const n_dot_wo {sn.dot(wo)};
-    float const h_dot_wo {half.dot(wo)};
+    float const n_dot_wo {emath::clamp(sn.dot(wo), 0.00001f, 1.f)};
+    float const n_dot_wi {emath::clamp(sn.dot(wi), 0.00001f, 1.f)};
+    float const n_dot_h  {emath::clamp(sn.dot(half), 0.00001f, 1.f)};
+    float const h_dot_wo {emath::clamp(wo.dot(half), 0.00001f, 1.f)};
 
     float const d {this->ndf(roughness, n_dot_h)};
-    float const g2 {this->geo_attenuation2(roughness, wi, wo, half)};
+    float const g2 {this->geo_attenuation2(roughness, n_dot_wi, n_dot_wo)};
     rgb_t<float> const f {this->fresnel_schlick(f0, h_dot_wo)};
 
     return f * (g2 * d / (4.f * n_dot_wi * n_dot_wo));
@@ -101,13 +101,10 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
         vec3_t const t2 {wo_h.cross(t1)};
 
         // Section 4.2: parameterization of the projected area
-        std::array<float, 2> const rand_pair {
-            std::rand() / static_cast<float>(RAND_MAX),
-            std::rand() / static_cast<float>(RAND_MAX)
-        };
+        std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
 
         float const r {std::sqrt(rand_pair[0])};
-        float const phi {TWO_PI * rand_pair[1]};
+        float const phi {emath::TWO_PI * rand_pair[1]};
         float const u1 {r * std::cos(phi)};
         float u2 {r * std::sin(phi)};
         float const s {0.5f * (1.f + wo_h.z)};
@@ -129,8 +126,8 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
     vec3_t const wi_local {vec3_t::reflect(wo, h_local)};
 
     vec3_t const n_local {0.f, 0.f, 1.f};
-    float const n_dot_wo {std::max(0.00001f, std::min(1.f, n_local.dot(wo)))};
-    float const n_dot_h  {std::max(0.00001f, std::min(1.f, n_local.dot(h_local)))};
+    float const n_dot_wo {emath::clamp(n_local.dot(wo), 0.00001f, 1.f)};
+    float const n_dot_h  {emath::clamp(n_local.dot(h_local), 0.00001f, 1.f)};
 
 
     //float3 F = evalFresnel(specularF0, shadowedF90(specularF0), HdotL);

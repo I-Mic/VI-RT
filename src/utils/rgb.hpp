@@ -10,10 +10,13 @@
 #include <type_traits>
 #include <array>
 
-template<typename T>
+template<
+    typename T,
+    typename = std::enable_if<
+        std::is_same<T, float>::value || std::is_same<T, unsigned char>::value
+    >
+>
 struct rgb_t {
-
-    static_assert(std::is_same<T, float>::value || std::is_same<T, unsigned char>::value);
 
 public:
 

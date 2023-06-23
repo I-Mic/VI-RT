@@ -8,10 +8,10 @@ class path_tracer_shader_t : public shader_t {
 
 private:
     rgb_t<float> const background;
-    unsigned const max_depth;
-    float const p_continue;
     std::unique_ptr<diffuse_brdf_t> const diffuse_brdf;
     std::unique_ptr<specular_brdf_t> const specular_brdf;
+    unsigned const max_depth;
+    float const p_continue;
 
     rgb_t<float> direct_lighting(
         intersection_t const& isect,
@@ -34,12 +34,14 @@ private:
 public:
     path_tracer_shader_t(
         std::unique_ptr<scene_t> scene,
+        std::unique_ptr<diffuse_brdf_t> diffuse_brdf,
+        std::unique_ptr<specular_brdf_t> specular_brdf,
         rgb_t<float> const& bg,
         unsigned const max_depth = 4,
         float const p_continue = 0.5f
     ) noexcept;
 
-    ~path_tracer_shader_t() noexcept;
+    ~path_tracer_shader_t() noexcept = default;
 
     rgb_t<float> shade(ray_t const& ray) const noexcept override;
 };

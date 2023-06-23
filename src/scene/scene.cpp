@@ -251,7 +251,7 @@ std::optional<intersection_t> scene_t::trace(ray_t const& r) const noexcept {
 }
 
 
-std::pair<lights_iter_t, lights_iter_t>
+std::pair<scene_t::lights_citer_t, scene_t::lights_citer_t>
 scene_t::get_lights_iterator() const noexcept {
     return std::make_pair(this->lights.begin(), this->lights.end());
 }

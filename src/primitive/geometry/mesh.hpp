@@ -26,10 +26,10 @@ struct face_t {
     vec3_t geo_normal;           // geometric normal
     std::optional<std::array<size_t, 3>> normals_indices;
     bb_t bb;      // face bounding box
-	vec3_t edge1;
-	vec3_t edge2;
+    vec3_t edge1;
+    vec3_t edge2;
 
-    face_t() noexcept;
+    face_t() noexcept = default;
     bool has_shading_normals() const noexcept;
 };
 
@@ -43,11 +43,11 @@ private:
 
     std::optional<intersection_t> triangle_intersect(
         ray_t const& r,
-		face_t const& face
+        face_t const& face
     ) const noexcept;
 
 public:
-    mesh_t() noexcept;
+    mesh_t() noexcept = default;
     mesh_t(
         std::vector<face_t> faces,
         std::unordered_map<size_t, vec3_t> vertices,
@@ -55,9 +55,9 @@ public:
         bb_t b
     ) noexcept;
 
-    ~mesh_t() noexcept;
+    ~mesh_t() noexcept = default;
 
-    std::optional<intersection_t> intersect(ray_t const& r) const override;
+    std::optional<intersection_t> intersect(ray_t const& r) const noexcept override;
 };
 
 #endif /* MESH_HPP */

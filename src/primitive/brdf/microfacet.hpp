@@ -1,10 +1,9 @@
 #ifndef MICROFACET_HPP
 #define MICROFACET_HPP
 
-#include "utils/rgb.hpp"
 #include "primitive/brdf/brdf.hpp"
+#include "utils/rgb.hpp"
 #include "utils/vector.hpp"
-#include <cmath>
 
 /**
  * D Term - A microfacet distribution function - tells us what fraction of microfacets are oriented
@@ -23,14 +22,13 @@ private:
     float ndf(float const roughness, float const n_dot_h) const noexcept;
 
     // G1 term of microfacet model (using GGX lambda and Smith)
-    float geo_attenuation1(float const roughness, float h_dot_wx) const noexcept;
+    float geo_attenuation1(float const roughness, float n_dot_wx) const noexcept;
 
     // G2 term of microfacet model (takes in account masking and shadowing effects)
     float geo_attenuation2(
         float const roughness,
-        vec3_t const& wi,
-        vec3_t const& wo,
-        vec3_t const& h   //microfacet normal, not half vector!
+        float const n_dot_wi,
+        float const n_dot_wo
     ) const noexcept;
 
     // F term of microfacet model (using Schlick's approximation)

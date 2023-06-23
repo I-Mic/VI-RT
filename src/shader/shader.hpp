@@ -14,7 +14,7 @@ protected:
 public:
 	shader_t(std::unique_ptr<scene_t> scene) noexcept : scene{std::move(scene)} {}
 
-	virtual ~shader_t() = default;
+	virtual ~shader_t() noexcept = default;
 
 	virtual rgb_t<float> shade(ray_t const& ray) const noexcept = 0;
 };

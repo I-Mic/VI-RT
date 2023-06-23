@@ -5,16 +5,16 @@
 
 whitted_shader_t::whitted_shader_t(
     std::unique_ptr<scene_t> scene,
+    std::unique_ptr<diffuse_brdf_t> diffuse_brdf,
+    std::unique_ptr<specular_brdf_t> specular_brdf,
     rgb_t<float> const& bg,
     unsigned const max_depth
 ) noexcept :
     shader_t{std::move(scene)},
     background{bg},
-    max_depth{max_depth},
-    diffuse_brdf{new lambert_t{}},
-    specular_brdf{new phong_t{}} {}
-
-whitted_shader_t::~whitted_shader_t() noexcept {}
+    diffuse_brdf{std::move(diffuse_brdf)},
+    specular_brdf{std::move(specular_brdf)},
+    max_depth{max_depth} {}
 
 rgb_t<float> whitted_shader_t::direct_lighting(
     intersection_t const& isect
@@ -26,7 +26,7 @@ rgb_t<float> whitted_shader_t::direct_lighting(
 
     rgb_t<float> color {};
 
-    for(lights_iter_t li {lights_iter_begin}; li != lights_iter_end; ++li){
+    for(scene_t::lights_citer_t li {lights_iter_begin}; li != lights_iter_end; ++li){
 
         std::unique_ptr<light_t> const& light {*li};
 

@@ -3,6 +3,7 @@
 
 #include "primitive/bb.hpp"
 #include "rays/ray.hpp"
+#include "utils/math_extra.hpp"
 #include "utils/vector.hpp"
 
 bb_t::bb_t() noexcept : min{0.f, 0.f, 0.f}, max{0.f, 0.f, 0.f} {}
@@ -53,7 +54,7 @@ static bool get_t0_and_t1(
     float const ray_dir_cp, float const ray_org_cp,
     float const min_cp, float const max_cp,
     float& t0, float& t1
-){
+) noexcept {
 
     float const inv_ray_dir_cp {1.f / ray_dir_cp};
     float t_near_cp {(min_cp - ray_org_cp) * inv_ray_dir_cp};
@@ -62,8 +63,7 @@ static bool get_t0_and_t1(
     if(t_near_cp > t_far_cp)
         std::swap(t_near_cp, t_far_cp);
 
-    static const float epsilon {std::numeric_limits<float>::epsilon()};
-    static const float gamma {3.f * epsilon / (1 - 3.f * epsilon)};
+    static float constexpr gamma {3.f * emath::EPSILON / (1 - 3.f * emath::EPSILON)};
 
     t_far_cp *= 1 + 2 * gamma;
 
@@ -73,7 +73,7 @@ static bool get_t0_and_t1(
     return t0 <= t1;
 }
 
-bool bb_t::intersects(ray_t const& r) const {
+bool bb_t::intersects(ray_t const& r) const noexcept {
 
     float t0 {0.f};
     float t1 {std::numeric_limits<float>::max()};

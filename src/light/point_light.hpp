@@ -15,7 +15,7 @@ private:
 public:
 
     point_light_t(rgb_t<float> const& color, vec3_t const& pos) noexcept;
-    ~point_light_t() noexcept;
+    ~point_light_t() noexcept = default;
 
     light_properties_t get_properties(light_parameters_t const&) const noexcept override;
 };

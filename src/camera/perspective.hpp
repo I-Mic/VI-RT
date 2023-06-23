@@ -28,6 +28,8 @@ public:
         size_t const w, size_t const h, float const fov_w, float const fov_h
     ) noexcept;
 
+    ~perspective_t() noexcept = default;
+
     ray_t generate_ray(
         size_t const x, size_t const y,
         std::array<float, 2> const jitter = {0.5, 0.5}

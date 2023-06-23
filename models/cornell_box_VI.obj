@@ -8,8 +8,8 @@
 mtllib cornell_box_VI.mtl
 
 o floor
-usemtl gold
-#usemtl white
+#usemtl gold
+usemtl white
 v 552.8 0.0   0.0
 v 0.0   0.0   0.0
 v 0.0   0.0 559.2

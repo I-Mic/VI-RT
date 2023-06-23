@@ -55,8 +55,10 @@ void image_ppm_t::normalize_tone_map() const {
             this->image_plane.get(),
             this->image_plane.get() + this->width * this->height,
             identity,
-            [](std::pair<float, float> const& acc, rgb_t<float> const& item)
-                -> std::pair<float, float> {
+            [](
+                std::pair<float, float> const& acc,
+                rgb_t<float> const& item
+            ) -> std::pair<float, float> {
                 return
                     std::pair<float, float>{
                         std::min(std::min(std::min(acc.first, item.r), item.g), item.b),
@@ -147,7 +149,7 @@ bool image_ppm_t::output_image() const {
 
     //shade each pixel
     this->shade_pixels();
-    // convert from float to {0,1,..., 255}
+
     this->tone_map();
 
     std::ofstream ofs {};
