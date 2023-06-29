@@ -28,14 +28,14 @@ Ka 20 20 20
 Kd 1 1 1
 Ks 0 0 0
 
-newmtl mirror_mat
-Ka 0 0 0
-Kd 0 0 0
+newmtl metal_mirror
+Ka 1 1 1
+Kd 0.98 0.98 0.98
 Ks 0.9 0.9 0.9
-Ns 100000000
+Ns 10000000
 
 newmtl metal_gold
 Ka 0.828 0.684 0.215
 Kd 0.828 0.684 0.215
-Ks 0.9 0.9 0.9
+Ks 0.828 0.684 0.215
 Ns 100

@@ -20,7 +20,7 @@ public:
     vec3_t sn;  // shading normal (the same as gn for the time being)
     vec3_t wo;
     float depth;
-    size_t material_index;
+    std::optional<size_t> material_index;
     std::optional<rgb_t<float>> le; // has value if intersects an area light
 
     intersection_t() noexcept = default;
@@ -30,7 +30,9 @@ public:
         vec3_t const& n,
         vec3_t const& wo,
         float const depth
-    ) noexcept : p{p}, gn{n}, sn{n}, wo{wo}, depth{depth}, material_index{0}, le{std::nullopt} {}
+    ) noexcept :
+        p{p}, gn{n}, sn{n}, wo{wo}, depth{depth},
+        material_index{std::nullopt}, le{std::nullopt} {}
 };
 
 #endif /* INTERSECTION_HPP */

@@ -5,7 +5,7 @@
 
 
 # whether or not to use precompiled headers (set to 'true' to use)
-USE_PCH			:= true
+USE_PCH			:= false
 
 
 
@@ -42,7 +42,7 @@ CXX 			:= clang++
 STD				:= c++20
 
 # compiler flags
-CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD) -g3 -ggdb
+CXXFLAGS 		:= -Wall -Wextra -Wsign-conversion -pedantic-errors -std=$(STD) -g3
 CXXFLAGS        += $(foreach path,$(INC_PATHS),-I$(path))
 
 # linker flags (e.g. -L/path/to/lib)

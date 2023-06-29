@@ -17,14 +17,11 @@ public:
 
     float x, y, z;
 
-    vec3_t() noexcept : x{0.f}, y{0.f}, z{0.f} {}
+    vec3_t() noexcept :
+        x{0.f}, y{0.f}, z{0.f} {}
 
-    vec3_t(float const x, float const y, float const z) noexcept : x{x}, y{y}, z{z} {}
-
-    vec3_t(vec3_t const& v) noexcept : x{v.x}, y{v.y}, z{v.z} {}
-
-    vec3_t& operator=(vec3_t const& v) noexcept = default;
-    vec3_t& operator=(vec3_t&& v) noexcept = default;
+    vec3_t(float const x, float const y, float const z) noexcept :
+        x{x}, y{y}, z{z} {}
 
     static vec3_t from_array(std::array<float, 3> const& arr) noexcept {
         return {arr[0], arr[1], arr[2]};
@@ -45,7 +42,7 @@ public:
         return r;
     }
 
-    static vec3_t normalize(vec3_t const& v) noexcept {
+    static vec3_t normalized(vec3_t const& v) noexcept {
         vec3_t v_norm {v};
         v_norm.normalize();
         return v_norm;
@@ -118,13 +115,28 @@ public:
     }
 
     template<std::floating_point T>
+    vec3_t& operator/=(T const rhs) noexcept {
+
+        float const f {static_cast<float>(rhs)};
+        this->x /= f;
+        this->y /= f;
+        this->z /= f;
+
+        return *this;
+    }
+
+    template<std::floating_point T>
     friend vec3_t operator*(T const lhs, vec3_t const& rhs) noexcept {
         return rhs * lhs;
     }
 
 
     float norm() const noexcept {
-        return std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+        return std::sqrt(
+            this->x * this->x +
+            this->y * this->y +
+            this->z * this->z
+        );
     }
 
     void normalize() noexcept {
@@ -132,9 +144,7 @@ public:
         float const norm {this->norm()};
 
         if (norm > 0.f) {
-            this->x /= norm;
-            this->y /= norm;
-            this->z /= norm;
+            *this /= norm;
         }
     }
 
@@ -197,6 +207,83 @@ public:
             this->x * rx.y + this->y * ry.y + this->z * rz.y,
             this->x * rx.z + this->y * ry.z + this->z * rz.z
         };
+    }
+};
+
+// for rotations
+
+struct vec4_t {
+
+public:
+    float x, y, z, w;
+
+    vec4_t() noexcept : x{0.f}, y{0.f}, z{0.f}, w{0.f} {}
+
+    vec4_t(vec3_t const& v, float const w) noexcept :
+        x{v.x}, y{v.y}, z{v.z}, w{w} {}
+
+    vec4_t(float const x, float const y, float const z, float const w) noexcept :
+        x{x}, y{y}, z{z}, w{w} {}
+
+    vec4_t(vec3_t const& v) noexcept :
+        x{v.x}, y{v.y}, z{v.z}, w{0.f} {}
+
+    // efficient implementation of a rotation using a quaternion
+    // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+    vec3_t rotate(vec3_t const& p) const noexcept {
+        vec3_t const axis {this->x, this->y, this->z};
+
+        return 2.f * p.dot(axis) * axis +
+            (this->w * this->w - axis.dot(axis)) * p +
+            2.f * this->w * axis.cross(p);
+    }
+
+    float norm() const noexcept {
+        return std::sqrt(
+            this->x * this->x +
+            this->y * this->y +
+            this->z * this->z +
+            this->w * this->w
+        );
+    }
+
+    void normalize() noexcept {
+
+        float const norm {this->norm()};
+
+        if (norm > 0.f) {
+            this->x /= norm;
+            this->y /= norm;
+            this->z /= norm;
+            this->w /= norm;
+        }
+    }
+
+    static vec4_t normalized(vec4_t const& v) noexcept {
+        vec4_t v_norm {v};
+        v_norm.normalize();
+        return v_norm;
+    }
+
+    // https://raw.githubusercontent.com/boksajak/brdf/master/brdf.h
+    static vec4_t get_rotation_from_z_axis(vec3_t const& p) noexcept {
+        // Handle special case when input is exact or near opposite of (0, 0, 1)
+        if(p.z < -0.99999f)
+            return {1.f, 0.f, 0.f, 0.f};
+
+        return normalized({-p.y, p.x, 0.f, 1.f + p.z});
+    }
+
+    static vec4_t get_rotation_to_z_axis(vec3_t const& p) noexcept {
+        // Handle special case when input is exact or near opposite of (0, 0, 1)
+        if(p.z < -0.99999f)
+            return {1.f, 0.f, 0.f, 0.f};
+
+        return normalized({p.y, -p.x, 0.f, 1.f + p.z});
+    }
+
+    vec4_t invert_rotation() const noexcept {
+        return {-this->x, -this->y, -this->z, this->w};
     }
 };
 

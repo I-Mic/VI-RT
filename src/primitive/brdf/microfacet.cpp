@@ -2,33 +2,24 @@
 #include "utils/math_extra.hpp"
 
 #include <cmath>
-#include <cstdlib>
 
 
+// GGX distribution function
 float microfacet_t::ndf(float const roughness, float const n_dot_h) const noexcept {
     float const alpha {roughness * roughness};
-    float const alpha_squared {alpha * alpha};
-    float const b {(alpha_squared - 1.f) * n_dot_h * n_dot_h + 1.f};
-    return alpha_squared * emath::INVERSE_PI / (b * b);
+    float const alpha_sq {alpha * alpha};
+    float const b {(alpha_sq - 1.f) * n_dot_h * n_dot_h + 1.f};
+    return alpha_sq * emath::INVERSE_PI / (b * b);
 }
 
 float microfacet_t::geo_attenuation1(float const roughness, float n_dot_wx) const noexcept {
-    /*float const a {
-        h_dot_wx / (
-            std::max(0.00001f, roughness) *
-            std::sqrt(1 - std::min(0.99999f, h_dot_wx * h_dot_wx))
-        )
-    };
-    float const lambda {-0.5f + std::sqrt(1.f + 1.f / (a * a)) * 0.5f};
-    return 1.f / (1.f + lambda);*/
-
     /* optimized */
     float const alpha {roughness * roughness};
-    float const alpha_squared {alpha * alpha};
-    float const n_dot_wx_squared {n_dot_wx * n_dot_wx};
+    float const alpha_sq {alpha * alpha};
+    float const n_dot_wx_sq {n_dot_wx * n_dot_wx};
     return 2.f / (
         1.f + std::sqrt(
-            1.f - alpha_squared + alpha_squared / n_dot_wx_squared
+            1.f - alpha_sq + alpha_sq / n_dot_wx_sq
         )
     );
 }
@@ -38,14 +29,12 @@ float microfacet_t::geo_attenuation2(
 ) const noexcept {
     float const g1_wi {this->geo_attenuation1(roughness, n_dot_wi)};
     float const g1_wo {this->geo_attenuation1(roughness, n_dot_wo)};
-    return 1.f / (1.f + g1_wo + g1_wi);
+    return g1_wo * g1_wi;
 }
 
 rgb_t<float> microfacet_t::fresnel_schlick(
-    rgb_t<float> const& f0,
-    float const h_dot_wx
+    rgb_t<float> const& f0, float const h_dot_wx, rgb_t<float> const& f90
 ) const noexcept {
-    static rgb_t<float> const f90 {1.f, 1.f, 1.f};
     return f0 + (f90 - f0) * std::pow(1.f - h_dot_wx, 5.f);
 }
 
@@ -73,10 +62,15 @@ rgb_t<float> microfacet_t::eval_specular(brdf_data_t const& data) const noexcept
 std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data) const noexcept {
 
     float const roughness {data.material->roughness};
-    //float const roughness_squared {roughness * roughness};
+    float const alpha {roughness * roughness};
     vec3_t const& wo {data.wo.value()};
+    vec3_t const& sn {data.sn.value()};
 
+    vec4_t const rz_quaternion {vec4_t::get_rotation_to_z_axis(sn)};
+    vec3_t const wo_local {rz_quaternion.rotate(wo)};
+    vec3_t const n_local {0.f, 0.f, 1.f};
     vec3_t h_local {};
+
     if(roughness == 0.f)
         h_local = {0.f, 0.f, 1.f};
     else {
@@ -89,7 +83,9 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
         */
 
         // Section 3.2: transforming the view direction to the hemisphere configuration
-        vec3_t const wo_h {vec3_t::normalize({roughness * wo.x, roughness * wo.y, wo.z})};
+        vec3_t const wo_h {
+            vec3_t::normalized({alpha * wo_local.x, alpha * wo_local.y, wo_local.z})
+        };
 
         // Section 4.1: orthonormal basis (with special case if cross product is zero)
         float const lensq {wo_h.x * wo_h.x + wo_h.y * wo_h.y};
@@ -106,41 +102,36 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
         float const r {std::sqrt(rand_pair[0])};
         float const phi {emath::TWO_PI * rand_pair[1]};
         float const u1 {r * std::cos(phi)};
-        float u2 {r * std::sin(phi)};
+        float const u2 {r * std::sin(phi)};
         float const s {0.5f * (1.f + wo_h.z)};
-        u2 = std::sqrt(1.f - u1 * u1) * (1.f - s) + u2 * s;
+        float const u3 {std::sqrt(1.f - u1 * u1) * (1.f - s) + u2 * s};
 
         // Section 4.3: reprojection onto hemisphere
-        vec3_t const nh {
+        vec3_t const n_h {
             u1 * t1 +
-            u2 * t2 +
+            u3 * t2 +
             std::sqrt(
-                std::max(0.f, 1.f - u1 * u1 - u2 * u2)
+                std::max(0.f, 1.f - u1 * u1 - u3 * u3)
             ) * wo_h
         };
 
         // Section 3.4: transforming the normal back to the ellipsoid configuration
-        h_local = vec3_t::normalize({roughness * nh.x, roughness * nh.y, std::max(0.f, nh.z)});
+        h_local = vec3_t::normalized({alpha * n_h.x, alpha * n_h.y, std::max(0.f, n_h.z)});
     }
 
-    vec3_t const wi_local {vec3_t::reflect(wo, h_local)};
+    vec3_t const wi_local {vec3_t::reflect(wo_local, h_local)};
 
-    vec3_t const n_local {0.f, 0.f, 1.f};
-    float const n_dot_wo {emath::clamp(n_local.dot(wo), 0.00001f, 1.f)};
-    float const n_dot_h  {emath::clamp(n_local.dot(h_local), 0.00001f, 1.f)};
-
-
-    //float3 F = evalFresnel(specularF0, shadowedF90(specularF0), HdotL);
-
-    // Calculate weight of the sample specific for selected sampling method
-    // (this is microfacet BRDF divided by PDF of sampling method - notice how most terms cancel out)
-    //weight = F * specularSampleWeight(alpha, alphaSquared, NdotL, NdotV, HdotL, NdotH);
+    float const n_dot_wo {emath::clamp(n_local.dot(wo_local), 0.00001f, 1.f)};
+    float const n_dot_h  {emath::clamp(n_local.dot(h_local),  0.00001f, 1.f)};
 
     float const pdf {
         this->ndf(roughness, n_dot_h) *
-        this->geo_attenuation1(roughness, n_dot_wo) /
-        (4.f * n_dot_wo)
+        this->geo_attenuation1(roughness, n_dot_wo) //
+        //(4.f * n_dot_wo)
     };
 
-    return std::make_tuple(wi_local, pdf);
+    // convert from local space
+    vec3_t const wi {vec3_t::normalized(rz_quaternion.invert_rotation().rotate(wi_local))};
+
+    return std::make_tuple(wi, pdf);
 }

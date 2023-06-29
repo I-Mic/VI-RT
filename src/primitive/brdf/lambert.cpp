@@ -6,11 +6,9 @@ rgb_t<float> lambert_t::eval_diffuse(brdf_data_t const& data) const noexcept {
     rgb_t<float> const& diffuse_reflectance {data.material->diffuse_reflectance};
 
     float const sn_dot_wi {sn.dot(wi)};
-    return diffuse_reflectance * (emath::INVERSE_PI * sn_dot_wi);
-    //return kd * sn_dot_wi;
+    return emath::INVERSE_PI * sn_dot_wi * diffuse_reflectance;
 }
 
 float lambert_t::diffuse_term(brdf_data_t const&) const noexcept {
     return 1.f;
 }
-

@@ -14,7 +14,7 @@ inline float constexpr INVERSE_TWO_PI {1.f / (2.f * M_PI)};
 inline float constexpr EPSILON {std::numeric_limits<float>::epsilon()};
 
 template<typename T, typename F, typename = std::enable_if<std::is_fundamental<F>::value>>
-constexpr T lerp(T const& t1, T const& t2, F const factor) noexcept {
+constexpr T mix(T const& t1, T const& t2, F const factor) noexcept {
     return t1 * (static_cast<F>(1) - factor) + t2 * factor;
 }
 

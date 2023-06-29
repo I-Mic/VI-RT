@@ -27,17 +27,12 @@ public:
         g{static_cast<T>(0)},
         b{static_cast<T>(0)} {}
 
-    rgb_t(T const r, T const g, T const b) noexcept : r{r}, g{g}, b{b} {}
-
-    rgb_t(rgb_t const& rgb) noexcept : r{rgb.r}, g{rgb.g}, b{rgb.b} {}
-
-    rgb_t& operator=(rgb_t const& rgb) = default;
-    rgb_t& operator=(rgb_t&& rgb) = default;
+    rgb_t(T const r, T const g, T const b) noexcept :
+        r{r}, g{g}, b{b} {}
 
     static rgb_t from_array(std::array<T, 3> const& arr){
         return {arr[0], arr[1], arr[2]};
     }
-
 
     friend rgb_t& operator/=(rgb_t& lhs, float const rhs) noexcept {
 

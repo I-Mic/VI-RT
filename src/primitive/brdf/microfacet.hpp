@@ -32,7 +32,9 @@ private:
     ) const noexcept;
 
     // F term of microfacet model (using Schlick's approximation)
-    rgb_t<float> fresnel_schlick(rgb_t<float> const& f0, float const h_dot_wx) const noexcept;
+    rgb_t<float> fresnel_schlick(
+        rgb_t<float> const& f0, float const h_dot_wx, rgb_t<float> const& f90 = {1.f, 1.f, 1.f}
+    ) const noexcept;
 
 public:
 

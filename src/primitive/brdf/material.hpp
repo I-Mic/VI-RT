@@ -9,6 +9,7 @@ struct material_t {
 
 public:
     static rgb_t<float> const RGB_MIN_DIELECTRICS_F0;
+    static material_t const DEFAULT;
 
     rgb_t<float> ka;
     rgb_t<float> kd;

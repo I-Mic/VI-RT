@@ -150,4 +150,4 @@ type = "standard"
 
 #spp = 512
 #spp = 64
-spp = 512
+spp = 128

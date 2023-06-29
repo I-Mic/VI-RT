@@ -7,9 +7,9 @@
 
 mtllib cornell_box_VI.mtl
 
+usemtl metal_gold
+#usemtl white
 o floor
-#usemtl gold
-usemtl white
 v 552.8 0.0   0.0
 v 0.0   0.0   0.0
 v 0.0   0.0 559.2
@@ -142,11 +142,10 @@ v    423.0   0.0 247.0
 f -4 -3 -2 -1
 
 # mirror on the left green wall
+usemtl metal_mirror
 o mirror
-usemtl mirror_mat
 v    549.0    20.0 300.0
 v    549.0    20.0  80.0
 v    549.0   270.0  80.0
 v    549.0   270.0 300.0
 f -4 -3 -2 -1
-

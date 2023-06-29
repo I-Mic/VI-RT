@@ -175,14 +175,13 @@ void scene_t::load(std::string const& fn){
         };
 
         // assumes all faces in a mesh use the same material!
-
         int const material_index {shape.mesh.material_ids.at(0)};
         this->prims.push_back(
             {
                 std::move(mesh),
-                material_index < 0
-                    ? materials.size() - static_cast<size_t>(-material_index)
-                    : static_cast<size_t>(material_index)
+                material_index < 0 ?
+                    std::nullopt :
+                    std::make_optional(static_cast<size_t>(material_index))
             }
         );
     }

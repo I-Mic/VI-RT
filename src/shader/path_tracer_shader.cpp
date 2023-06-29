@@ -102,7 +102,11 @@ rgb_t<float> path_tracer_shader_t::direct_lighting(
 
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
-    material_t const* const mat {this->scene->material_at(isect.material_index)};
+    material_t const* const mat {
+        isect.material_index.has_value()
+            ? this->scene->material_at(isect.material_index.value())
+            : &material_t::DEFAULT
+    };
 
     long const num_of_lights {lights_iter_end - lights_iter_begin};
     long const light_index {std::rand() % num_of_lights};
@@ -115,7 +119,11 @@ rgb_t<float> path_tracer_shader_t::specular_reflection(
     intersection_t const& isect, unsigned const depth
 ) const noexcept {
 
-    material_t const* const mat {this->scene->material_at(isect.material_index)};
+    material_t const* const mat {
+        isect.material_index.has_value()
+            ? this->scene->material_at(isect.material_index.value())
+            : &material_t::DEFAULT
+    };
 
     std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
 
@@ -129,7 +137,7 @@ rgb_t<float> path_tracer_shader_t::specular_reflection(
     auto const& [wi, pdf] {this->specular_brdf->sample_specular(data)};
     data.wi = std::make_optional(wi);
 
-    vec3_t const half {vec3_t::normalize(wi + isect.wo)};
+    vec3_t const half {vec3_t::normalized(wi + isect.wo)};
     data.half = std::make_optional(half);
 
     ray_t spec_ray {isect.p, wi};
@@ -146,7 +154,11 @@ rgb_t<float> path_tracer_shader_t::diffuse_reflection(
     unsigned const depth
 ) const noexcept {
 
-    material_t const* const mat {this->scene->material_at(isect.material_index)};
+    material_t const* const mat {
+        isect.material_index.has_value()
+            ? this->scene->material_at(isect.material_index.value())
+            : &material_t::DEFAULT
+    };
 
     std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
     auto const& [wi, pdf] {this->specular_brdf->sample_hemisphere(rand_pair)};
@@ -184,20 +196,30 @@ rgb_t<float> path_tracer_shader_t::shade(
         else if(depth < this->max_depth){
 
             std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};
-            material_t const* const mat {this->scene->material_at(isect.value().material_index)};
-            float const sp {mat->ks.luminance() / (mat->ks.luminance() + mat->kd.luminance())};
+
+            //material_t const* const mat {
+            //    isect.value().material_index.has_value()
+            //        ? this->scene->material_at(isect.value().material_index.value())
+            //        : &material_t::DEFAULT
+            //};
+
+            //float const sp {mat->ks.luminance() / (mat->ks.luminance() + mat->kd.luminance())};
             rgb_t<float> color {};
 
             if(rand_pair[1] < this->p_continue){
-                if(rand_pair[0] < sp)
-                    color = this->specular_reflection(isect.value(), depth) / sp;
+                if(rand_pair[0] < 0.5f)
+                    color = this->specular_reflection(isect.value(), depth) / 0.5f;
                 else
-                    color = this->diffuse_reflection(isect.value(), depth) / (1.f - sp);
+                    color = this->diffuse_reflection(isect.value(), depth) / 0.5f;
 
                 color /= this->p_continue;
-
-                color += this->direct_lighting(isect.value());
+                //color =
+                //    (this->specular_reflection(isect.value(), depth) +
+                //    this->diffuse_reflection(isect.value(), depth)) /
+                //    this->p_continue;
             }
+
+            color += this->direct_lighting(isect.value());
             return color;
         }
     }
