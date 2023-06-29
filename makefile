@@ -71,7 +71,7 @@ endif
 release: CXXFLAGS += -O2 -DNDEBUG
 release: all
 
-debug: CXXFLAGS += -O0
+debug: CXXFLAGS += -O0 -fsanitize=address
 debug: all
 
 

@@ -99,9 +99,9 @@ rgb_t<float> distributed_shader_t::direct_lighting(
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
     material_t const* const mat {
-        isect.material_index.has_value()
-            ? this->scene->material_at(isect.material_index.value())
-            : &material_t::DEFAULT
+        isect.material_index.has_value() ?
+            this->scene->material_at(isect.material_index.value()) :
+            &material_t::DEFAULT
     };
 
     long const num_of_lights {lights_iter_end - lights_iter_begin};
@@ -116,9 +116,9 @@ rgb_t<float> distributed_shader_t::specular_reflection(
 ) const noexcept {
 
     material_t const* const mat {
-        isect.material_index.has_value()
-            ? this->scene->material_at(isect.material_index.value())
-            : &material_t::DEFAULT
+        isect.material_index.has_value() ?
+            this->scene->material_at(isect.material_index.value()) :
+            &material_t::DEFAULT
     };
 
     std::array<float, 2> const rand_pair {emath::rand_tuple<2>()};

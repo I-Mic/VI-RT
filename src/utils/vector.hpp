@@ -140,9 +140,7 @@ public:
     }
 
     void normalize() noexcept {
-
         float const norm {this->norm()};
-
         if (norm > 0.f) {
             *this /= norm;
         }
@@ -169,13 +167,6 @@ public:
             std::abs(this->y),
             std::abs(this->z)
         };
-    }
-
-    size_t get_max_dimension() const noexcept {
-        return
-            (this->x > this->y)
-                ? ((this->x > this->z) ? 0 : 2)
-                : ((this->y > this->z) ? 1 : 2);
     }
 
     // flip a vector such that it points to the same "side" as v (positive cosine)
@@ -248,9 +239,7 @@ public:
     }
 
     void normalize() noexcept {
-
         float const norm {this->norm()};
-
         if (norm > 0.f) {
             this->x /= norm;
             this->y /= norm;

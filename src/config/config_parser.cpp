@@ -208,7 +208,7 @@ private:
             if(toml::find(this->toml_obj, table_name).contains("max_depth"))
                 return std::make_unique<whitted_shader_t>(
                     std::move(scene),
-                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                     std::move(specular_brdf),
                     rgb_t<float>::from_array(bg),
                     toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
@@ -216,7 +216,7 @@ private:
             else
                 return std::make_unique<whitted_shader_t>(
                     std::move(scene),
-                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                     std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );
@@ -242,7 +242,7 @@ private:
             if(toml::find(this->toml_obj, table_name).contains("max_depth"))
                 return std::make_unique<distributed_shader_t>(
                     std::move(scene),
-                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                     std::move(specular_brdf),
                     rgb_t<float>::from_array(bg),
                     toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
@@ -250,7 +250,7 @@ private:
             else
                 return std::make_unique<distributed_shader_t>(
                     std::move(scene),
-                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                     std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );
@@ -278,7 +278,7 @@ private:
                 if(toml::find(this->toml_obj, table_name).contains("p_continue"))
                     return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
-                        std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                        std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                         std::move(specular_brdf),
                         rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth"),
@@ -287,7 +287,7 @@ private:
                 else
                     return std::make_unique<path_tracer_shader_t>(
                         std::move(scene),
-                        std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                        std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                         std::move(specular_brdf),
                         rgb_t<float>::from_array(bg),
                         toml::find<unsigned>(this->toml_obj, table_name, "max_depth")
@@ -296,7 +296,7 @@ private:
             else
                 return std::make_unique<path_tracer_shader_t>(
                     std::move(scene),
-                    std::unique_ptr<diffuse_brdf_t>(new lambert_t{}),
+                    std::unique_ptr<diffuse_brdf_t>{std::make_unique<lambert_t>()},
                     std::move(specular_brdf),
                     rgb_t<float>::from_array(bg)
                 );

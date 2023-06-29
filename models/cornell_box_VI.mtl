@@ -18,6 +18,12 @@ Ka 0 0 1
 Kd 0 0 1
 Ks 0 0 0
 
+newmtl metal_yellow
+Ka 0.75 0.38 0
+Kd 0.75 0.38 0
+Ks 0 0 0
+Ns 20
+
 newmtl yellow
 Ka 0.75 0.38 0
 Kd 0.75 0.38 0

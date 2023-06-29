@@ -23,9 +23,9 @@ rgb_t<float> whitted_shader_t::direct_lighting(
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
     material_t const* const mat {
-        isect.material_index.has_value()
-            ? this->scene->material_at(isect.material_index.value())
-            : &material_t::DEFAULT
+        isect.material_index.has_value() ?
+            this->scene->material_at(isect.material_index.value()) :
+            &material_t::DEFAULT
     };
 
     rgb_t<float> color {};
@@ -76,9 +76,9 @@ rgb_t<float> whitted_shader_t::specular_reflection(
 ) const noexcept {
 
     material_t const* const mat {
-        isect.material_index.has_value()
-            ? this->scene->material_at(isect.material_index.value())
-            : &material_t::DEFAULT
+        isect.material_index.has_value() ?
+            this->scene->material_at(isect.material_index.value()) :
+            &material_t::DEFAULT
     };
 
     std::array<float, 2> const rand_pair {0.5f, 0.5f};

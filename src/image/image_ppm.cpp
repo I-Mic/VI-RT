@@ -44,10 +44,8 @@ void image_ppm_t::clamp_tone_map() const {
 void image_ppm_t::normalize_tone_map() const {
 
     static std::pair<float, float> const identity {
-        std::make_pair<float, float>(
-            std::numeric_limits<float>::max(),
-            std::numeric_limits<float>::min()
-        )
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::min()
     };
 
     auto const [comp_min, comp_max] {
@@ -93,30 +91,26 @@ void image_ppm_t::tone_map() const {
 
 void image_ppm_t::shade_pixels() const {
 
-    auto const worker {
+    static auto const worker {
 
-        [this](size_t const begin_index, size_t const end_index, rgb_t<float>* const buffer){
+        [this](size_t const begin_idx, size_t const end_idx, rgb_t<float>* const buffer){
 
-            size_t x {begin_index % this->width};
-            size_t y {begin_index / this->width};
-
-            size_t const local_size {end_index - begin_index};
+            size_t const local_size {end_idx - begin_idx};
+            size_t x {begin_idx % this->width};
+            size_t y {begin_idx / this->width};
 
             for(size_t i {0}; i < local_size; ++i){
-
-                if(x >= this->width){
-                    x = 0;
-                    ++y;
-                }
 
                 rgb_t<float> const color {this->renderer->render_pixel(x, y)};
                 buffer[i] = color;
 
-                ++x;
+                if(++x == this->width){
+                    x = 0;
+                    ++y;
+                }
             }
         }
     };
-
 
     size_t const image_plane_size {this->width * this->height};
     size_t const local_size {
@@ -128,21 +122,18 @@ void image_ppm_t::shade_pixels() const {
         )
     };
 
-    std::vector<std::thread> threads {};
+    std::vector<std::jthread> threads {};
     // better than calling constructor with argument = this->num_of_threads directly
     // this avoids default constructing objects that would be reassigned afterwards
     threads.reserve(this->num_of_threads);
 
     for(size_t lower_bound {0}; lower_bound < image_plane_size; lower_bound += local_size)
         threads.emplace_back(
-            worker,
+           worker,
             lower_bound,
             std::min(lower_bound + local_size, image_plane_size),
             this->image_plane.get() + lower_bound
         );
-
-    for(std::thread& t : threads)
-        t.join();
 }
 
 bool image_ppm_t::output_image() const {

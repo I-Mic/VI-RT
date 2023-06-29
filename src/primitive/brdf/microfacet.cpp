@@ -90,9 +90,9 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
         // Section 4.1: orthonormal basis (with special case if cross product is zero)
         float const lensq {wo_h.x * wo_h.x + wo_h.y * wo_h.y};
         vec3_t const t1 {
-            lensq > 0.f
-                ? vec3_t{-wo_h.y, wo_h.x, 0.f} / std::sqrt(lensq)
-                : vec3_t{1.f, 0.f, 0.f}
+            lensq > 0.f ?
+                vec3_t{-wo_h.y, wo_h.x, 0.f} / std::sqrt(lensq) :
+                vec3_t{1.f, 0.f, 0.f}
         };
         vec3_t const t2 {wo_h.cross(t1)};
 
@@ -126,8 +126,7 @@ std::tuple<vec3_t, float> microfacet_t::sample_specular(brdf_data_t const& data)
 
     float const pdf {
         this->ndf(roughness, n_dot_h) *
-        this->geo_attenuation1(roughness, n_dot_wo) //
-        //(4.f * n_dot_wo)
+        this->geo_attenuation1(roughness, n_dot_wo)
     };
 
     // convert from local space

@@ -142,8 +142,8 @@ max_depth = 4
 
 p_continue = 0.5
 
-brdf = "microfacet"
-#brdf = "phong"
+#brdf = "microfacet"
+brdf = "phong"
 
 
 [renderer]

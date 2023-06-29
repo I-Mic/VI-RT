@@ -19,9 +19,9 @@ rgb_t<float> ambient_shader_t::shade(ray_t const& ray) const noexcept {
     auto const& [lights_iter_begin, lights_iter_end] {this->scene->get_lights_iterator()};
 
     material_t const* const mat {
-        isect.value().material_index.has_value()
-            ? this->scene->material_at(isect.value().material_index.value())
-            : &material_t::DEFAULT
+        isect.value().material_index.has_value() ?
+            this->scene->material_at(isect.value().material_index.value()) :
+            &material_t::DEFAULT
     };
 
     for(scene_t::lights_citer_t li {lights_iter_begin}; li != lights_iter_end; ++li){
