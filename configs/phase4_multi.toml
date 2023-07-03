@@ -7,7 +7,7 @@ output_fn     = "path_tracer.ppm"
 width         = 1024
 height        = 1024
 
-threads     = 8
+threads     = 4
 normalize   = false
 #normalize   = true
 
@@ -142,8 +142,8 @@ max_depth = 4
 
 p_continue = 0.5
 
-#brdf = "microfacet"
-brdf = "phong"
+brdf = "microfacet"
+#brdf = "phong"
 
 
 [renderer]
