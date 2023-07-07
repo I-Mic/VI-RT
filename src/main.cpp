@@ -27,7 +27,7 @@ int main(int const argc, char const* const* const argv){
                 config_parser_t::from_toml(argv[i])
             };
 
-            std::unique_ptr<image_t> img {config_obj->build_image()};
+            std::unique_ptr<image_t> const img {config_obj->build_image()};
             if(!img->output_image()){
                 std::cerr << "Error writing output\n";
                 status = 2;
